@@ -35,22 +35,11 @@ struct ContentView: View {
                     .tag(2)
             }
 
-            // Фаза 2: Оверлей быстрого потока системных логов (в стиле Dopamine)
-            if jailbreakState == .streamingLogs {
-                LogStreamView(onCompleted: {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        jailbreakState = .respring
-                    }
-                })
-                .transition(.opacity)
-                .zIndex(10)
-            }
-
-            // Фаза 3: Оверлей симуляции респринга SpringBoard
+            // Оверлей симуляции нативного респринга SpringBoard
             if jailbreakState == .respring {
                 NeoSpringView(onFinished: {
                     isJailbroken = true
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
                         jailbreakState = .completed
                     }
                 })

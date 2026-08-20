@@ -96,12 +96,13 @@ struct SettingsView: View {
 
                 Spacer()
 
-                Picker(strings.languageLabel, selection: $appLanguage) {
+                Picker("", selection: $appLanguage) {
                     ForEach(AppLanguage.allCases) { lang in
                         Text(lang.displayName).tag(lang.rawValue)
                     }
                 }
                 .pickerStyle(.menu)
+                .labelsHidden()
                 .tint(.blue)
             }
         }
@@ -272,7 +273,7 @@ struct SettingsView: View {
             HStack {
                 Label(strings.versionLabel, systemImage: "info.circle.fill")
                 Spacer()
-                Text("1.0.6 (iOS Native HIG)")
+                Text("1.0.5")
                     .foregroundColor(.secondary)
                     .font(.system(.body, design: .default))
             }

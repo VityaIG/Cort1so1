@@ -53,18 +53,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.7' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.0.7' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.5' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.0.5' }}
           body: |
-            Автоматическая сборка приложения Cort1so1 (iOS HIG Native) v1.0.7.
+            Официальная сборка приложения Cort1so1 (iOS HIG Native) v1.0.5.
 
-            Особенности и обновления в v1.0.7:
-            - Динамическое определение версии iOS устройства (`UIDevice.current.systemVersion`) в главном экране и настройках.
-            - Полностью переработанный раздел «Откат iOS» с новыми версиями (27.0 Beta 4, 26.6, 26.0, 18.7.1, 18.5).
-            - Детальные спецификации прошивок (SHA-256, TSS/SHSH2, SEP/Cryptex1) и симуляция Futurerestore с живыми логами.
-            - Ссылка на создателя @VityaV в Telegram с голубой иконкой и флагом 🇷🇺.
-            - Пошаговый пайплайн джейлбрейка в стиле Dopamine с сохранением состояния при перезапуске.
-            - Кнопка «Убрать джейлбрейк» и переключатель языков (Русский / English).
+            Возможности:
+            - Плавная нативная анимация джейлбрейка в стиле Dopamine (с отображением логов и этапов непосредственно в интерфейсе).
+            - Автоматическое определение реальной версии iOS и модели устройства (`UIDevice.current`).
+            - Раздел «Откат iOS» с каталогом версий IPSW и симуляцией Futurerestore / TSS.
+            - Профиль создателя @VityaV в Telegram с фирменным стилем.
+            - Поддержка Русского и English языков, Темная и Светлая темы.
+            - Полное сохранение состояния джейлбрейка и функция безопасного сброса.
 
             Инструкция по установке:
             1. Скачайте файл Cort1so1.ipa из блока Assets ниже.

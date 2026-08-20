@@ -7,6 +7,7 @@ struct MainView: View {
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
 
     @State private var currentStepIndex: Int = 0
+    @State private var progressPercent: Double = 0.0
     @State private var stepTimer: Timer?
     @State private var isProcessing: Bool = false
     @State private var executionMode: Int = 0
@@ -133,20 +134,21 @@ struct MainView: View {
 
     /// Карточка этапов пайплайна в стиле Dopamine
     private var dopaminePipelineCard: some View {
-        VStack(spacing: 14) {
-            if isProcessing, currentStepIndex < pipelineSteps.count {
-                let step = pipelineSteps[currentStepIndex]
+        VStack(spacing: 16) {
+            if isProcessing {
+                let stepIndex = min(currentStepIndex, pipelineSteps.count - 1)
+                let step = pipelineSteps[stepIndex]
 
                 VStack(spacing: 14) {
                     // Dopamine animated progress header
                     HStack {
                         HStack(spacing: 6) {
-                            Circle().fill(Color.red.opacity(0.8)).frame(width: 8, height: 8)
-                            Circle().fill(Color.yellow.opacity(0.8)).frame(width: 8, height: 8)
-                            Circle().fill(Color.green.opacity(0.8)).frame(width: 8, height: 8)
+                            Circle().fill(Color.red.opacity(0.85)).frame(width: 8, height: 8)
+                            Circle().fill(Color.yellow.opacity(0.85)).frame(width: 8, height: 8)
+                            Circle().fill(Color.green.opacity(0.85)).frame(width: 8, height: 8)
                         }
                         Spacer()
-                        Text("[\(currentStepIndex + 1)/\(pipelineSteps.count)]")
+                        Text("[\(stepIndex + 1)/\(pipelineSteps.count)]")
                             .font(.system(.caption, design: .monospaced))
                             .fontWeight(.bold)
                             .foregroundColor(.blue)
@@ -158,12 +160,14 @@ struct MainView: View {
                             .font(.system(.headline, design: .default))
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
+                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
 
                         Text(step.subtitle)
                             .font(.system(.subheadline, design: .default))
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 8)
+                            .transition(.opacity)
                     }
 
                     // Анимированная полоса прогресса в стиле Dopamine
@@ -182,19 +186,19 @@ struct MainView: View {
                                             endPoint: .trailing
                                         )
                                     )
-                                    .frame(width: max(16, geo.size.width * CGFloat(Double(currentStepIndex + 1) / Double(pipelineSteps.count))), height: 8)
-                                    .animation(.easeInOut(duration: 0.35), value: currentStepIndex)
+                                    .frame(width: max(16, geo.size.width * CGFloat(progressPercent)), height: 8)
+                                    .animation(.easeInOut(duration: 0.25), value: progressPercent)
                             }
                         }
                         .frame(height: 8)
                         .padding(.horizontal, 4)
 
                         HStack {
-                            Text("\(strings.stepProgress) \(currentStepIndex + 1) \(strings.stepOf) \(pipelineSteps.count)")
+                            Text("\(strings.stepProgress) \(stepIndex + 1) \(strings.stepOf) \(pipelineSteps.count)")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("\(Int(Double(currentStepIndex + 1) / Double(pipelineSteps.count) * 100))%")
+                            Text("\(Int(progressPercent * 100))%")
                                 .font(.caption)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)
@@ -202,26 +206,45 @@ struct MainView: View {
                         .padding(.horizontal, 4)
                     }
 
-                    // Живой мини-терминал шага
+                    // Плавный поток системных логов в стиле Dopamine (в карточке)
                     if !liveLogs.isEmpty {
-                        VStack(alignment: .leading, spacing: 3) {
-                            ForEach(liveLogs.suffix(2), id: \.self) { log in
-                                Text(log)
-                                    .font(.system(size: 11, design: .monospaced))
-                                    .foregroundColor(.green.opacity(0.9))
-                                    .lineLimit(1)
+                        ScrollViewReader { proxy in
+                            ScrollView(.vertical, showsIndicators: false) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    ForEach(Array(liveLogs.enumerated()), id: \.offset) { index, log in
+                                        HStack(alignment: .top, spacing: 6) {
+                                            Text(logTag(for: log))
+                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                                .foregroundColor(logTagColor(for: log))
+
+                                            Text(logContent(for: log))
+                                                .font(.system(size: 11, design: .monospaced))
+                                                .foregroundColor(Color(uiColor: .label).opacity(0.85))
+                                                .lineLimit(2)
+                                        }
+                                        .id(index)
+                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                    }
+                                }
+                                .padding(12)
+                            }
+                            .frame(height: 100)
+                            .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .onChange(of: liveLogs.count) { _ in
+                                if let last = liveLogs.indices.last {
+                                    withAnimation(.easeOut(duration: 0.2)) {
+                                        proxy.scrollTo(last, anchor: .bottom)
+                                    }
+                                }
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(10)
-                        .background(Color.black.opacity(0.85))
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                 }
                 .padding(.vertical, 4)
             } else if jailbreakState == .completed {
                 // Состояние завершенного джейлбрейка
-                VStack(spacing: 12) {
+                VStack(spacing: 14) {
                     HStack(spacing: 14) {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(.green)
@@ -359,9 +382,34 @@ struct MainView: View {
         }
     }
 
+    private func logTag(for log: String) -> String {
+        if log.hasPrefix("[+]") { return "[+]" }
+        if log.hasPrefix("[*]") { return "[*]" }
+        if log.hasPrefix("[✓]") { return "[✓]" }
+        if log.hasPrefix("[-]") { return "[-]" }
+        return "[*]"
+    }
+
+    private func logTagColor(for log: String) -> Color {
+        if log.hasPrefix("[+]") { return .green }
+        if log.hasPrefix("[*]") { return .blue }
+        if log.hasPrefix("[✓]") { return .green }
+        if log.hasPrefix("[-]") { return .red }
+        return .secondary
+    }
+
+    private func logContent(for log: String) -> String {
+        let tag = logTag(for: log)
+        if log.hasPrefix(tag) {
+            return String(log.dropFirst(tag.count)).trimmingCharacters(in: .whitespaces)
+        }
+        return log
+    }
+
     private func startJailbreakSequence() {
         isProcessing = true
         currentStepIndex = 0
+        progressPercent = 0.05
         liveLogs = ["[+] Starting Cort1so1 Dopamine exploit engine..."]
 
         let steps = pipelineSteps
@@ -371,25 +419,60 @@ struct MainView: View {
             description: steps[0].title
         )
 
-        stepTimer = Timer.scheduledTimer(withTimeInterval: 0.85, repeats: true) { timer in
-            if currentStepIndex < steps.count - 1 {
+        let stepLogs: [[String]] = [
+            [
+                "[*] Checking sandbox & entitlements...",
+                "[+] Allocated PhysPuppet memory page"
+            ],
+            [
+                "[*] Resolving KASLR slide: 0x18004000",
+                "[*] Located allproc structure at 0xfffffff007c08a10"
+            ],
+            [
+                "[+] AMFI TrustCache patched successfully",
+                "[+] CoreTrust signature validation bypassed"
+            ],
+            [
+                "[*] Escalating privileges to root (uid 0)",
+                "[+] Kernel task port acquired (tfp0: OK)"
+            ],
+            [
+                "[+] Extracting Procursus bootstrap snapshot",
+                "[+] Installing Sileo package manager & ElleKit",
+                "[✓] Jailbreak environment ready!"
+            ]
+        ]
+
+        var currentLogBatch = 0
+        stepTimer = Timer.scheduledTimer(withTimeInterval: 0.65, repeats: true) { timer in
+            if currentLogBatch < stepLogs.count {
                 withAnimation(.easeInOut(duration: 0.25)) {
-                    currentStepIndex += 1
+                    currentStepIndex = currentLogBatch
                     let step = steps[currentStepIndex]
-                    liveLogs.append("[*] Step \(currentStepIndex + 1): \(step.title)")
                     jailbreakState = .initializing(
                         step: currentStepIndex + 1,
                         total: steps.count,
                         description: step.title
                     )
+                    
+                    // Добавляем логи текущего шага
+                    for l in stepLogs[currentLogBatch] {
+                        liveLogs.append(l)
+                    }
+                    
+                    progressPercent = Double(currentLogBatch + 1) / Double(stepLogs.count)
                 }
+                currentLogBatch += 1
             } else {
                 timer.invalidate()
                 stepTimer = nil
-                isProcessing = false
+                progressPercent = 1.0
 
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    jailbreakState = .streamingLogs
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isProcessing = false
+                        jailbreakState = .respring
+                    }
                 }
             }
         }
