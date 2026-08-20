@@ -33,13 +33,25 @@ struct LocalizedStrings {
     // MARK: - Tweaks View
     var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }
     var tweaksHeaderSubtitle: String { lang == .ru ? "Управление модулями инъекции и системными модификациями Substrate" : "Substrate runtime injection modules & system patches" }
+    var tweaksSectionCustom: String { lang == .ru ? "Кастомные твики" : "Custom Tweaks" }
     var tweaksSectionEssential: String { lang == .ru ? "Базовые модификации ядра" : "Core Kernel Modules" }
-    var tweaksSectionReality: String { lang == .ru ? "Квантовые и квантово-физические модули" : "Quantum & Spatial Modules" }
     var tweaksSectionHardware: String { lang == .ru ? "Аппаратные оверклок-твики" : "Hardware Overclock Tweaks" }
+    var tweaksSectionReality: String { lang == .ru ? "Квантовые и квантово-физические модули" : "Quantum & Spatial Modules" }
     var tweaksApplyBtn: String { lang == .ru ? "Применить" : "Apply" }
     var tweaksAppliedTitle: String { "Cort1so1" }
     var tweaksAppliedMsg: String { lang == .ru ? "Твики успешно применены! Изменения вступили в силу в подсистеме SpringBoard." : "Tweaks applied successfully! Changes are now active in SpringBoard." }
     var tweaksActiveBadge: String { lang == .ru ? "Substrate активен" : "Substrate Active" }
+    
+    var tweaksAddTitle: String { lang == .ru ? "Новый твик" : "New Tweak" }
+    var tweaksAddName: String { lang == .ru ? "Название твика" : "Tweak Name" }
+    var tweaksAddNamePlaceholder: String { lang == .ru ? "Напр. Двойной прыжок в реальности" : "e.g. Double Jump in Real Life" }
+    var tweaksAddDesc: String { lang == .ru ? "Описание" : "Description" }
+    var tweaksAddDescPlaceholder: String { lang == .ru ? "Патчинг физики пространства и времени" : "Runtime injection into physics engine" }
+    var tweaksAddIconLabel: String { lang == .ru ? "Иконка" : "Icon" }
+    var tweaksAddColorLabel: String { lang == .ru ? "Цвет" : "Color" }
+    var tweaksAddSaveBtn: String { lang == .ru ? "Добавить твик" : "Add Tweak" }
+    var tweaksAddCancelBtn: String { lang == .ru ? "Отмена" : "Cancel" }
+    var tweaksDeleteAction: String { lang == .ru ? "Удалить" : "Delete" }
 
     // MARK: - Main View
     var mainTitle: String { "Cort1so1" }
