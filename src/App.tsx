@@ -45,6 +45,22 @@ const firmwares: Firmware[] = [
   { id: "ios185", version: "18.5", build: "22F72", releaseDateRu: "16 декабря 2024", releaseDateEn: "December 16, 2024", sizeGB: 5.4, isSigned: false, isBeta: false, sha256: "def0123456789abcdef0123456789abc" }
 ];
 
+function Cort1so1Icon({ className = "w-12 h-12" }: { className?: string }) {
+  return (
+    <div
+      className={`${className} rounded-2xl overflow-hidden shadow-lg shadow-black/30 border border-white/20 relative flex items-center justify-center bg-gradient-to-b from-white via-[#FAFBFD] via-60% to-[#C2C7CF] shrink-0`}
+    >
+      <svg
+        viewBox="0 0 1024 1024"
+        className="w-[70%] h-[70%]"
+        fill="#141618"
+      >
+        <path d="M 807.1 417 L 710.4 417 A 220 220 0 1 0 710.4 607 L 807.1 607 A 310 310 0 1 1 807.1 417 Z" />
+      </svg>
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'main' | 'downgrade' | 'settings'>('main');
   const [appLanguage, setAppLanguage] = useState<'ru' | 'en'>('ru');
@@ -177,9 +193,7 @@ export default function App() {
         {/* Release & Download Header */}
         <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <ShieldCheck className="w-6 h-6 text-white" />
-            </div>
+            <Cort1so1Icon className="w-12 h-12" />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-white tracking-tight">Cort1so1</h1>
@@ -432,6 +446,25 @@ export default function App() {
             {/* 3. Settings Tab */}
             {activeTab === 'settings' && (
               <div className="space-y-3.5 text-xs">
+                {/* App Profile Header */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Cort1so1Icon className="w-11 h-11" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white text-sm">Cort1so1</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                          v1.0.5
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">iOS Jailbreak & IPSW Utility</span>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isJailbroken ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700/50 text-slate-400'}`}>
+                    {isJailbroken ? (isRu ? 'Активен' : 'Active') : (isRu ? 'Не активен' : 'Stock')}
+                  </span>
+                </div>
+
                 {/* Developer Profile Header */}
                 <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -439,16 +472,13 @@ export default function App() {
                       <Send className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block">{isRu ? 'Создатель' : 'Creator'}</span>
+                      <span className="text-[10px] text-slate-400 block">{isRu ? 'Создатель & Разработчик' : 'Creator & Developer'}</span>
                       <a href="https://t.me/VityaV" target="_blank" rel="noreferrer" className="font-bold text-white hover:text-[#229ED9] flex items-center gap-1">
                         @VityaV 🇷🇺
                         <ExternalLink className="w-3 h-3 text-[#229ED9]" />
                       </a>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    Cort1so1 v1.0.5
-                  </span>
                 </div>
 
                 {/* Toggles */}

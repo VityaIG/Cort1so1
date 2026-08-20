@@ -76,22 +76,30 @@ struct SettingsView: View {
     private var appHeaderCard: some View {
         VStack(spacing: 14) {
             HStack(spacing: 14) {
-                // Иконка приложения
+                // Новая фирменная иконка приложения
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [Color.blue, Color.cyan],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                                colors: [
+                                    Color.white,
+                                    Color(red: 0.94, green: 0.95, blue: 0.97),
+                                    Color(red: 0.76, green: 0.78, blue: 0.81)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
                         )
                         .frame(width: 54, height: 54)
-                        .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.black.opacity(0.1), lineWidth: 1)
+                        )
 
-                    Image(systemName: "shield.checkered")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
+                    Cort1so1IconShape()
+                        .fill(Color(red: 0.08, green: 0.09, blue: 0.10))
+                        .frame(width: 36, height: 36)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -402,6 +410,41 @@ struct SettingsView: View {
 
 extension Color {
     static let slateColor = Color(red: 0.35, green: 0.45, blue: 0.55)
+}
+
+/// Векторная форма фирменной центрированной буквы «C» Cort1so1
+struct Cort1so1IconShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outerRadius = rect.width * (310.0 / 1024.0)
+        let innerRadius = rect.width * (220.0 / 1024.0)
+        
+        let cutOffsetY = rect.height * (95.0 / 1024.0)
+        let topCutY = center.y - cutOffsetY
+        let bottomCutY = center.y + cutOffsetY
+        
+        let outerXOffset = sqrt(max(0, outerRadius * outerRadius - cutOffsetY * cutOffsetY))
+        let innerXOffset = sqrt(max(0, innerRadius * innerRadius - cutOffsetY * cutOffsetY))
+        
+        let outerTop = CGPoint(x: center.x + outerXOffset, y: topCutY)
+        let innerTop = CGPoint(x: center.x + innerXOffset, y: topCutY)
+        let outerBottom = CGPoint(x: center.x + outerXOffset, y: bottomCutY)
+        let innerBottom = CGPoint(x: center.x + innerXOffset, y: bottomCutY)
+        
+        let startAngleOuter = atan2(-cutOffsetY, outerXOffset)
+        let endAngleOuter = atan2(cutOffsetY, outerXOffset)
+        let startAngleInner = atan2(cutOffsetY, innerXOffset)
+        let endAngleInner = atan2(-cutOffsetY, innerXOffset)
+        
+        path.move(to: outerTop)
+        path.addLine(to: innerTop)
+        path.addArc(center: center, radius: innerRadius, startAngle: Angle(radians: Double(endAngleInner)), endAngle: Angle(radians: Double(startAngleInner)), clockwise: true)
+        path.addLine(to: outerBottom)
+        path.addArc(center: center, radius: outerRadius, startAngle: Angle(radians: Double(endAngleOuter)), endAngle: Angle(radians: Double(startAngleOuter)), clockwise: false)
+        path.closeSubpath()
+        return path
+    }
 }
 
 #Preview {

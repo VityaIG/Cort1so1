@@ -1,30 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <!-- Background vertical subtle gradient: crisp white at top transitioning softly to very light silvery gray at bottom -->
+    <!-- Background vertical gradient: pure crisp white transitioning to smooth visible cool silver gray at bottom -->
     <linearGradient id="bgGradient" x1="50%" y1="0%" x2="50%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="35%" stop-color="#FDFDFE" />
-      <stop offset="70%" stop-color="#F2F3F5" />
-      <stop offset="100%" stop-color="#E2E4E8" />
+      <stop offset="25%" stop-color="#FAFBFD" />
+      <stop offset="55%" stop-color="#E8EBEF" />
+      <stop offset="85%" stop-color="#D0D4DB" />
+      <stop offset="100%" stop-color="#C2C7CF" />
     </linearGradient>
   </defs>
 
   <!-- Full canvas background -->
   <rect width="1024" height="1024" fill="url(#bgGradient)" />
 
-  <!-- Exact Centered Capital Letter "C" Ring Structure -->
-  <!-- Center at (512, 512), Outer radius = 320, Inner radius = 232, stroke thickness = 88. 
-       Right opening gap cut precisely with horizontal top and bottom terminal caps -->
-  <!-- Top terminal: x: 512 + 320*cos(-36.87°) = 512 + 256 = 768, y: 512 - 320*sin(36.87°) = 512 - 192 = 320 -->
-  <!-- Top inner: x: 512 + 232*cos(-36.87°) = 512 + 185.6 = 697.6, y: 512 - 232*sin(36.87°) = 512 - 139.2 = 372.8 -->
-  <!-- Bottom inner: x: 697.6, y: 512 + 139.2 = 651.2 -->
-  <!-- Bottom terminal: x: 768, y: 512 + 192 = 704 -->
+  <!-- Exactly Centered Capital Letter "C" Ring Structure -->
+  <!-- Center: (512, 512), Outer Radius: 310, Inner Radius: 220, Thickness: 90 -->
+  <!-- Horizontal cuts at y = 417 and y = 607 -->
   <path d="
-    M 808 418
-    L 718 418
-    A 230 230 0 1 0 718 606
-    L 808 606
-    A 320 320 0 1 1 808 418
+    M 807.1 417
+    L 710.4 417
+    A 220 220 0 1 0 710.4 607
+    L 807.1 607
+    A 310 310 0 1 1 807.1 417
     Z" 
     fill="#16181A" />
 </svg>
