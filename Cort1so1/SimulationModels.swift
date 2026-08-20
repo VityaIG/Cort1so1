@@ -16,13 +16,24 @@ struct PipelineStep: Identifiable {
     let subtitle: String
 }
 
-/// Доступные шаги пайплайна в стиле Dopamine
+/// Генерация шагов пайплайна с учетом языка
+func getPipelineSteps(for strings: LocalizedStrings) -> [PipelineStep] {
+    return [
+        PipelineStep(id: 1, title: strings.step1Title, subtitle: strings.step1Subtitle),
+        PipelineStep(id: 2, title: strings.step2Title, subtitle: strings.step2Subtitle),
+        PipelineStep(id: 3, title: strings.step3Title, subtitle: strings.step3Subtitle),
+        PipelineStep(id: 4, title: strings.step4Title, subtitle: strings.step4Subtitle),
+        PipelineStep(id: 5, title: strings.step5Title, subtitle: strings.step5Subtitle)
+    ]
+}
+
+/// Доступные шаги пайплайна по умолчанию
 let defaultPipelineSteps: [PipelineStep] = [
     PipelineStep(id: 1, title: "Инициализация среды", subtitle: "Проверка системных разрешений и песочницы..."),
     PipelineStep(id: 2, title: "Поиск смещений ядра", subtitle: "Вычисление KASLR slide и структуры proc_t..."),
     PipelineStep(id: 3, title: "Обход защитных механизмов", subtitle: "Патчинг проверок подписи AMFI и CoreTrust..."),
     PipelineStep(id: 4, title: "Получение привилегий tfp0", subtitle: "Установка прав суперпользователя (root)..."),
-    PipelineStep(id: 5, title: "Подготовка Bootstrap", subtitle: "Развертывание Procursus и менеджеров пакетов...")
+    PipelineStep(id: 5, title: "Развертывание Bootstrap", subtitle: "Развертывание Procursus и менеджеров пакетов...")
 ]
 
 /// Модель прошивки для симуляции отката

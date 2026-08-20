@@ -3,8 +3,14 @@ import SwiftUI
 /// Корневой контейнер приложения с нативным TabView в стиле iOS HIG
 struct ContentView: View {
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
+    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
+
+    private var strings: LocalizedStrings {
+        LocalizedStrings(langCode: appLanguage)
+    }
 
     var body: some View {
         ZStack {
@@ -12,24 +18,24 @@ struct ContentView: View {
             TabView(selection: $selectedTab) {
                 MainView(jailbreakState: $jailbreakState)
                     .tabItem {
-                        Label("Основное", systemImage: "bolt.shield.fill")
+                        Label(strings.tabMain, systemImage: "bolt.shield.fill")
                     }
                     .tag(0)
 
                 DowngradeView()
                     .tabItem {
-                        Label("Откат iOS", systemImage: "arrow.counterclockwise.circle.fill")
+                        Label(strings.tabDowngrade, systemImage: "arrow.counterclockwise.circle.fill")
                     }
                     .tag(1)
 
-                SettingsView()
+                SettingsView(jailbreakState: $jailbreakState)
                     .tabItem {
-                        Label("Настройки", systemImage: "gearshape.fill")
+                        Label(strings.tabSettings, systemImage: "gearshape.fill")
                     }
                     .tag(2)
             }
 
-            // Фаза 2: Оверлей быстрого потока системных логов
+            // Фаза 2: Оверлей быстрого потока системных логов (в стиле Dopamine)
             if jailbreakState == .streamingLogs {
                 LogStreamView(onCompleted: {
                     withAnimation(.easeInOut(duration: 0.25)) {
@@ -43,12 +49,19 @@ struct ContentView: View {
             // Фаза 3: Оверлей симуляции респринга SpringBoard
             if jailbreakState == .respring {
                 NeoSpringView(onFinished: {
+                    isJailbroken = true
                     withAnimation(.easeInOut(duration: 0.25)) {
                         jailbreakState = .completed
                     }
                 })
                 .transition(.opacity)
                 .zIndex(20)
+            }
+        }
+        .onAppear {
+            // Если ранее был выполнен джейлбрейк, восстанавливаем состояние
+            if isJailbroken {
+                jailbreakState = .completed
             }
         }
         // Поддержка двух режимов оформления

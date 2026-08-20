@@ -3,8 +3,13 @@ import SwiftUI
 /// Представление симуляции перезапуска SpringBoard (Respring)
 struct NeoSpringView: View {
     var onFinished: () -> Void
+    @AppStorage("appLanguage") private var appLanguage: String = "ru"
     @State private var isVisible = false
     @State private var rotationAngle: Double = 0
+
+    private var strings: LocalizedStrings {
+        LocalizedStrings(langCode: appLanguage)
+    }
 
     var body: some View {
         ZStack {
@@ -17,7 +22,7 @@ struct NeoSpringView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.8)
 
-                Text("Перезапуск SpringBoard...")
+                Text(strings.respringText)
                     .font(.system(size: 14, weight: .medium, design: .monospaced))
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -29,7 +34,7 @@ struct NeoSpringView: View {
             }
             
             // Симуляция времени респринга перед возвратом в систему
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
                     isVisible = false
                 }

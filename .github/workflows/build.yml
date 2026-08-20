@@ -53,17 +53,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.5' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.0.5' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.6' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.0.6' }}
           body: |
-            Автоматическая сборка приложения Cort1so1 (iOS HIG Native).
+            Автоматическая сборка приложения Cort1so1 (iOS HIG Native) v1.0.6.
 
-            Особенности интерфейса:
-            - Чистый, высококонтрастный нативный интерфейс iOS HIG (Human Interface Guidelines).
-            - Нативные сгруппированные карточки с системными цветами и адаптивной темой (Light / Dark).
-            - Вкладка Основное: пошаговый пайплайн инициализации, терминал логов ядра и оверлей респринга SpringBoard.
+            Особенности и обновления:
+            - Фирменная ссылка на создателя @VityaV в Telegram.
+            - Пошаговый пайплайн джейлбрейка в стиле Dopamine с красивым градиентным прогресс-баром.
+            - Сохранение состояния джейлбрейка между перезапусками.
+            - Кнопка «Убрать джейлбрейк» в настройках.
+            - Поддержка двух языков интерфейса: Русский и English.
             - Вкладка Откат iOS: каталог версий IPSW с симуляцией проверки подписей TSS и распаковки SEP.
-            - Вкладка Настройки: управление параметрами утилиты, логов и темы оформления.
 
             Инструкция по установке:
             1. Скачайте файл Cort1so1.ipa из блока Assets ниже.
