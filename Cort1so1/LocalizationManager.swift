@@ -66,6 +66,11 @@ struct LocalizedStrings {
     var buttonReJailbreak: String { lang == .ru ? "Повторить (Re-Jailbreak)" : "Re-Jailbreak" }
     var buttonRespring: String { lang == .ru ? "Респринг" : "Respring" }
 
+    // Alert
+    var confirmAlertTitle: String { lang == .ru ? "Вы уверены?" : "Are you sure?" }
+    var confirmAlertMessage: String { lang == .ru ? "Будет выполнен процесс джейлбрейка Cort1so1 для текущего устройства." : "The Cort1so1 jailbreak sequence will begin for this device." }
+    var confirmYesBtn: String { lang == .ru ? "Да" : "Yes" }
+
     var stepProgress: String { lang == .ru ? "Этап" : "Step" }
     var stepOf: String { lang == .ru ? "из" : "of" }
 
