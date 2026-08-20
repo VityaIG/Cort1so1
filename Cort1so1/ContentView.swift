@@ -26,7 +26,7 @@ struct ContentView: View {
                 if isJailbroken || jailbreakState == .completed {
                     TweaksView()
                         .tabItem {
-                            Label(strings.tabTweaks, systemImage: "wand.and.stars")
+                            Label(strings.tabTweaks, systemImage: "hammer.fill")
                         }
                         .tag(1)
                 }
