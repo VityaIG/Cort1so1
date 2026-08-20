@@ -8,7 +8,6 @@ struct MainView: View {
 
     @State private var showingConfirmAlert: Bool = false
     @State private var showingProcessModal: Bool = false
-    @State private var executionMode: Int = 0
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -22,9 +21,6 @@ struct MainView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 16) {
-                        // Сегментированный переключатель режимов (Rootless / Стандарт / Эксперт)
-                        modeSelectorSection
-
                         // Карточка системного состояния
                         systemStatusCard
 
@@ -66,17 +62,6 @@ struct MainView: View {
 
     // MARK: - Компоненты интерфейса
 
-    /// Переключатель режимов
-    private var modeSelectorSection: some View {
-        Picker(strings.modeTitle, selection: $executionMode) {
-            Text(strings.modeRootless).tag(0)
-            Text(strings.modeStandard).tag(1)
-            Text(strings.modeExpert).tag(2)
-        }
-        .pickerStyle(.segmented)
-        .padding(.vertical, 2)
-    }
-
     /// Карточка системных параметров
     private var systemStatusCard: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -86,7 +71,7 @@ struct MainView: View {
                         .font(.system(.body, design: .default))
                         .fontWeight(.semibold)
                 } icon: {
-                    Image(systemName: "shield.lefthalf.filled")
+                    Image(systemName: "lock.open.fill")
                         .foregroundColor(.blue)
                 }
 
@@ -186,7 +171,7 @@ struct MainView: View {
             } else {
                 // Исходное состояние готовности
                 HStack(spacing: 14) {
-                    Image(systemName: "shield.checkered")
+                    Image(systemName: "lock.open.fill")
                         .foregroundColor(.blue)
                         .font(.system(size: 34))
 

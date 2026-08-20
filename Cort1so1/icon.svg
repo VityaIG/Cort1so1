@@ -1,17 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <defs>
-    <!-- Background vertical gradient: pure crisp white transitioning to smooth visible cool silver gray at bottom -->
-    <linearGradient id="bgGradient" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="25%" stop-color="#FAFBFD" />
-      <stop offset="55%" stop-color="#E8EBEF" />
-      <stop offset="85%" stop-color="#D0D4DB" />
-      <stop offset="100%" stop-color="#C2C7CF" />
-    </linearGradient>
-  </defs>
-
-  <!-- Full canvas background -->
-  <rect width="1024" height="1024" fill="url(#bgGradient)" />
+  <!-- Full canvas background: clean solid white -->
+  <rect width="1024" height="1024" fill="#FFFFFF" />
 
   <!-- Exactly Centered Capital Letter "C" Ring Structure -->
   <!-- Center: (512, 512), Outer Radius: 310, Inner Radius: 220, Thickness: 90 -->

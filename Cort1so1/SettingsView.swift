@@ -79,19 +79,9 @@ struct SettingsView: View {
                 // Новая фирменная иконка приложения
                 ZStack {
                     RoundedRectangle(cornerRadius: 13, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.white,
-                                    Color(red: 0.94, green: 0.95, blue: 0.97),
-                                    Color(red: 0.76, green: 0.78, blue: 0.81)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
+                        .fill(Color.white)
                         .frame(width: 50, height: 50)
-                        .shadow(color: Color.black.opacity(0.18), radius: 5, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.12), radius: 3, x: 0, y: 1)
                         .overlay(
                             RoundedRectangle(cornerRadius: 13, style: .continuous)
                                 .stroke(Color.black.opacity(0.1), lineWidth: 1)

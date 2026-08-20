@@ -18,7 +18,7 @@ struct ContentView: View {
             TabView(selection: $selectedTab) {
                 MainView(jailbreakState: $jailbreakState)
                     .tabItem {
-                        Label(strings.tabMain, systemImage: "bolt.shield.fill")
+                        Label(strings.tabMain, systemImage: "lock.open.fill")
                     }
                     .tag(0)
 

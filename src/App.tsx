@@ -22,7 +22,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
 
   const isRu = lang === 'ru';
-  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.0.6/Cort1so1.ipa";
+  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.0.5/Cort1so1.ipa";
   const trollStoreUrl = `apple-magnifier://install?url=${encodeURIComponent(latestReleaseUrl)}`;
   const githubRepoUrl = "https://github.com/VityaIG/Cort1so1";
   const telegramUrl = "https://t.me/VityaV";
@@ -36,11 +36,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-blue-500 selection:text-white flex flex-col justify-between">
       {/* Top Navigation */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="border-b border-slate-800 bg-slate-950 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center font-bold text-white text-lg tracking-tight">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="font-bold text-white text-lg tracking-tight">
                 C
               </div>
             </div>
@@ -48,7 +48,7 @@ export default function App() {
               <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
                 Cort1so1
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  v1.0.6 IPA
+                  v1.0.5 IPA
                 </span>
               </span>
               <p className="text-[11px] text-slate-400 font-medium -mt-0.5">
@@ -121,7 +121,7 @@ export default function App() {
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all"
             >
               <Download className="w-4 h-4" />
-              {isRu ? 'Скачать Cort1so1.ipa (v1.0.6)' : 'Download Cort1so1.ipa (v1.0.6)'}
+              {isRu ? 'Скачать Cort1so1.ipa (v1.0.5)' : 'Download Cort1so1.ipa (v1.0.5)'}
             </a>
 
             <a
@@ -271,7 +271,7 @@ export default function App() {
         </section>
 
         {/* Creator and Links */}
-        <section className="p-5 rounded-2xl bg-gradient-to-r from-blue-950/30 to-slate-900 border border-blue-900/30 max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <section className="p-5 rounded-2xl bg-slate-900 border border-slate-800 max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-base">
               В

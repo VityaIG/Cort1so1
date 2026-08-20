@@ -133,13 +133,7 @@ struct DowngradeView: View {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue, Color.cyan],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(Color.blue)
                         .frame(width: 48, height: 48)
 
                     Image(systemName: "iphone.gen3")
@@ -529,13 +523,7 @@ struct DowngradeView: View {
                                 .frame(height: 8)
 
                             RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color.blue, Color.cyan],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
+                                .fill(Color.blue)
                                 .frame(width: max(12, geo.size.width * CGFloat(progressRatio)), height: 8)
                                 .animation(.linear(duration: 0.1), value: progressRatio)
                         }
