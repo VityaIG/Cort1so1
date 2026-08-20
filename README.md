@@ -1,4 +1,4 @@
-# Cort1so1 (v1.0.5)
+# Cort1so1 (v1.0.6)
 
 <p align="center">
   <img src="Cort1so1/icon.svg" width="130" height="130" alt="Cort1so1 Icon" style="border-radius: 28px;" />

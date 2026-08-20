@@ -3,7 +3,7 @@ import Foundation
 /// Набор системных логов для фазы вывода в терминал
 struct LogData {
     static let systemLogs: [String] = [
-        "[*] Cort1so1 Exploit Engine v1.0.5 (iOS 26.0 - arm64e)",
+        "[*] Cort1so1 Exploit Engine v1.0.6 (iOS 26.0 - arm64e)",
         "[*] Проверка архитектуры: Apple Silicon Neural Subsystem",
         "[*] Определение базового адреса mach_kernel: 0xfffffff007004000",
         "[*] Вычисление KASLR Slide: 0x000000001bc24000",
