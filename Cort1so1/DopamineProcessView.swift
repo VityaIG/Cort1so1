@@ -11,7 +11,7 @@ enum DopamineProcessPhase {
 }
 
 /// Модель отдельного шага логов процесса джейлбрейка
-struct JailbreakLogStep: Identifiable {
+struct JailbreakLogStep: Identifiable, Equatable {
     let id: Int
     let titleRu: String
     let titleEn: String
@@ -19,7 +19,7 @@ struct JailbreakLogStep: Identifiable {
     let iconName: String
 }
 
-/// Модальное окно процесса джейлбрейка в стиле Dopamine с компактными логами на чистом черном фоне
+/// Модальное окно процесса джейлбрейка в стиле Dopamine с ультра-плавными нативными анимациями
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "ru"
     var onComplete: () -> Void
@@ -27,8 +27,14 @@ struct DopamineProcessView: View {
     @State private var phase: DopamineProcessPhase = .logging
     @State private var visibleLogs: [JailbreakLogStep] = []
     @State private var currentStepIndex: Int = 0
+    
+    // Анимационные параметры для логотипов Apple и респринга
     @State private var appleWhiteOpacity: Double = 0.0
+    @State private var appleWhiteScale: CGFloat = 0.92
     @State private var appleRedOpacity: Double = 0.0
+    @State private var appleRedScale: CGFloat = 0.94
+    @State private var appleRedGlow: CGFloat = 0.0
+    @State private var respringRotation: Double = 0.0
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -184,6 +190,10 @@ struct DopamineProcessView: View {
         ]
     }
 
+    private var progressRatio: Double {
+        Double(currentStepIndex) / Double(max(1, logSteps.count))
+    }
+
     var body: some View {
         ZStack {
             // Чистый сплошной черный фон без градиентов
@@ -196,7 +206,7 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
 
             case .appleWhite:
-                appleLogoView(color: .white, opacity: appleWhiteOpacity)
+                appleLogoView(color: .white, opacity: appleWhiteOpacity, scale: appleWhiteScale)
                     .transition(.opacity)
 
             case .blackScreen:
@@ -205,7 +215,7 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
 
             case .appleRed:
-                appleLogoView(color: Color(red: 0.95, green: 0.22, blue: 0.22), opacity: appleRedOpacity)
+                appleRedView
                     .transition(.opacity)
 
             case .respring:
@@ -245,74 +255,100 @@ struct DopamineProcessView: View {
 
                 Spacer()
 
-                Text("[\(currentStepIndex)/\(logSteps.count)]")
-                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(Capsule())
+                HStack(spacing: 4) {
+                    Text("[\(currentStepIndex)/\(logSteps.count)]")
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    Text("\(Int(progressRatio * 100))%")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
+                }
+                .foregroundColor(.white.opacity(0.9))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.white.opacity(0.12))
+                .clipShape(Capsule())
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(Color.black)
 
-            // Простой плоский сплошной прогресс-бар (без градиента)
+            // Прогресс-бар с динамической подсветкой
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.white.opacity(0.1))
-                        .frame(height: 2)
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 2.5)
 
                     Rectangle()
-                        .fill(Color.white)
-                        .frame(
-                            width: max(8, geo.size.width * CGFloat(Double(currentStepIndex) / Double(max(1, logSteps.count)))),
-                            height: 2
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.blue, Color(red: 0.35, green: 0.9, blue: 0.5), Color.white],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                        .animation(.easeInOut(duration: 0.3), value: currentStepIndex)
+                        .frame(
+                            width: max(6, geo.size.width * CGFloat(progressRatio)),
+                            height: 2.5
+                        )
+                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentStepIndex)
                 }
             }
-            .frame(height: 2)
+            .frame(height: 2.5)
 
-            // Список логов: анимация загрузки (ProgressView) и увеличенный размер шрифта
+            // Список логов: анимации каждого элемента
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(visibleLogs) { step in
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(Array(visibleLogs.enumerated()), id: \.element.id) { index, step in
+                            let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
+                            let isDone = !isCurrentRunning
+
                             HStack(alignment: .center, spacing: 12) {
-                                // Анимация загрузки (ProgressView) перед каждым логом
-                                if step.isMajorPhase {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
-                                        .frame(width: 20, height: 20)
-                                } else {
+                                // Иконка состояния: если выполняется — индикатор прогресса, если завершен — зеленая галочка / значок
+                                if isCurrentRunning {
                                     ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white.opacity(0.85)))
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                         .scaleEffect(0.85)
-                                        .frame(width: 20, height: 20)
+                                        .frame(width: 22, height: 22)
+                                } else if step.isMajorPhase {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
+                                        .frame(width: 22, height: 22)
+                                } else {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5).opacity(0.9))
+                                        .frame(width: 22, height: 22)
                                 }
 
-                                // Текст лога увеличенного размера под стать индикатору загрузки
+                                // Текст лога
                                 Text(isRu ? step.titleRu : step.titleEn)
-                                    .font(.system(size: step.isMajorPhase ? 16 : 15, weight: step.isMajorPhase ? .bold : .medium))
-                                    .foregroundColor(step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5) : Color.white)
+                                    .font(.system(size: step.isMajorPhase ? 15 : 14, weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular)))
+                                    .foregroundColor(step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5) : (isCurrentRunning ? Color.white : Color.white.opacity(0.85)))
                                     .lineLimit(2)
 
                                 Spacer(minLength: 0)
 
                                 if step.isMajorPhase {
                                     Text(isRu ? "OK" : "DONE")
-                                        .font(.system(size: 10, weight: .bold))
+                                        .font(.system(size: 10, weight: .heavy))
                                         .foregroundColor(.black)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
+                                        .padding(.horizontal, 7)
+                                        .padding(.vertical, 2.5)
                                         .background(Color(red: 0.35, green: 0.9, blue: 0.5))
                                         .clipShape(Capsule())
                                 }
                             }
-                            .padding(.vertical, 3)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                isCurrentRunning
+                                    ? Color.white.opacity(0.06)
+                                    : (step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5).opacity(0.08) : Color.clear)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .id(step.id)
                             .transition(.asymmetric(
                                 insertion: .opacity.combined(with: .move(edge: .bottom)),
@@ -320,13 +356,13 @@ struct DopamineProcessView: View {
                             ))
                         }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 14)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .onChange(of: visibleLogs.count) { _ in
                     if let lastStep = visibleLogs.last {
-                        withAnimation(.easeOut(duration: 0.3)) {
+                        withAnimation(.easeOut(duration: 0.25)) {
                             proxy.scrollTo(lastStep.id, anchor: .bottom)
                         }
                     }
@@ -335,7 +371,7 @@ struct DopamineProcessView: View {
 
             Spacer(minLength: 0)
 
-            // Нижняя компактная статусная строка (сплошной черный фон)
+            // Нижняя компактная статусная строка
             HStack(spacing: 10) {
                 ProgressView()
                     .tint(.white)
@@ -343,20 +379,20 @@ struct DopamineProcessView: View {
 
                 Text(isRu ? "Выполняется джейлбрейк..." : "Jailbreak in progress...")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white.opacity(0.9))
 
                 Spacer()
 
-                Text("rootless")
-                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.5))
+                Text("rootless • arm64e")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.55))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(Color.black)
             .overlay(
                 Rectangle()
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color.white.opacity(0.1))
                     .frame(height: 0.5),
                 alignment: .top
             )
@@ -366,15 +402,39 @@ struct DopamineProcessView: View {
 
     // MARK: - Экран с логотипом Apple
 
-    private func appleLogoView(color: Color, opacity: Double) -> some View {
+    private func appleLogoView(color: Color, opacity: Double, scale: CGFloat) -> some View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
 
             Image(systemName: "applelogo")
-                .font(.system(size: 92, weight: .regular))
+                .font(.system(size: 96, weight: .regular))
                 .foregroundColor(color)
+                .scaleEffect(scale)
                 .opacity(opacity)
+        }
+    }
+
+    private var appleRedView: some View {
+        ZStack {
+            Color.black
+                .ignoresSafeArea()
+
+            // Свечение сзади красного логотипа (эффект Dopamine)
+            RadialGradient(
+                colors: [Color(red: 0.95, green: 0.15, blue: 0.15).opacity(0.25), Color.clear],
+                center: .center,
+                startRadius: 20,
+                endRadius: 160
+            )
+            .frame(width: 320, height: 320)
+            .opacity(appleRedOpacity)
+
+            Image(systemName: "applelogo")
+                .font(.system(size: 96, weight: .regular))
+                .foregroundColor(Color(red: 0.96, green: 0.22, blue: 0.22))
+                .scaleEffect(appleRedScale)
+                .opacity(appleRedOpacity)
         }
     }
 
@@ -385,13 +445,14 @@ struct DopamineProcessView: View {
             Color.black
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack(spacing: 26) {
+                // Плавный системный индикатор респринга SpringBoard
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.6)
+                    .scaleEffect(1.7)
 
                 Text(strings.respringText)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: .medium, design: .monospaced))
                     .foregroundColor(.white.opacity(0.85))
             }
         }
@@ -400,84 +461,81 @@ struct DopamineProcessView: View {
     // MARK: - Замедленный асинхронный пайплайн выполнения
 
     private func runExecutionPipeline() async {
-        // Вывод логов с более плавными и медленными задержками (1.1s - 1.6s на шаг)
+        // Вывод логов с плавными задержками (1.1s - 1.6s на шаг)
         for (idx, step) in logSteps.enumerated() {
-            let delayNanos: UInt64 = step.isMajorPhase ? 1_600_000_000 : 1_100_000_000
-            try? await Task.sleep(nanoseconds: delayNanos)
-
             await MainActor.run {
-                triggerHaptic(isMajor: step.isMajorPhase)
-
-                withAnimation(.easeOut(duration: 0.3)) {
+                currentStepIndex = idx + 1
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     visibleLogs.append(step)
-                    currentStepIndex = idx + 1
                 }
+                triggerHaptic(isMajor: step.isMajorPhase)
             }
+
+            let delayNanos: UInt64 = step.isMajorPhase ? 1_500_000_000 : 1_100_000_000
+            try? await Task.sleep(nanoseconds: delayNanos)
         }
 
         // Пауза перед переходом к экранам Apple
         try? await Task.sleep(nanoseconds: 1_200_000_000)
 
-        // Появление белого логотипа Apple
-        await MainActor.run {
-            triggerImpact(style: .light)
-            withAnimation(.easeInOut(duration: 0.4)) {
-                phase = .appleWhite
-            }
-        }
-        await MainActor.run {
-            withAnimation(.easeIn(duration: 0.4)) {
-                appleWhiteOpacity = 1.0
-            }
-        }
-
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
-
-        // Затухание белого логотипа
-        await MainActor.run {
-            withAnimation(.easeOut(duration: 0.4)) {
-                appleWhiteOpacity = 0.0
-            }
-        }
-        try? await Task.sleep(nanoseconds: 400_000_000)
-
-        // Чистый черный экран
-        await MainActor.run {
-            phase = .blackScreen
-        }
-        try? await Task.sleep(nanoseconds: 1_200_000_000)
-
-        // Появление красного логотипа Apple
+        // 1. Появление белого логотипа Apple с анимацией увеличения и затухания
         await MainActor.run {
             triggerImpact(style: .medium)
-            phase = .appleRed
-        }
-        await MainActor.run {
-            withAnimation(.easeIn(duration: 0.4)) {
-                appleRedOpacity = 1.0
+            phase = .appleWhite
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                appleWhiteOpacity = 1.0
+                appleWhiteScale = 1.0
             }
         }
 
         try? await Task.sleep(nanoseconds: 1_600_000_000)
 
+        // Затухание белого логотипа
+        await MainActor.run {
+            withAnimation(.easeOut(duration: 0.45)) {
+                appleWhiteOpacity = 0.0
+                appleWhiteScale = 0.95
+            }
+        }
+        try? await Task.sleep(nanoseconds: 450_000_000)
+
+        // 2. Чистый черный экран
+        await MainActor.run {
+            phase = .blackScreen
+        }
+        try? await Task.sleep(nanoseconds: 900_000_000)
+
+        // 3. Появление красного логотипа Apple (фирменный знак Dopamine)
+        await MainActor.run {
+            triggerImpact(style: .heavy)
+            phase = .appleRed
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
+                appleRedOpacity = 1.0
+                appleRedScale = 1.0
+            }
+        }
+
+        try? await Task.sleep(nanoseconds: 1_700_000_000)
+
         // Затухание красного логотипа
         await MainActor.run {
-            withAnimation(.easeOut(duration: 0.4)) {
+            withAnimation(.easeOut(duration: 0.45)) {
                 appleRedOpacity = 0.0
+                appleRedScale = 0.95
             }
         }
         try? await Task.sleep(nanoseconds: 400_000_000)
 
-        // Респринг
+        // 4. Респринг SpringBoard
         await MainActor.run {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: 0.35)) {
                 phase = .respring
             }
         }
 
         try? await Task.sleep(nanoseconds: 2_400_000_000)
 
-        // Завершение
+        // 5. Завершение
         await MainActor.run {
             triggerNotificationSuccess()
             onComplete()
