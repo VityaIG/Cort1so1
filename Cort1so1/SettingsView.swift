@@ -331,7 +331,7 @@ struct SettingsView: View {
                 Text(strings.versionLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("1.1 (Build 26B101)")
+                Text("1.1.3 (Build 26B101)")
                     .foregroundColor(.secondary)
                     .font(.system(.subheadline, design: .monospaced))
             }
