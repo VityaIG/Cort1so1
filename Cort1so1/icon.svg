@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="50%" stop-color="#F2F3F5" />
+      <stop offset="100%" stop-color="#D2D6DC" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bg)" />
+
+  <!-- Outer Letter "C" -->
+  <!-- Center: (512, 520), outer radius 320, inner radius 230, gap on right side from -38 deg to 38 deg -->
+  <path d="
+    M 764.3 323.0
+    A 320 320 0 1 0 764.3 717.0
+    L 693.3 661.6
+    A 230 230 0 1 1 693.3 378.4
+    Z" 
+    fill="#16181B" />
+
+  <!-- Center Lock -->
+  <g fill="#16181B">
+    <!-- Open Shackle -->
+    <!-- Left vertical bar going into lock body, top arch, right bar cut short & lifted up (open) -->
+    <path d="
+      M 430 500
+      L 430 436
+      A 82 82 0 0 1 594 436
+      L 594 466
+      L 628 466
+      L 628 436
+      A 116 116 0 0 0 396 436
+      L 396 500
+      Z" />
+
+    <!-- Lock Body (Rounded Rectangle) -->
+    <rect x="392" y="496" width="240" height="176" rx="28" ry="28" />
+  </g>
+
+  <!-- Keyhole in white inside the lock body -->
+  <path d="
+    M 512 546
+    A 24 24 0 0 0 496 584
+    L 501 632
+    A 6 6 0 0 0 507 637
+    L 517 637
+    A 6 6 0 0 0 523 632
+    L 528 584
+    A 24 24 0 0 0 512 546
+    Z" 
+    fill="#FFFFFF" />
+</svg>
