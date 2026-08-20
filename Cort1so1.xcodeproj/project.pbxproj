@@ -19,6 +19,7 @@
 		B10010122C74000100000001 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010132C74000100000001 /* LocalizationManager.swift */; };
 		B10010142C74000100000001 /* DopamineProcessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010142C74000100000001 /* DopamineProcessView.swift */; };
 		B10010102C74000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10010102C74000100000001 /* Assets.xcassets */; };
+		B10010162C74000100000001 /* TweaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010162C74000100000001 /* TweaksView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		F10010102C74000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F10010112C74000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F10010122C74000100000001 /* Cort1so1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cort1so1.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F10010162C74000100000001 /* TweaksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweaksView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 			children = (
 				F10010012C74000100000001 /* Cort1so1App.swift */,
 				F10010022C74000100000001 /* ContentView.swift */,
+				F10010162C74000100000001 /* TweaksView.swift */,
 				F10010032C74000100000001 /* MainView.swift */,
 				F10010042C74000100000001 /* LogStreamView.swift */,
 				F10010052C74000100000001 /* NeoSpringView.swift */,
@@ -156,6 +159,7 @@
 			files = (
 				B10010012C74000100000001 /* Cort1so1App.swift in Sources */,
 				B10010022C74000100000001 /* ContentView.swift in Sources */,
+				B10010162C74000100000001 /* TweaksView.swift in Sources */,
 				B10010032C74000100000001 /* MainView.swift in Sources */,
 				B10010042C74000100000001 /* LogStreamView.swift in Sources */,
 				B10010052C74000100000001 /* NeoSpringView.swift in Sources */,
