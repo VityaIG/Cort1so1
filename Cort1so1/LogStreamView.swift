@@ -14,42 +14,48 @@ struct LogStreamView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-                // Служебный заголовок в стиле Liquid Terminal
+                // Служебный заголовок в нативном терминальном стиле
                 HStack {
-                    Text("CORT1SO1 LIQUID ENGINE — iOS 26.0")
-                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundColor(.green.opacity(0.85))
+                    HStack(spacing: 6) {
+                        Circle().fill(Color.red.opacity(0.8)).frame(width: 10, height: 10)
+                        Circle().fill(Color.yellow.opacity(0.8)).frame(width: 10, height: 10)
+                        Circle().fill(Color.green.opacity(0.8)).frame(width: 10, height: 10)
+                    }
+                    .padding(.trailing, 8)
+
+                    Text("CORT1SO1 EXPLOIT ENGINE — iOS 26.0")
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundColor(.green.opacity(0.9))
 
                     Spacer()
 
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .green))
-                        .scaleEffect(0.6)
+                        .scaleEffect(0.7)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(.ultraThinMaterial)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(white: 0.1))
                 .overlay(
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(.green.opacity(0.3)),
+                    Divider()
+                        .background(Color.white.opacity(0.15)),
                     alignment: .bottom
                 )
 
-                // Поток логов со сверхмелким шрифтом
+                // Поток логов
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: true) {
-                        LazyVStack(alignment: .leading, spacing: 2) {
+                        LazyVStack(alignment: .leading, spacing: 4) {
                             ForEach(Array(visibleLogs.enumerated()), id: \.offset) { index, log in
                                 Text(log)
-                                    .font(.system(size: 7, design: .monospaced))
+                                    .font(.system(size: 10, design: .monospaced))
                                     .foregroundColor(logColor(for: log))
                                     .textSelection(.enabled)
                                     .id(index)
                             }
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
                     }
                     .onChange(of: visibleLogs.count) { _ in
                         if let lastIndex = visibleLogs.indices.last {

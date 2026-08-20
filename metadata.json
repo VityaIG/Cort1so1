@@ -1,6 +1,6 @@
 {
   "name": "Cort1so1",
-  "description": "Cort1so1 iOS System Simulator with Liquid Glass HIG design system, interactive jailbreak pipeline, IPSW downgrade simulation, and automated GitHub Actions IPA release workflow.",
+  "description": "Cort1so1 iOS System Simulator with native iOS HIG design system, interactive jailbreak pipeline, IPSW downgrade simulation, and automated GitHub Actions IPA release workflow.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

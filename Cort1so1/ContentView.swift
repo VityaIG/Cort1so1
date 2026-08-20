@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Корневой контейнер приложения с нативным TabView в концепции iOS 26 Liquid Glass
+/// Корневой контейнер приложения с нативным TabView в стиле iOS HIG
 struct ContentView: View {
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @State private var jailbreakState: JailbreakState = .idle
@@ -8,7 +8,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Нативный системный TabView с материалом ультратонкого стекла
+            // Нативный системный TabView
             TabView(selection: $selectedTab) {
                 MainView(jailbreakState: $jailbreakState)
                     .tabItem {
@@ -28,13 +28,11 @@ struct ContentView: View {
                     }
                     .tag(2)
             }
-            .toolbarBackground(.ultraThinMaterial, for: .tabBar)
-            .toolbarBackground(.visible, for: .tabBar)
 
             // Фаза 2: Оверлей быстрого потока системных логов
             if jailbreakState == .streamingLogs {
                 LogStreamView(onCompleted: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
                         jailbreakState = .respring
                     }
                 })
@@ -45,7 +43,7 @@ struct ContentView: View {
             // Фаза 3: Оверлей симуляции респринга SpringBoard
             if jailbreakState == .respring {
                 NeoSpringView(onFinished: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
                         jailbreakState = .completed
                     }
                 })

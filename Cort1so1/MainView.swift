@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Главный экран утилиты «Cort1so1» в дизайн-системе iOS 26 Liquid Glass HIG
+/// Главный экран утилиты «Cort1so1» в нативном стиле Apple iOS HIG
 struct MainView: View {
     @Binding var jailbreakState: JailbreakState
     @State private var currentStepIndex: Int = 0
@@ -11,23 +11,23 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Базовый фон с легкой диффузией для эффекта стекла
-                ambientBackground
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
 
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 18) {
-                        // Сегментированный переключатель режимов в стеклянном контейнере
-                        modeSelectorCard
+                    VStack(spacing: 16) {
+                        // Сегментированный переключатель режимов
+                        modeSelectorSection
 
-                        // Парящая карточка состояния среды
+                        // Карточка системного состояния
                         systemStatusCard
 
-                        // Парящая карточка пайплайна выполнения
+                        // Карточка выполнения этапов
                         pipelineProcessCard
 
-                        // Пространственная интерактивная кнопка действия
+                        // Кнопка основного действия
                         actionButton
-                            .padding(.top, 4)
+                            .padding(.top, 6)
                             .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 16)
@@ -36,48 +36,20 @@ struct MainView: View {
             }
             .navigationTitle("Cort1so1")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
         }
     }
 
-    // MARK: - Фон с преломлением
-
-    private var ambientBackground: some View {
-        ZStack {
-            Color(uiColor: .systemGroupedBackground)
-                .ignoresSafeArea()
-
-            // Мягкие ореолы рассеивания для пространственного преломления через ultraThinMaterial
-            Circle()
-                .fill(Color.blue.opacity(0.12))
-                .frame(width: 320, height: 320)
-                .blur(radius: 80)
-                .offset(x: -80, y: -160)
-
-            Circle()
-                .fill(Color.cyan.opacity(0.10))
-                .frame(width: 280, height: 280)
-                .blur(radius: 75)
-                .offset(x: 100, y: 120)
-        }
-    }
-
-    // MARK: - Парящие карточки Liquid Glass
+    // MARK: - Компоненты интерфейса
 
     /// Переключатель режимов
-    private var modeSelectorCard: some View {
+    private var modeSelectorSection: some View {
         Picker("Режим работы", selection: $executionMode) {
             Text("Rootless").tag(0)
             Text("Стандарт").tag(1)
             Text("Эксперт").tag(2)
         }
         .pickerStyle(.segmented)
-        .padding(6)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 18))
-        .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 6)
+        .padding(.vertical, 2)
     }
 
     /// Карточка системных параметров
@@ -86,12 +58,11 @@ struct MainView: View {
             HStack {
                 Label {
                     Text("Состояние")
-                        .font(.system(.body, design: .rounded))
+                        .font(.system(.body, design: .default))
                         .fontWeight(.semibold)
                 } icon: {
                     Image(systemName: "shield.lefthalf.filled")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.blue)
                 }
 
                 Spacer()
@@ -102,60 +73,50 @@ struct MainView: View {
                         .frame(width: 8, height: 8)
                     Text(statusBadgeText)
                         .foregroundColor(jailbreakState == .completed ? .green : .blue)
-                        .font(.system(.subheadline, design: .rounded))
+                        .font(.system(.subheadline, design: .default))
                         .fontWeight(.semibold)
                 }
                 .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .strokeBorder(
-                            (jailbreakState == .completed ? Color.green : Color.blue).opacity(0.3),
-                            lineWidth: 0.5
-                        )
+                .padding(.vertical, 4)
+                .background(
+                    (jailbreakState == .completed ? Color.green : Color.blue).opacity(0.12)
                 )
+                .clipShape(Capsule())
             }
 
             Divider()
-                .opacity(0.6)
 
             HStack {
                 Label {
                     Text("Ядро")
-                        .font(.system(.subheadline, design: .rounded))
+                        .font(.system(.subheadline, design: .default))
                 } icon: {
-                    Image(systemName: "cpu.fill")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundColor(.accentColor)
+                    Image(systemName: "cpu")
+                        .foregroundColor(.secondary)
                 }
                 Spacer()
                 Text(kernelStatusText)
                     .foregroundColor(.secondary)
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(.subheadline, design: .default))
             }
 
             HStack {
                 Label {
                     Text("Архитектура")
-                        .font(.system(.subheadline, design: .rounded))
+                        .font(.system(.subheadline, design: .default))
                 } icon: {
-                    Image(systemName: "memorychip.fill")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundColor(.accentColor)
+                    Image(systemName: "memorychip")
+                        .foregroundColor(.secondary)
                 }
                 Spacer()
                 Text("arm64e (PPL Bypass)")
                     .foregroundColor(.secondary)
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(.subheadline, design: .default))
             }
         }
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.05), radius: 18, x: 0, y: 8)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     /// Карточка этапов пайплайна
@@ -166,88 +127,82 @@ struct MainView: View {
 
                 VStack(spacing: 12) {
                     ProgressView()
-                        .scaleEffect(1.2)
                         .padding(.top, 4)
 
                     Text(step.title)
-                        .font(.system(.headline, design: .rounded))
+                        .font(.system(.headline, design: .default))
                         .fontWeight(.semibold)
                         .multilineTextAlignment(.center)
-                        .transition(.opacity)
 
                     Text(step.subtitle)
-                        .font(.system(.caption, design: .rounded))
+                        .font(.system(.subheadline, design: .default))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 8)
 
                     VStack(spacing: 6) {
                         ProgressView(value: Double(currentStepIndex + 1), total: Double(defaultPipelineSteps.count))
-                            .tint(.accentColor)
-                            .padding(.horizontal, 16)
+                            .tint(.blue)
+                            .padding(.horizontal, 8)
                             .padding(.top, 4)
 
                         HStack {
                             Text("Этап \(currentStepIndex + 1) из \(defaultPipelineSteps.count)")
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
                             Text("\(Int(Double(currentStepIndex + 1) / Double(defaultPipelineSteps.count) * 100))%")
-                                .font(.caption2)
+                                .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 8)
                     }
                 }
                 .padding(.vertical, 8)
             } else if jailbreakState == .completed {
-                HStack(spacing: 16) {
+                HStack(spacing: 14) {
                     Image(systemName: "checkmark.circle.fill")
-                        .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.green)
-                        .font(.system(size: 40))
+                        .font(.system(size: 36))
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Джейлбрейк активен")
-                            .font(.system(.headline, design: .rounded))
+                            .font(.system(.headline, design: .default))
                             .fontWeight(.bold)
                         Text("Пакетный менеджер Sileo готов к работе.")
-                            .font(.system(.caption, design: .rounded))
+                            .font(.system(.caption, design: .default))
                             .foregroundColor(.secondary)
                     }
                     Spacer()
                 }
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
             } else {
-                HStack(spacing: 16) {
-                    Image(systemName: "sparkles.square.filled.on.square")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundColor(.accentColor)
-                        .font(.system(size: 38))
+                HStack(spacing: 14) {
+                    Image(systemName: "shield.checkered")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 34))
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text("iOS 26.0 — Совместимо")
-                            .font(.system(.headline, design: .rounded))
+                            .font(.system(.headline, design: .default))
                             .fontWeight(.bold)
                         Text("Система готова к запуску симуляции.")
-                            .font(.system(.caption, design: .rounded))
+                            .font(.system(.caption, design: .default))
                             .foregroundColor(.secondary)
                     }
                     Spacer()
                 }
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.05), radius: 18, x: 0, y: 8)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
-    /// Интерактивная кнопка с пружинной динамикой
+    /// Интерактивная кнопка действия
     private var actionButton: some View {
         Button(action: startJailbreakSequence) {
             HStack(spacing: 8) {
@@ -259,60 +214,19 @@ struct MainView: View {
                 }
 
                 Text(buttonTitle)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
                     .fontWeight(.bold)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .background(
-                Group {
-                    if isProcessing {
-                        Color.gray.opacity(0.6)
-                    } else {
-                        LinearGradient(
-                            colors: [Color.blue, Color.blue.opacity(0.85)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    }
-                }
-            )
+            .frame(height: 50)
+            .background(isProcessing ? Color.gray.opacity(0.5) : Color.blue)
             .foregroundColor(.white)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 0.5
-                    )
-            )
-            .shadow(color: Color.blue.opacity(0.25), radius: 14, x: 0, y: 7)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .disabled(isProcessing)
-        .buttonStyle(SpringPressButtonStyle())
     }
 
-    // MARK: - Вспомогательные модификаторы
-
-    private func glassBorder(cornerRadius: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.45),
-                        Color.white.opacity(0.08),
-                        Color.blue.opacity(0.12)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                lineWidth: 0.5
-            )
-    }
+    // MARK: - Вспомогательные свойства и методы
 
     private var buttonTitle: String {
         if isProcessing {
@@ -352,9 +266,9 @@ struct MainView: View {
             description: defaultPipelineSteps[0].title
         )
 
-        stepTimer = Timer.scheduledTimer(withTimeInterval: 0.9, repeats: true) { timer in
+        stepTimer = Timer.scheduledTimer(withTimeInterval: 0.85, repeats: true) { timer in
             if currentStepIndex < defaultPipelineSteps.count - 1 {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     currentStepIndex += 1
                     let step = defaultPipelineSteps[currentStepIndex]
                     jailbreakState = .initializing(
@@ -368,20 +282,11 @@ struct MainView: View {
                 stepTimer = nil
                 isProcessing = false
 
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     jailbreakState = .streamingLogs
                 }
             }
         }
-    }
-}
-
-/// Пружинная динамика нажатия кнопки (iOS 26 Spring Dynamics)
-struct SpringPressButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 

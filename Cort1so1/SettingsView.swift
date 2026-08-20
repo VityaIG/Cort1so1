@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Экран настроек приложения «Cort1so1» в дизайн-системе iOS 26 Liquid Glass HIG
+/// Экран настроек приложения «Cort1so1» в стиле iOS HIG
 struct SettingsView: View {
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
@@ -10,10 +10,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                ambientBackground
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
 
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 18) {
+                    VStack(spacing: 16) {
                         // Секция оформления и тем
                         appearanceCard
 
@@ -33,39 +34,16 @@ struct SettingsView: View {
             }
             .navigationTitle("Настройки")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
         }
     }
 
-    // MARK: - Фон с преломлением
-
-    private var ambientBackground: some View {
-        ZStack {
-            Color(uiColor: .systemGroupedBackground)
-                .ignoresSafeArea()
-
-            Circle()
-                .fill(Color.purple.opacity(0.08))
-                .frame(width: 280, height: 280)
-                .blur(radius: 80)
-                .offset(x: 100, y: -120)
-
-            Circle()
-                .fill(Color.blue.opacity(0.08))
-                .frame(width: 260, height: 260)
-                .blur(radius: 70)
-                .offset(x: -80, y: 140)
-        }
-    }
-
-    // MARK: - Парящие карточки Liquid Glass
+    // MARK: - Компоненты интерфейса
 
     /// Карточка темы оформления
     private var appearanceCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Внешний вид")
-                .font(.system(.caption, design: .rounded))
+                .font(.system(.caption, design: .default))
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
@@ -73,27 +51,24 @@ struct SettingsView: View {
             Toggle(isOn: $isDarkMode) {
                 Label {
                     Text("Темная тема")
-                        .font(.system(.body, design: .rounded))
+                        .font(.system(.body, design: .default))
                 } icon: {
                     Image(systemName: "moon.fill")
-                        .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.indigo)
                 }
             }
-            .tint(.accentColor)
+            .tint(.blue)
         }
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.04), radius: 16, x: 0, y: 8)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     /// Карточка параметров работы
     private var utilityOptionsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Параметры утилиты")
-                .font(.system(.caption, design: .rounded))
+                .font(.system(.caption, design: .default))
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
@@ -101,161 +76,125 @@ struct SettingsView: View {
             Toggle(isOn: $verboseLogs) {
                 Label {
                     Text("Подробный вывод логов")
-                        .font(.system(.body, design: .rounded))
+                        .font(.system(.body, design: .default))
                 } icon: {
                     Image(systemName: "terminal.fill")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.blue)
                 }
             }
-            .tint(.accentColor)
+            .tint(.blue)
 
             Divider()
-                .opacity(0.6)
 
             Toggle(isOn: $autoRespring) {
                 Label {
                     Text("Автоматический респринг")
-                        .font(.system(.body, design: .rounded))
+                        .font(.system(.body, design: .default))
                 } icon: {
                     Image(systemName: "arrow.clockwise.circle.fill")
-                        .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.green)
                 }
             }
-            .tint(.accentColor)
+            .tint(.blue)
 
             Divider()
-                .opacity(0.6)
 
             Toggle(isOn: $tweakInjection) {
                 Label {
                     Text("Инъекция твиков (Substrate)")
-                        .font(.system(.body, design: .rounded))
+                        .font(.system(.body, design: .default))
                 } icon: {
                     Image(systemName: "puzzlepiece.extension.fill")
-                        .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.orange)
                 }
             }
-            .tint(.accentColor)
+            .tint(.blue)
         }
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.04), radius: 16, x: 0, y: 8)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     /// Карточка системного окружения
     private var systemEnvironmentCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Системное окружение")
-                .font(.system(.caption, design: .rounded))
+                .font(.system(.caption, design: .default))
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
             HStack {
                 Label("Версия ОС", systemImage: "iphone")
-                    .symbolRenderingMode(.hierarchical)
                 Spacer()
                 Text("iOS 26.0")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
 
             HStack {
-                Label("Архитектура", systemImage: "cpu.fill")
-                    .symbolRenderingMode(.hierarchical)
+                Label("Архитектура", systemImage: "cpu")
                 Spacer()
                 Text("arm64e")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
 
             HStack {
                 Label("Эксплойт", systemImage: "bolt.fill")
-                    .symbolRenderingMode(.hierarchical)
                 Spacer()
                 Text("PhysPuppet")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
         }
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.04), radius: 16, x: 0, y: 8)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     /// Карточка «О программе»
     private var aboutCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("О программе")
-                .font(.system(.caption, design: .rounded))
+                .font(.system(.caption, design: .default))
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
             HStack {
                 Label("Название", systemImage: "app.fill")
-                    .symbolRenderingMode(.hierarchical)
                 Spacer()
                 Text("Cort1so1")
                     .fontWeight(.bold)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
 
             HStack {
                 Label("Версия", systemImage: "info.circle.fill")
-                    .symbolRenderingMode(.hierarchical)
                 Spacer()
-                Text("1.0.0 (Liquid Glass HIG)")
+                Text("1.0.5 (iOS Native HIG)")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
 
             HStack {
                 Label("Пакетный менеджер", systemImage: "shippingbox.fill")
-                    .symbolRenderingMode(.hierarchical)
                 Spacer()
                 Text("Sileo v2.6")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .rounded))
+                    .font(.system(.body, design: .default))
             }
 
             Divider()
-                .opacity(0.6)
 
             Text("Cort1so1 — развлекательное демонстрационное приложение-симулятор. Проект создан исключительно в ознакомительных целях.")
-                .font(.system(.caption2, design: .rounded))
+                .font(.system(.caption, design: .default))
                 .foregroundColor(.secondary)
         }
-        .padding(18)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay(glassBorder(cornerRadius: 26))
-        .shadow(color: Color.black.opacity(0.04), radius: 16, x: 0, y: 8)
-    }
-
-    // MARK: - Вспомогательные функции
-
-    private func glassBorder(cornerRadius: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.45),
-                        Color.white.opacity(0.08),
-                        Color.blue.opacity(0.12)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                lineWidth: 0.5
-            )
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
