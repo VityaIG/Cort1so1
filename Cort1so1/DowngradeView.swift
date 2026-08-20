@@ -108,11 +108,11 @@ struct DowngradeView: View {
             }
             .navigationTitle(strings.downgradeTitle)
             .navigationBarTitleDisplayMode(.inline)
-            // Алерт успешного завершения 1-минутного процесса
+            // Алерт успешного завершения процесса отката
             .alert(strings.downgradeFinished, isPresented: $showSuccessAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("\(strings.downgradeFinishedMsg)\n\n" + (isRu ? "Целевая ОС: iOS " : "Target OS: iOS ") + "\(selectedFirmware.version) (\(selectedFirmware.build))")
+                Text(strings.downgradeFinishedMsg)
             }
             // Алерт прерывания
             .alert(isRu ? "Прервать откат?" : "Cancel Downgrade?", isPresented: $showCancelAlert) {

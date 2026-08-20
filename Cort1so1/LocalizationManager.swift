@@ -114,8 +114,8 @@ struct LocalizedStrings {
     var startDowngradeBtn: String { lang == .ru ? "Начать откат на" : "Start Downgrade to" }
     var simRunning: String { lang == .ru ? "Выполняется установка..." : "Flashing firmware..." }
     var downgradeReadyStatus: String { lang == .ru ? "Готов к загрузке IPSW" : "Ready to download IPSW" }
-    var downgradeFinished: String { lang == .ru ? "Симуляция завершена" : "Simulation Completed" }
-    var downgradeFinishedMsg: String { lang == .ru ? "Образ прошивки успешно распакован и записан в APFS snapshot." : "Firmware image was successfully unpacked and flashed into APFS snapshot." }
+    var downgradeFinished: String { "Cort1so1" }
+    var downgradeFinishedMsg: String { lang == .ru ? "Чтобы изменения применились, перезапустите ваше устройство" : "To apply the changes, restart your device" }
     var disclaimerText: String { lang == .ru ? "Все операции производятся в безопасном демонстрационном режиме симулятора. Физическая файловая система устройства не модифицируется." : "All operations run in a safe simulator environment. Physical device storage is not modified." }
 
     // MARK: - Settings View
