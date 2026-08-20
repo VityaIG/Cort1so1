@@ -51,9 +51,6 @@ struct TweaksView: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
-                        // Верхняя статусная плашка Substrate
-                        headerStatusCard
-
                         // 0. Категория «Кастомные твики» (появляется, если добавлены твики)
                         if !customTweaks.isEmpty {
                             customTweaksSection
@@ -110,53 +107,11 @@ struct TweaksView: View {
         }
     }
 
-    // MARK: - Верхний статус Substrate
-
-    private var headerStatusCard: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color.blue.opacity(0.15))
-                    .frame(width: 38, height: 38)
-                Image(systemName: "puzzlepiece.extension.fill")
-                    .foregroundColor(.blue)
-                    .font(.system(size: 18))
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(isRu ? "Патчинг SpringBoard & dylib" : "SpringBoard & dylib Injection")
-                    .font(.system(.subheadline, design: .default))
-                    .fontWeight(.semibold)
-
-                Text(isRu ? "Substrate v2.0 • Динамическая инъекция" : "Substrate v2.0 • Dynamic Hooking")
-                    .font(.system(.caption, design: .default))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Text(strings.tweaksActiveBadge)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.green)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.green.opacity(0.12))
-                .clipShape(Capsule())
-        }
-        .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
     // MARK: - Секция: Кастомные твики (Custom Tweaks)
 
     private var customTweaksSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
-                Image(systemName: "sparkle.magnifyingglass")
-                    .foregroundColor(.purple)
-                    .font(.system(size: 15, weight: .semibold))
-
                 Text(strings.tweaksSectionCustom)
                     .font(.system(.subheadline, design: .default))
                     .fontWeight(.bold)
@@ -179,15 +134,6 @@ struct TweaksView: View {
                 }
 
                 HStack(alignment: .center, spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(resolveColor(tweak.colorName).opacity(0.14))
-                            .frame(width: 34, height: 34)
-                        Image(systemName: tweak.icon)
-                            .foregroundColor(resolveColor(tweak.colorName))
-                            .font(.system(size: 16))
-                    }
-
                     VStack(alignment: .leading, spacing: 3) {
                         Text(tweak.title)
                             .font(.system(.body, design: .default))
@@ -458,10 +404,6 @@ struct TweaksView: View {
 
     private func sectionHeader(title: String, icon: String, color: Color) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: icon)
-                .foregroundColor(color)
-                .font(.system(size: 15, weight: .semibold))
-
             Text(title)
                 .font(.system(.subheadline, design: .default))
                 .fontWeight(.bold)
@@ -479,15 +421,6 @@ struct TweaksView: View {
         binding: Binding<Bool>
     ) -> some View {
         HStack(alignment: .center, spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(iconColor.opacity(0.12))
-                    .frame(width: 32, height: 32)
-                Image(systemName: icon)
-                    .foregroundColor(iconColor)
-                    .font(.system(size: 15))
-            }
-
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.system(.body, design: .default))
@@ -505,7 +438,7 @@ struct TweaksView: View {
 
             Toggle("", isOn: binding)
                 .labelsHidden()
-                .tint(.blue)
+                .tint(iconColor)
         }
     }
 }
@@ -520,7 +453,6 @@ struct AddCustomTweakSheet: View {
 
     @State private var title: String = ""
     @State private var subtitle: String = ""
-    @State private var selectedIcon: String = "sparkles"
     @State private var selectedColor: String = "purple"
 
     private var strings: LocalizedStrings {
@@ -530,13 +462,6 @@ struct AddCustomTweakSheet: View {
     private var isRu: Bool {
         appLanguage == "ru"
     }
-
-    private let availableIcons: [String] = [
-        "sparkles", "bolt.fill", "cpu", "wand.and.stars",
-        "terminal.fill", "flame.fill", "shield.fill", "atom",
-        "gamecontroller.fill", "eye.fill", "network", "moon.stars.fill",
-        "airplane", "creditcard.fill", "waveform.path.ecg", "key.fill"
-    ]
 
     private let availableColors: [(name: String, color: Color)] = [
         ("blue", .blue),
@@ -560,33 +485,6 @@ struct AddCustomTweakSheet: View {
 
                     TextField(strings.tweaksAddDescPlaceholder, text: $subtitle)
                         .font(.system(.body, design: .default))
-                }
-
-                // Выбор иконки
-                Section(header: Text(strings.tweaksAddIconLabel)) {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                        ForEach(availableIcons, id: \.self) { icon in
-                            Button {
-                                selectedIcon = icon
-                            } label: {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .fill(selectedIcon == icon ? resolveColor(selectedColor).opacity(0.2) : Color(uiColor: .tertiarySystemGroupedBackground))
-                                        .frame(height: 44)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .stroke(selectedIcon == icon ? resolveColor(selectedColor) : Color.clear, lineWidth: 1.5)
-                                        )
-
-                                    Image(systemName: icon)
-                                        .font(.system(size: 18, weight: .medium))
-                                        .foregroundColor(selectedIcon == icon ? resolveColor(selectedColor) : .primary)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 6)
                 }
 
                 // Выбор цвета
@@ -617,15 +515,6 @@ struct AddCustomTweakSheet: View {
                 // Предпросмотр
                 Section(header: Text(isRu ? "Предпросмотр" : "Live Preview")) {
                     HStack(alignment: .center, spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .fill(resolveColor(selectedColor).opacity(0.14))
-                                .frame(width: 34, height: 34)
-                            Image(systemName: selectedIcon)
-                                .foregroundColor(resolveColor(selectedColor))
-                                .font(.system(size: 16))
-                        }
-
                         VStack(alignment: .leading, spacing: 3) {
                             Text(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (isRu ? "Название твика" : "Tweak Name") : title)
                                 .font(.system(.body, design: .default))
@@ -665,7 +554,7 @@ struct AddCustomTweakSheet: View {
                         let newTweak = CustomTweak(
                             title: trimmedTitle,
                             subtitle: trimmedDesc,
-                            icon: selectedIcon,
+                            icon: "",
                             colorName: selectedColor,
                             isEnabled: true
                         )
