@@ -38,7 +38,6 @@ interface Firmware {
 }
 
 const firmwares: Firmware[] = [
-  { id: "ios27beta4", version: "27.0 Beta 4", build: "25A5316j", releaseDateRu: "15 августа 2026", releaseDateEn: "August 15, 2026", sizeGB: 7.2, isSigned: true, isBeta: true, sha256: "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d" },
   { id: "ios266", version: "26.6", build: "24G77", releaseDateRu: "24 июля 2026", releaseDateEn: "July 24, 2026", sizeGB: 6.8, isSigned: true, isBeta: false, sha256: "1f2e3d4c5b6a7890abcdef1234567890" },
   { id: "ios260", version: "26.0", build: "24A348", releaseDateRu: "18 сентября 2025", releaseDateEn: "September 18, 2025", sizeGB: 6.5, isSigned: false, isBeta: false, sha256: "a1b2c3d4e5f6789012345678abcdef01" },
   { id: "ios1871", version: "18.7.1", build: "22H30", releaseDateRu: "12 мая 2025", releaseDateEn: "May 12, 2025", sizeGB: 5.9, isSigned: false, isBeta: false, sha256: "bcdef0123456789abcdef0123456789a" },
@@ -447,20 +446,20 @@ export default function App() {
             {activeTab === 'settings' && (
               <div className="space-y-3.5 text-xs">
                 {/* App Profile Header */}
-                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Cort1so1Icon className="w-11 h-11" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-sm">Cort1so1</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Cort1so1Icon className="w-11 h-11 shrink-0" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
+                        <span className="font-bold text-white text-sm shrink-0">Cort1so1</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                           v1.0.5
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-400 block">iOS Jailbreak & IPSW Utility</span>
+                      <span className="text-[10px] text-slate-400 block truncate">iOS Jailbreak & IPSW Utility</span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isJailbroken ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700/50 text-slate-400'}`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${isJailbroken ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700/50 text-slate-400'}`}>
                     {isJailbroken ? (isRu ? 'Активен' : 'Active') : (isRu ? 'Не активен' : 'Stock')}
                   </span>
                 </div>

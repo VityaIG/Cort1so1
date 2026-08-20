@@ -75,10 +75,10 @@ struct SettingsView: View {
 
     private var appHeaderCard: some View {
         VStack(spacing: 14) {
-            HStack(spacing: 14) {
+            HStack(alignment: .center, spacing: 12) {
                 // Новая фирменная иконка приложения
                 ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
@@ -90,23 +90,26 @@ struct SettingsView: View {
                                 endPoint: .bottom
                             )
                         )
-                        .frame(width: 54, height: 54)
-                        .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
+                        .frame(width: 50, height: 50)
+                        .shadow(color: Color.black.opacity(0.18), radius: 5, x: 0, y: 2)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
                                 .stroke(Color.black.opacity(0.1), lineWidth: 1)
                         )
 
                     Cort1so1IconShape()
                         .fill(Color(red: 0.08, green: 0.09, blue: 0.10))
-                        .frame(width: 36, height: 36)
+                        .frame(width: 32, height: 32)
                 }
+                .fixedSize()
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .center, spacing: 6) {
                         Text("Cort1so1")
-                            .font(.system(.title3, design: .default))
-                            .fontWeight(.bold)
+                            .font(.system(size: 19, weight: .bold))
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .layoutPriority(2)
 
                         Text("v1.0.5")
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
@@ -115,31 +118,33 @@ struct SettingsView: View {
                             .padding(.vertical, 2)
                             .background(Color.blue.opacity(0.12))
                             .clipShape(Capsule())
+                            .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text("iOS Jailbreak & IPSW Utility")
-                        .font(.system(.caption, design: .default))
+                        .font(.system(size: 12, design: .default))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
 
-                Spacer()
+                Spacer(minLength: 4)
 
                 // Статус джейлбрейка
-                VStack(alignment: .trailing, spacing: 3) {
-                    HStack(spacing: 5) {
-                        Circle()
-                            .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.4))
-                            .frame(width: 8, height: 8)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.4))
+                        .frame(width: 6, height: 6)
 
-                        Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Не активен" : "Stock"))
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
-                    }
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 5)
-                    .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
-                    .clipShape(Capsule())
+                    Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Не активен" : "Stock"))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
+                        .lineLimit(1)
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
+                .clipShape(Capsule())
+                .fixedSize(horizontal: true, vertical: false)
             }
 
             Divider()
@@ -150,20 +155,22 @@ struct SettingsView: View {
                     ZStack {
                         Circle()
                             .fill(telegramColor.opacity(0.15))
-                            .frame(width: 32, height: 32)
+                            .frame(width: 34, height: 34)
                         Image(systemName: "paperplane.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 15))
                             .foregroundColor(telegramColor)
                     }
 
-                    VStack(alignment: .leading, spacing: 1) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.secondary)
+                            .lineLimit(1)
 
                         Text("@VityaV 🇷🇺")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 14, weight: .bold))
                             .foregroundColor(telegramColor)
+                            .lineLimit(1)
                     }
 
                     Spacer()

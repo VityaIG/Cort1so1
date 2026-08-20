@@ -62,18 +62,6 @@ struct FirmwareVersion: Identifiable, Hashable {
 /// Список версий для экрана отката согласно спецификации
 let sampleFirmwares: [FirmwareVersion] = [
     FirmwareVersion(
-        version: "27.0 Beta 4",
-        build: "31A512",
-        releaseDateRu: "Июль 2026",
-        releaseDateEn: "July 2026",
-        isSigned: true,
-        isBeta: true,
-        sizeGB: 7.4,
-        sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        sepStatusRu: "Совместим (Beta SEP)",
-        sepStatusEn: "Compatible (Beta SEP)"
-    ),
-    FirmwareVersion(
         version: "26.6",
         build: "30G78",
         releaseDateRu: "Август 2025",

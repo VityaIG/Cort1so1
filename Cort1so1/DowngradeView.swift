@@ -10,7 +10,6 @@ struct DowngradeView: View {
     // Параметры восстановления
     @State private var keepUserData: Bool = true
     @State private var verifySepCryptex: Bool = true
-    @State private var autoGenerateNonce: Bool = true
     
     // Состояние 60-секундного процесса
     @State private var isRestoring: Bool = false
@@ -41,8 +40,8 @@ struct DowngradeView: View {
             (
                 "1. Проверка подписи TSS / SHSH2",
                 "1. Validating TSS / SHSH2 Tickets",
-                "Запрос gs.apple.com & сверка ApTicket генератора Nonce...",
-                "Querying gs.apple.com & verifying ApTicket nonce generator...",
+                "Запрос gs.apple.com & верификация бинарного ApTicket...",
+                "Querying gs.apple.com & validating ApTicket payload...",
                 0.0...10.0
             ),
             (
@@ -202,10 +201,10 @@ struct DowngradeView: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    Image(systemName: "key.fill")
+                    Image(systemName: "opticaldisc.fill")
                         .font(.caption2)
-                        .foregroundColor(.orange)
-                    Text("Nonce: 0x1111111111111111")
+                        .foregroundColor(.blue)
+                    Text("APFS Snapshot: Ready")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                 }
@@ -455,20 +454,6 @@ struct DowngradeView: View {
             }
             .tint(.blue)
             .disabled(isRestoring)
-
-            Divider()
-
-            Toggle(isOn: $autoGenerateNonce) {
-                Label {
-                    Text(strings.bypassNoncesToggle)
-                        .font(.system(.subheadline, design: .default))
-                } icon: {
-                    Image(systemName: "key.fill")
-                        .foregroundColor(.orange)
-                }
-            }
-            .tint(.blue)
-            .disabled(isRestoring)
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -680,7 +665,7 @@ struct DowngradeView: View {
                 restoreSpeedMBs = Double.random(in: 44.0...54.0)
 
                 if currentSecondsInt == 3 && terminalLogs.count < 3 {
-                    terminalLogs.append("\(formattedTime) [ApTicket] Verifying Nonce 0x1111111111111111 generator: OK")
+                    terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK")
                 } else if currentSecondsInt == 7 && terminalLogs.count < 4 {
                     terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(selectedFirmware.sha256.prefix(10))...")
                 }
