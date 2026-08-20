@@ -22,7 +22,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
 
   const isRu = lang === 'ru';
-  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.0.5/Cort1so1.ipa";
+  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.0.6/Cort1so1.ipa";
   const trollStoreUrl = `apple-magnifier://install?url=${encodeURIComponent(latestReleaseUrl)}`;
   const githubRepoUrl = "https://github.com/VityaIG/Cort1so1";
   const telegramUrl = "https://t.me/VityaV";
@@ -48,7 +48,7 @@ export default function App() {
               <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
                 Cort1so1
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  v1.0.5 IPA
+                  v1.0.6 IPA
                 </span>
               </span>
               <p className="text-[11px] text-slate-400 font-medium -mt-0.5">
@@ -121,7 +121,7 @@ export default function App() {
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all"
             >
               <Download className="w-4 h-4" />
-              {isRu ? 'Скачать Cort1so1.ipa (v1.0.5)' : 'Download Cort1so1.ipa (v1.0.5)'}
+              {isRu ? 'Скачать Cort1so1.ipa (v1.0.6)' : 'Download Cort1so1.ipa (v1.0.6)'}
             </a>
 
             <a
