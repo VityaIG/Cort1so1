@@ -101,7 +101,7 @@ struct SettingsView: View {
                             .fixedSize(horizontal: true, vertical: false)
                             .layoutPriority(2)
 
-                        Text("v1.0.6")
+                        Text("v1.1")
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(.blue)
                             .padding(.horizontal, 6)
@@ -331,7 +331,7 @@ struct SettingsView: View {
                 Text(strings.versionLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("1.0.6 (Build 26A102)")
+                Text("1.1 (Build 26B101)")
                     .foregroundColor(.secondary)
                     .font(.system(.subheadline, design: .monospaced))
             }

@@ -22,17 +22,26 @@ struct ContentView: View {
                     }
                     .tag(0)
 
+                // Раздел «Твики» появляется только после выполнения джейлбрейка
+                if isJailbroken || jailbreakState == .completed {
+                    TweaksView()
+                        .tabItem {
+                            Label(strings.tabTweaks, systemImage: "wand.and.stars")
+                        }
+                        .tag(1)
+                }
+
                 DowngradeView()
                     .tabItem {
                         Label(strings.tabDowngrade, systemImage: "arrow.counterclockwise.circle.fill")
                     }
-                    .tag(1)
+                    .tag(2)
 
                 SettingsView(jailbreakState: $jailbreakState)
                     .tabItem {
                         Label(strings.tabSettings, systemImage: "gearshape.fill")
                     }
-                    .tag(2)
+                    .tag(3)
             }
 
             // Оверлей симуляции нативного респринга SpringBoard

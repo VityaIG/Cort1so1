@@ -26,8 +26,20 @@ struct LocalizedStrings {
 
     // MARK: - Tab Bar
     var tabMain: String { lang == .ru ? "Основное" : "Main" }
+    var tabTweaks: String { lang == .ru ? "Твики" : "Tweaks" }
     var tabDowngrade: String { lang == .ru ? "Откат iOS" : "iOS Downgrade" }
     var tabSettings: String { lang == .ru ? "Настройки" : "Settings" }
+
+    // MARK: - Tweaks View
+    var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }
+    var tweaksHeaderSubtitle: String { lang == .ru ? "Управление модулями инъекции и системными модификациями Substrate" : "Substrate runtime injection modules & system patches" }
+    var tweaksSectionEssential: String { lang == .ru ? "Базовые модификации ядра" : "Core Kernel Modules" }
+    var tweaksSectionReality: String { lang == .ru ? "Квантовые и квантово-физические модули" : "Quantum & Spatial Modules" }
+    var tweaksSectionHardware: String { lang == .ru ? "Аппаратные оверклок-твики" : "Hardware Overclock Tweaks" }
+    var tweaksApplyBtn: String { lang == .ru ? "Применить" : "Apply" }
+    var tweaksAppliedTitle: String { "Cort1so1" }
+    var tweaksAppliedMsg: String { lang == .ru ? "Твики успешно применены! Изменения вступили в силу в подсистеме SpringBoard." : "Tweaks applied successfully! Changes are now active in SpringBoard." }
+    var tweaksActiveBadge: String { lang == .ru ? "Substrate активен" : "Substrate Active" }
 
     // MARK: - Main View
     var mainTitle: String { "Cort1so1" }

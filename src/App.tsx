@@ -22,7 +22,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
 
   const isRu = lang === 'ru';
-  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.0.6/Cort1so1.ipa";
+  const latestReleaseUrl = "https://github.com/VityaIG/Cort1so1/releases/download/v1.1/Cort1so1.ipa";
   const trollStoreUrl = `apple-magnifier://install?url=${encodeURIComponent(latestReleaseUrl)}`;
   const githubRepoUrl = "https://github.com/VityaIG/Cort1so1";
   const telegramUrl = "https://t.me/VityaV";
@@ -48,7 +48,7 @@ export default function App() {
               <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
                 Cort1so1
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  v1.0.6 IPA
+                  v1.1 IPA
                 </span>
               </span>
               <p className="text-[11px] text-slate-400 font-medium -mt-0.5">
@@ -100,8 +100,8 @@ export default function App() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
             <Smartphone className="w-3.5 h-3.5" />
             {isRu
-              ? 'Веб-версия отключена — проект доступен как нативное iOS приложение'
-              : 'Web simulation removed — pure native iOS Swift & IPA build'}
+              ? 'Обновление v1.1 — Добавлен менеджер твиков Substrate'
+              : 'Update v1.1 — Substrate Tweak Manager Added'}
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
@@ -110,8 +110,8 @@ export default function App() {
 
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
             {isRu
-              ? 'Полнофункциональная нативная системная утилита, симулятор джейлбрейка Dopamine и движок отката прошивок iOS, написанный на чистом Swift / SwiftUI. Установите готовый IPA-файл на устройство.'
-              : 'High-performance native iOS system utility, Dopamine jailbreak simulator, and 60-second IPSW downgrade engine built in Swift / SwiftUI. Install the compiled IPA directly on your iOS device.'}
+              ? 'Полнофункциональная нативная системная утилита, симулятор джейлбрейка Dopamine, менеджер твиков Substrate и движок отката прошивок iOS, написанный на чистом Swift / SwiftUI.'
+              : 'High-performance native iOS system utility, Dopamine jailbreak simulator, Substrate tweak manager, and 60-second IPSW downgrade engine built in Swift / SwiftUI.'}
           </p>
 
           {/* Action Buttons */}
@@ -121,7 +121,7 @@ export default function App() {
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all"
             >
               <Download className="w-4 h-4" />
-              {isRu ? 'Скачать Cort1so1.ipa (v1.0.6)' : 'Download Cort1so1.ipa (v1.0.6)'}
+              {isRu ? 'Скачать Cort1so1.ipa (v1.1)' : 'Download Cort1so1.ipa (v1.1)'}
             </a>
 
             <a
