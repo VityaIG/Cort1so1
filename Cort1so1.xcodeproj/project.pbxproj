@@ -17,6 +17,7 @@
 		B10010082C74000100000001 /* SimulationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010082C74000100000001 /* SimulationModels.swift */; };
 		B10010092C74000100000001 /* LogData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010092C74000100000001 /* LogData.swift */; };
 		B10010122C74000100000001 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010132C74000100000001 /* LocalizationManager.swift */; };
+		B10010142C74000100000001 /* DopamineProcessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010142C74000100000001 /* DopamineProcessView.swift */; };
 		B10010102C74000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10010102C74000100000001 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		F10010082C74000100000001 /* SimulationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulationModels.swift; sourceTree = "<group>"; };
 		F10010092C74000100000001 /* LogData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogData.swift; sourceTree = "<group>"; };
 		F10010132C74000100000001 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
+		F10010142C74000100000001 /* DopamineProcessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DopamineProcessView.swift; sourceTree = "<group>"; };
 		F10010102C74000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F10010112C74000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F10010122C74000100000001 /* Cort1so1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cort1so1.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,6 +70,7 @@
 				F10010082C74000100000001 /* SimulationModels.swift */,
 				F10010092C74000100000001 /* LogData.swift */,
 				F10010132C74000100000001 /* LocalizationManager.swift */,
+				F10010142C74000100000001 /* DopamineProcessView.swift */,
 				F10010102C74000100000001 /* Assets.xcassets */,
 				F10010112C74000100000001 /* Info.plist */,
 			);
@@ -161,6 +164,7 @@
 				B10010082C74000100000001 /* SimulationModels.swift in Sources */,
 				B10010092C74000100000001 /* LogData.swift in Sources */,
 				B10010122C74000100000001 /* LocalizationManager.swift in Sources */,
+				B10010142C74000100000001 /* DopamineProcessView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
