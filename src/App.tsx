@@ -60,6 +60,42 @@ function Cort1so1Icon({ className = "w-12 h-12" }: { className?: string }) {
   );
 }
 
+interface JbStep {
+  id: number;
+  titleRu: string;
+  titleEn: string;
+  detailRu: string;
+  detailEn: string;
+  isMajor: boolean;
+  stageRu: string;
+  stageEn: string;
+  telemetryField?: 'kaslr' | 'tfp0' | 'uid' | 'ppl' | 'trustCache';
+  telemetryValue?: string;
+}
+
+const jbStepList: JbStep[] = [
+  { id: 1, titleRu: "Инициализация Cort1so1 Engine", titleEn: "Initializing Cort1so1 Engine", detailRu: "Определение архитектуры Apple Silicon arm64e и ревизии ядра", detailEn: "Detecting Apple Silicon arm64e architecture & kernel revision", isMajor: false, stageRu: "Ядро", stageEn: "Kernel", telemetryField: "kaslr", telemetryValue: "0x1bc24000" },
+  { id: 2, titleRu: "Определение KASLR Slide mach_kernel", titleEn: "Computing mach_kernel KASLR Slide", detailRu: "Базовый адрес: 0xfffffff007004000 | Смещение: 0x1bc24000", detailEn: "Base address: 0xfffffff007004000 | Slide: 0x1bc24000", isMajor: false, stageRu: "Ядро", stageEn: "Kernel", telemetryField: "kaslr", telemetryValue: "0x1bc24000" },
+  { id: 3, titleRu: "Картирование физической памяти", titleEn: "Mapping Physical Memory Space", detailRu: "Диапазон: 0xffffffe000000000 - 0xffffffe3ffffffff (PhysPuppet)", detailEn: "Range: 0xffffffe000000000 - 0xffffffe3ffffffff (PhysPuppet)", isMajor: false, stageRu: "Ядро", stageEn: "Kernel", telemetryField: "tfp0", telemetryValue: "kread64 / kwrite64 OK" },
+  { id: 4, titleRu: "Активация примитива kread64 / kwrite64", titleEn: "Activating kread64 / kwrite64 Primitives", detailRu: "Получен порт задачи ядра task_for_pid(0) [tfp0: 0x403]", detailEn: "Acquired kernel task port task_for_pid(0) [tfp0: 0x403]", isMajor: false, stageRu: "Ядро", stageEn: "Kernel", telemetryField: "tfp0", telemetryValue: "0x403 (Active)" },
+  { id: 5, titleRu: "Фаза 1 завершена: Ядро и память инициализированы", titleEn: "Phase 1 Complete: Kernel & Memory Mapped", detailRu: "Стабильность примитива чтения/записи ядра: 100%", detailEn: "Kernel memory read/write primitive stability: 100%", isMajor: true, stageRu: "Ядро OK", stageEn: "Kernel OK" },
+  { id: 6, titleRu: "Обход защиты Page Protection Layer (PPL)", titleEn: "Bypassing Page Protection Layer (PPL)", detailRu: "Разблокированы таблицы страниц L2 PTE для записи в память ядра", detailEn: "Unlocked L2 PTE page tables for kernel memory write access", isMajor: false, stageRu: "PPL & PAC", stageEn: "PPL & PAC", telemetryField: "ppl", telemetryValue: "PPL Bypassed" },
+  { id: 7, titleRu: "Анализ Pointer Authentication (PAC)", titleEn: "Evaluating Pointer Authentication (PAC)", detailRu: "Подмена криптографических ключей подписи указателей IA / DA", detailEn: "Forging pointer authentication signing keys IA / DA", isMajor: false, stageRu: "PPL & PAC", stageEn: "PPL & PAC", telemetryField: "ppl", telemetryValue: "PPL + PAC Bypassed" },
+  { id: 8, titleRu: "Поиск дескриптора процесса proc_t", titleEn: "Locating Process Descriptor proc_t", detailRu: "Смещение allproc найдено по адресу: 0xfffffff00938b120", detailEn: "allproc offset located at: 0xfffffff00938b120", isMajor: false, stageRu: "Привилегии", stageEn: "Privileges" },
+  { id: 9, titleRu: "Повышение привилегий до Root (UID 0)", titleEn: "Escalating Privileges to Root (UID 0)", detailRu: "Замена структуры ucred: UID 501 -> UID 0, сброс флагов cr_svgid", detailEn: "Swapping ucred struct: UID 501 -> UID 0, cr_svgid flags cleared", isMajor: false, stageRu: "Привилегии", stageEn: "Privileges", telemetryField: "uid", telemetryValue: "UID: 0 (root)" },
+  { id: 10, titleRu: "Снятие ограничений песочницы (Sandbox Escape)", titleEn: "Unsandboxing Process (Sandbox Escape)", detailRu: "Отключение изоляции Mach Sandbox для текущего task_t", detailEn: "Disabled Mach Sandbox container isolation for task_t", isMajor: false, stageRu: "Привилегии", stageEn: "Privileges", telemetryField: "uid", telemetryValue: "UID: 0 (Rootless)" },
+  { id: 11, titleRu: "Фаза 2 завершена: Получены права Root и снята песочница", titleEn: "Phase 2 Complete: Root Escalation & Unsandboxing", detailRu: "Процесс обладает наивысшим уровнем системного доступа", detailEn: "Process running with unrestricted highest system privileges", isMajor: true, stageRu: "Root OK", stageEn: "Root OK" },
+  { id: 12, titleRu: "Патчинг хуков AMFI и проверка CoreTrust", titleEn: "Patching AMFI Hooks & CoreTrust Bypass", detailRu: "Деактивация проверки подписи Mach-O и cs_enforcement флагов", detailEn: "Bypassed Mach-O signature verification & cs_enforcement flags", isMajor: false, stageRu: "TrustCache", stageEn: "TrustCache", telemetryField: "trustCache", telemetryValue: "AMFI Patched" },
+  { id: 13, titleRu: "Внедрение динамического TrustCache", titleEn: "Injecting Dynamic TrustCache to Kernel", detailRu: "Добавлено 1,420 SHA-256 хэшей системных утилит в память ядра", detailEn: "Injected 1,420 binary SHA-256 hashes into kernel TrustCache list", isMajor: false, stageRu: "TrustCache", stageEn: "TrustCache", telemetryField: "trustCache", telemetryValue: "TrustCache (1,420)" },
+  { id: 14, titleRu: "Тест стабильности и проверка вероятности бутлупа", titleEn: "Stability Test & Bootloop Probability Check", detailRu: "Вероятность сбоя: 0.00% | Проверка NVRAM boot-args успешна", detailEn: "Crash probability: 0.00% | NVRAM boot-args validation passed", isMajor: false, stageRu: "Стабильность", stageEn: "Stability" },
+  { id: 15, titleRu: "Фаза 3 завершена: TrustCache активен, риски отсутствуют", titleEn: "Phase 3 Complete: TrustCache Injected & Safe", detailRu: "Система полностью готова к монтированию rootless bootstrap", detailEn: "System integrity verified for rootless bootstrap mount", isMajor: true, stageRu: "TrustCache OK", stageEn: "TrustCache OK" },
+  { id: 16, titleRu: "Монтирование файловой системы APFS RootFS", titleEn: "Mounting Rootless APFS Preboot Path", detailRu: "Точка монтирования: /private/preboot/cort1so1_rootfs (rw)", detailEn: "Mount point: /private/preboot/cort1so1_rootfs (read-write)", isMajor: false, stageRu: "Bootstrap", stageEn: "Bootstrap" },
+  { id: 17, titleRu: "Развертывание Procursus Bootstrap & ElleKit", titleEn: "Extracting Procursus Bootstrap & ElleKit", detailRu: "Распаковка dpkg, apt, libsubstrate.dylib, Sileo.app и Zebra.app", detailEn: "Unpacking dpkg, apt, libsubstrate.dylib, Sileo.app & Zebra.app", isMajor: false, stageRu: "Bootstrap", stageEn: "Bootstrap" },
+  { id: 18, titleRu: "Запуск системного демона cort1so1_daemon", titleEn: "Starting cort1so1_daemon IPC Service", detailRu: "Служба запущена на локальном сокете /var/run/cort1so1.sock", detailEn: "IPC daemon active on local socket /var/run/cort1so1.sock", isMajor: false, stageRu: "Демон", stageEn: "Daemon" },
+  { id: 19, titleRu: "Инъекция хуков в launchd (PID: 1)", titleEn: "Hooking System Service launchd (PID: 1)", detailRu: "Твик-инжектор ElleKit успешно перехватил libsystem_trace", detailEn: "ElleKit hook engine successfully attached to launchd", isMajor: false, stageRu: "Launchd", stageEn: "Launchd" },
+  { id: 20, titleRu: "Джейлбрейк успешно подготовлен к респрингу", titleEn: "Jailbreak Environment Ready for Respring", detailRu: "Синхронизация дескрипторов и запуск перезагрузки ядра", detailEn: "Syncing file descriptors and triggering kernel respring", isMajor: true, stageRu: "Финал", stageEn: "Final" }
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'main' | 'downgrade' | 'settings'>('main');
   const [appLanguage, setAppLanguage] = useState<'ru' | 'en'>('ru');
@@ -82,7 +118,17 @@ export default function App() {
   // Jailbreak Process modal
   const [isJailbreakModalOpen, setIsJailbreakModalOpen] = useState(false);
   const [jbPhase, setJbPhase] = useState<'logging' | 'appleWhite' | 'blackScreen' | 'appleRed' | 'respring'>('logging');
-  const [jbLogs, setJbLogs] = useState<string[]>([]);
+  const [visibleJbSteps, setVisibleJbSteps] = useState<JbStep[]>([]);
+  const [currentJbIndex, setCurrentJbIndex] = useState(0);
+  const [telemetry, setTelemetry] = useState({
+    kaslr: '0x0000000000000000',
+    tfp0: 'Ожидание...',
+    uid: 'UID: 501 (mobile)',
+    ppl: 'Защищен (PPL/SPTM)',
+    trustCache: 'Стандартный',
+    stage: 'Инициализация'
+  });
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   const isRu = appLanguage === 'ru';
 
@@ -105,7 +151,7 @@ export default function App() {
       const timeStr = `[00:${sec < 10 ? '0' + sec : sec}]`;
 
       if (sec === 5 && !terminalLogs.some(l => l.includes('ApTicket'))) {
-        setTerminalLogs(prev => [...prev, `${timeStr} [ApTicket] Verifying Nonce 0x1111111111111111 generator: OK`]);
+        setTerminalLogs(prev => [...prev, `${timeStr} [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK`]);
       } else if (sec === 12 && !terminalLogs.some(l => l.includes('Mounting DMG'))) {
         setTerminalLogs(prev => [...prev, `${timeStr} [APFS] Mounting DMG RootFS container: disk0s1s1`]);
       } else if (sec === 22 && !terminalLogs.some(l => l.includes('Cryptex1'))) {
@@ -138,34 +184,45 @@ export default function App() {
   const startJailbreak = async () => {
     setIsJailbreakModalOpen(true);
     setJbPhase('logging');
-    setJbLogs([]);
+    setVisibleJbSteps([]);
+    setCurrentJbIndex(0);
+    setTelemetry({
+      kaslr: '0x0000000000000000',
+      tfp0: isRu ? 'Ожидание...' : 'Waiting...',
+      uid: 'UID: 501 (mobile)',
+      ppl: isRu ? 'Защищен (PPL/SPTM)' : 'Protected (PPL)',
+      trustCache: isRu ? 'Стандартный' : 'Stock',
+      stage: isRu ? 'Инициализация' : 'Init'
+    });
 
-    const steps = isRu
-      ? [
-          "Инициализация Cort1so1",
-          "Проверка совместимости устройства",
-          "> Первая фаза готова",
-          "Проверяем стабильность",
-          "> Вторая фаза готова",
-          "Проверка вероятности бутлупа…",
-          "> Третья фаза готова"
-        ]
-      : [
-          "Initializing Cort1so1",
-          "Checking device compatibility",
-          "> Phase one complete",
-          "Checking stability",
-          "> Phase two complete",
-          "Checking bootloop probability…",
-          "> Phase three complete"
-        ];
+    for (let i = 0; i < jbStepList.length; i++) {
+      const step = jbStepList[i];
+      await new Promise(r => setTimeout(r, step.isMajor ? 650 : 400));
+      
+      setVisibleJbSteps(prev => [...prev, step]);
+      setCurrentJbIndex(i + 1);
 
-    for (let i = 0; i < steps.length; i++) {
-      await new Promise(r => setTimeout(r, steps[i].startsWith('>') ? 900 : 700));
-      setJbLogs(prev => [...prev, steps[i]]);
+      if (step.telemetryField && step.telemetryValue) {
+        setTelemetry(t => ({
+          ...t,
+          [step.telemetryField!]: step.telemetryValue,
+          stage: isRu ? step.stageRu : step.stageEn
+        }));
+      } else {
+        setTelemetry(t => ({
+          ...t,
+          stage: isRu ? step.stageRu : step.stageEn
+        }));
+      }
+
+      setTimeout(() => {
+        if (logsContainerRef.current) {
+          logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+        }
+      }, 50);
     }
 
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 650));
     setJbPhase('appleWhite');
     await new Promise(r => setTimeout(r, 1200));
     setJbPhase('blackScreen');
@@ -173,7 +230,7 @@ export default function App() {
     setJbPhase('appleRed');
     await new Promise(r => setTimeout(r, 1300));
     setJbPhase('respring');
-    await new Promise(r => setTimeout(r, 2200));
+    await new Promise(r => setTimeout(r, 2000));
 
     setIsJailbroken(true);
     setIsJailbreakModalOpen(false);
@@ -535,53 +592,132 @@ export default function App() {
 
       {/* Dopamine Jailbreak Fullscreen Modal */}
       {isJailbreakModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between p-6 antialiased animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 antialiased animate-fadeIn">
           {jbPhase === 'logging' && (
-            <div className="w-full max-w-md mx-auto my-auto bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[460px]">
-              {/* Dopamine Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-800">
+            <div className="w-full max-w-lg mx-auto my-auto bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[560px]">
+              {/* Dopamine Top Bar */}
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-800/80">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                 </div>
-                <span className="font-mono text-xs font-bold text-white">Cort1so1</span>
-                <span className="font-mono text-xs text-blue-400">[{jbLogs.length}/7]</span>
+                <div className="flex items-center gap-1.5 font-bold text-white text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Cort1so1 Exploit Engine</span>
+                </div>
+                <span className="text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full font-mono">
+                  [{currentJbIndex}/{jbStepList.length}]
+                </span>
               </div>
 
               {/* Progress Line */}
               <div className="w-full bg-slate-950 h-1">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full transition-all duration-300"
-                  style={{ width: `${(jbLogs.length / 7) * 100}%` }}
+                  className="bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 h-full transition-all duration-200"
+                  style={{ width: `${(currentJbIndex / jbStepList.length) * 100}%` }}
                 />
               </div>
 
-              {/* Logs */}
-              <div className="flex-1 p-5 overflow-y-auto space-y-3 font-mono text-xs">
-                {jbLogs.map((log, idx) => {
-                  const isSuccess = log.startsWith('>');
+              {/* Live Kernel Telemetry Box */}
+              <div className="p-3 bg-slate-950/90 border-b border-slate-800/80 space-y-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="font-bold text-slate-300">
+                      {isRu ? 'Телеметрия ядра' : 'Kernel Telemetry'}
+                    </span>
+                  </div>
+                  <span className="text-cyan-400 font-medium">
+                    {isRu ? 'Модуль: ' : 'Module: '}{telemetry.stage}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-1.5">
+                    <span className="text-slate-500 block font-semibold">KASLR</span>
+                    <span className="text-blue-400 font-mono font-medium truncate block">{telemetry.kaslr}</span>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-1.5">
+                    <span className="text-slate-500 block font-semibold">TFP0 Port</span>
+                    <span className="text-cyan-400 font-mono font-medium truncate block">{telemetry.tfp0}</span>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-1.5">
+                    <span className="text-slate-500 block font-semibold">{isRu ? 'Привилегии' : 'Privilege'}</span>
+                    <span className="text-emerald-400 font-medium truncate block">{telemetry.uid}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-1.5">
+                    <span className="text-slate-500 block font-semibold">PPL / PAC</span>
+                    <span className="text-amber-400 font-medium truncate block">{telemetry.ppl}</span>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-1.5">
+                    <span className="text-slate-500 block font-semibold">TrustCache</span>
+                    <span className="text-purple-400 font-medium truncate block">{telemetry.trustCache}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logs Stream (Large, Regular Font, Readable Spacing) */}
+              <div
+                ref={logsContainerRef}
+                className="flex-1 p-4 overflow-y-auto space-y-2.5 scroll-smooth"
+              >
+                {visibleJbSteps.map((step) => {
                   return (
                     <div
-                      key={idx}
-                      className={`flex items-start gap-2.5 animate-fadeIn ${
-                        isSuccess ? 'text-emerald-400 font-semibold' : 'text-slate-200'
+                      key={step.id}
+                      className={`p-2.5 rounded-xl border transition-all animate-fadeIn flex items-start gap-3 ${
+                        step.isMajor
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm'
+                          : 'bg-slate-900/40 border-slate-800/60 text-slate-200'
                       }`}
                     >
-                      {isSuccess ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-1.5" />
-                      )}
-                      <span>{log}</span>
+                      <div className="mt-0.5 shrink-0">
+                        {step.isMajor ? (
+                          <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <Zap className="w-3.5 h-3.5" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`text-[14px] leading-snug ${step.isMajor ? 'font-bold text-emerald-300' : 'font-semibold text-white'}`}>
+                            {isRu ? step.titleRu : step.titleEn}
+                          </span>
+                          {step.isMajor && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950">
+                              {isRu ? 'УСПЕХ' : 'DONE'}
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-[12px] leading-relaxed mt-0.5 ${step.isMajor ? 'text-emerald-300/80' : 'text-slate-400'}`}>
+                          {isRu ? step.detailRu : step.detailEn}
+                        </p>
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
+              {/* Status Footer */}
               <div className="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                <span className="animate-pulse">{isRu ? 'Выполняется...' : 'Executing...'}</span>
-                <span className="font-mono text-[10px]">iOS 18.0</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  <span className="font-medium text-slate-300">
+                    {isRu ? `Выполняется: ${telemetry.stage}` : `Executing: ${telemetry.stage}`}
+                  </span>
+                </div>
+                <span className="font-semibold text-blue-400 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[11px]">
+                  arm64e • tfp0
+                </span>
               </div>
             </div>
           )}
