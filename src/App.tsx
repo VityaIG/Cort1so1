@@ -16,7 +16,11 @@ import {
   Box, 
   Layers,
   Sparkles,
-  Check
+  Check,
+  Smartphone,
+  Key,
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 
 type Tab = 'main' | 'downgrade' | 'settings';
@@ -38,12 +42,90 @@ const pipelineSteps: PipelineStep[] = [
   { id: 5, titleRu: "Развертывание Bootstrap", titleEn: "Extracting Bootstrap", subtitleRu: "Развертывание Procursus и менеджеров пакетов...", subtitleEn: "Deploying Procursus bootstrap & Sileo package manager..." }
 ];
 
+// Точные 5 версий согласно запросу
 const sampleFirmwares = [
-  { version: "iOS 26.0", build: "30A195", dateRu: "Сентябрь 2025", dateEn: "September 2025", isSigned: true, sizeGB: 7.1 },
-  { version: "iOS 25.5.1", build: "29F80", dateRu: "Июль 2025", dateEn: "July 2025", isSigned: true, sizeGB: 6.8 },
-  { version: "iOS 25.4", build: "29E210", dateRu: "Май 2025", dateEn: "May 2025", isSigned: false, sizeGB: 6.6 },
-  { version: "iOS 25.1", build: "29B120", dateRu: "Декабрь 2024", dateEn: "December 2024", isSigned: false, sizeGB: 6.3 }
+  {
+    version: "27.0 Beta 4",
+    build: "31A512",
+    dateRu: "Июль 2026",
+    dateEn: "July 2026",
+    isSigned: true,
+    isBeta: true,
+    sizeGB: 7.4,
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4...",
+    sepRu: "Совместим (Beta SEP)",
+    sepEn: "Compatible (Beta SEP)"
+  },
+  {
+    version: "26.6",
+    build: "30G78",
+    dateRu: "Август 2025",
+    dateEn: "August 2025",
+    isSigned: true,
+    isBeta: false,
+    sizeGB: 7.1,
+    sha256: "8f434346648f6b96df89dda901c5176b10a6d83...",
+    sepRu: "Совместим (Cryptex1 Match)",
+    sepEn: "Compatible (Cryptex1 Match)"
+  },
+  {
+    version: "26.0",
+    build: "30A195",
+    dateRu: "Сентябрь 2024",
+    dateEn: "September 2024",
+    isSigned: true,
+    isBeta: false,
+    sizeGB: 6.8,
+    sha256: "ca978112ca1bbdcafac231b39a23dc4da786eff...",
+    sepRu: "Совместим (Full TSS)",
+    sepEn: "Compatible (Full TSS)"
+  },
+  {
+    version: "18.7.1",
+    build: "22H310",
+    dateRu: "Октябрь 2024",
+    dateEn: "October 2024",
+    isSigned: false,
+    isBeta: false,
+    sizeGB: 6.4,
+    sha256: "5e884898da28047151d0e56f8dc6292773603d0...",
+    sepRu: "Требуются SHSH2 + Cryptex Fix",
+    sepEn: "Requires SHSH2 + Cryptex Fix"
+  },
+  {
+    version: "18.5",
+    build: "22F76",
+    dateRu: "Май 2024",
+    dateEn: "May 2024",
+    isSigned: false,
+    isBeta: false,
+    sizeGB: 6.1,
+    sha256: "4b227777d4dd1fc61c6f884f48641d02b4d121d...",
+    sepRu: "SHSH2 Futurerestore (Gaster)",
+    sepEn: "SHSH2 Futurerestore (Gaster)"
+  }
 ];
+
+// Автоопределение версии iOS и устройства
+function detectDeviceSystem() {
+  if (typeof window === 'undefined') return { os: '18.5', device: 'iPhone' };
+  const ua = navigator.userAgent;
+  let os = '18.5';
+  let device = 'iPhone';
+
+  if (/iPad/.test(ua)) {
+    device = 'iPad';
+  } else if (/iPhone/.test(ua)) {
+    device = 'iPhone';
+  }
+
+  const match = ua.match(/OS (\d+[._]\d+([._]\d+)?)/);
+  if (match && match[1]) {
+    os = match[1].replace(/_/g, '.');
+  }
+
+  return { os, device };
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('main');
@@ -61,16 +143,24 @@ export default function App() {
     return localStorage.getItem('isJailbroken') === 'true' ? 'completed' : 'idle';
   });
 
+  const [deviceInfo] = useState(() => detectDeviceSystem());
+
   const [currentStep, setCurrentStep] = useState(0);
   const [executionMode, setExecutionMode] = useState(0);
   const [liveLogs, setLiveLogs] = useState<string[]>([]);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  // Downgrade states
+  // Downgrade states (Reimagined)
   const [selectedFw, setSelectedFw] = useState(sampleFirmwares[0]);
-  const [isDownloadingFw, setIsDownloadingFw] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [downgradeComplete, setDowngradeComplete] = useState(false);
+  const [keepUserData, setKeepUserData] = useState(true);
+  const [verifySep, setVerifySep] = useState(true);
+  const [autoNonce, setAutoNonce] = useState(true);
+
+  const [isRestoringFw, setIsRestoringFw] = useState(false);
+  const [restoreProgress, setRestoreProgress] = useState(0);
+  const [restoreStage, setRestoreStage] = useState(0);
+  const [restoreLogs, setRestoreLogs] = useState<string[]>([]);
+  const [restoreComplete, setRestoreComplete] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('appLanguage', lang);
@@ -88,7 +178,10 @@ export default function App() {
   const startDopamineJailbreak = () => {
     setJbState('initializing');
     setCurrentStep(0);
-    setLiveLogs(['[+] Initializing Cort1so1 Dopamine exploit engine...', '[*] Target: iOS 26.0 (arm64e)']);
+    setLiveLogs([
+      '[+] Initializing Cort1so1 Dopamine exploit engine...',
+      `[*] Target: iOS ${deviceInfo.os} (arm64e)`
+    ]);
 
     let step = 0;
     const interval = setInterval(() => {
@@ -117,25 +210,69 @@ export default function App() {
     setShowRemoveModal(false);
   };
 
-  const startDowngrade = () => {
-    setIsDownloadingFw(true);
-    setDownloadProgress(0);
-    setDowngradeComplete(false);
+  // Reimagined Flashing Downgrade Sequence
+  const startFlashing = () => {
+    setIsRestoringFw(true);
+    setRestoreProgress(0);
+    setRestoreStage(0);
+    setRestoreComplete(false);
+    setRestoreLogs([
+      `[TSS] Handshake with gs.apple.com for ${selectedFw.version}...`,
+      `[Futurerestore] Initializing BuildManifest: ${selectedFw.build}`
+    ]);
 
     const intv = setInterval(() => {
-      setDownloadProgress(prev => {
+      setRestoreProgress(prev => {
         if (prev >= 1) {
           clearInterval(intv);
-          setIsDownloadingFw(false);
-          setDowngradeComplete(true);
+          setIsRestoringFw(false);
+          setRestoreComplete(true);
           return 1;
         }
-        return prev + 0.08;
+
+        const next = prev + 0.05;
+        if (next > 0.25 && next < 0.5) {
+          setRestoreStage(1);
+          if (!restoreLogs.includes('[APFS] Unpacking DMG root filesystem snapshot')) {
+            setRestoreLogs(p => [...p, '[APFS] Unpacking DMG root filesystem snapshot']);
+          }
+        } else if (next >= 0.5 && next < 0.75) {
+          setRestoreStage(2);
+          if (!restoreLogs.includes('[SEP] Microcode validation: Cryptex match OK')) {
+            setRestoreLogs(p => [...p, '[SEP] Microcode validation: Cryptex match OK']);
+          }
+        } else if (next >= 0.75 && next < 0.95) {
+          setRestoreStage(3);
+          if (!restoreLogs.includes('[Snapshot] Writing com.apple.os.update image')) {
+            setRestoreLogs(p => [...p, '[Snapshot] Writing com.apple.os.update image']);
+          }
+        } else if (next >= 0.95) {
+          setRestoreStage(4);
+          setRestoreLogs(p => [...p, '[Done] Flashing finished. NVRAM updated!']);
+        }
+
+        return next;
       });
-    }, 200);
+    }, 180);
   };
 
   const isRu = lang === 'ru';
+
+  const restoreStageTitlesRu = [
+    'Проверка подписи TSS / SHSH2',
+    'Распаковка RootFS & Cryptex1',
+    'Прошивка SEP & Baseband',
+    'Запись APFS Snapshot',
+    'Финализация и NVRAM'
+  ];
+
+  const restoreStageTitlesEn = [
+    'Validating TSS / SHSH2 Tickets',
+    'Extracting RootFS & Cryptex1',
+    'Flashing SEP & Baseband',
+    'Writing APFS Snapshot',
+    'Finalizing & NVRAM Update'
+  ];
 
   return (
     <div className={`min-h-screen font-sans transition-colors duration-200 ${isDarkMode ? 'bg-[#000000] text-white' : 'bg-[#F2F2F7] text-[#1C1C1E]'}`}>
@@ -159,11 +296,11 @@ export default function App() {
               <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
               <span className="w-3 h-3 rounded-full bg-green-500/80" />
             </div>
-            <span className="text-white/70 font-semibold">CORT1SO1 EXPLOIT ENGINE — iOS 26.0</span>
+            <span className="text-white/70 font-semibold">CORT1SO1 EXPLOIT ENGINE — iOS {deviceInfo.os}</span>
             <span className="animate-pulse">● EXPLOITING</span>
           </div>
           <div className="flex-1 space-y-1.5 overflow-y-auto">
-            <p className="text-white">[+] Kernel slide: 0x1f400000</p>
+            <p className="text-white">[+] System version detected: iOS {deviceInfo.os}</p>
             <p className="text-green-400">[+] PhysPuppet memory primitive acquired</p>
             <p className="text-white">[*] Overwriting proc_t credentials (tfp0)</p>
             <p className="text-green-400">[+] AMFI & CoreTrust patch applied</p>
@@ -301,7 +438,8 @@ export default function App() {
                   <div className="flex items-center space-x-3 py-1">
                     <Shield className="w-8 h-8 text-blue-500" />
                     <div>
-                      <h4 className="font-bold text-sm">iOS 26.0 — {isRu ? 'Совместимо' : 'Compatible'}</h4>
+                      {/* ДИНАМИЧЕСКИЙ ЗАГОЛОВОК ДЛЯ ТЕКУЩЕЙ IOS ПОЛЬЗОВАТЕЛЯ */}
+                      <h4 className="font-bold text-sm">iOS {deviceInfo.os} — {isRu ? 'Совместимо' : 'Compatible'}</h4>
                       <p className="text-xs text-zinc-500">{isRu ? 'Система готова к запуску симуляции.' : 'System is ready to begin exploitation.'}</p>
                     </div>
                   </div>
@@ -339,85 +477,173 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 2: DOWNGRADE */}
+          {/* TAB 2: DOWNGRADE (ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ ЭКРАН) */}
           {activeTab === 'downgrade' && (
             <div className="space-y-4">
-              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-3`}>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
-                  {isRu ? 'Целевая версия прошивки' : 'Target Firmware Version'}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {sampleFirmwares.map(fw => (
-                    <button
-                      key={fw.version}
-                      onClick={() => setSelectedFw(fw)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
-                        selectedFw.version === fw.version 
-                          ? 'border-blue-500 bg-blue-500/10 text-blue-500' 
-                          : 'border-black/5 dark:border-white/10 hover:border-black/20'
-                      }`}
-                    >
-                      <div className="font-bold text-sm">{fw.version}</div>
-                      <div className="text-[11px] text-zinc-500">{fw.build} • {fw.isSigned ? (isRu ? 'Подписана' : 'Signed') : 'SHSH2'}</div>
-                    </button>
-                  ))}
+              
+              {/* Header: Current Device and OS */}
+              <div className={`p-3.5 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm flex items-center justify-between`}>
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-xs">{deviceInfo.device}</div>
+                    <div className="text-[11px] text-zinc-500">{isRu ? 'Текущая' : 'Current'}: iOS {deviceInfo.os} • arm64e</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] uppercase font-bold text-zinc-400">{isRu ? 'Цель' : 'Target'}</div>
+                  <div className="text-xs font-bold text-blue-500">{selectedFw.version}</div>
                 </div>
               </div>
 
-              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-2 text-xs`}>
+              {/* 5 Firmware Selection Cards */}
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-3`}>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                    {isRu ? 'Каталог версий IPSW' : 'IPSW Firmware Catalog'}
+                  </span>
+                  <span className="text-[11px] text-zinc-400 font-medium">5 {isRu ? 'версий' : 'versions'}</span>
+                </div>
+
+                <div className="space-y-2">
+                  {sampleFirmwares.map(fw => {
+                    const isSelected = selectedFw.version === fw.version;
+                    return (
+                      <button
+                        key={fw.version}
+                        onClick={() => !isRestoringFw && setSelectedFw(fw)}
+                        className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-500/10'
+                            : 'border-black/5 dark:border-white/5 hover:border-black/20 bg-black/[0.02] dark:bg-white/[0.02]'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-zinc-400'}`}>
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center space-x-1.5">
+                              <span className="font-bold text-sm">{fw.version}</span>
+                              {fw.isBeta && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 font-bold">
+                                  BETA
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-zinc-500">{fw.build} • {isRu ? fw.dateRu : fw.dateEn}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-1.5 text-xs">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                            fw.isSigned ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-400'
+                          }`}>
+                            {fw.isSigned ? (isRu ? 'TSS Подписана' : 'TSS Signed') : 'SHSH2'}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Selected Firmware Specs */}
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-2.5 text-xs`}>
+                <div className="flex justify-between items-center pb-1 border-b border-black/5 dark:border-white/5">
+                  <span className="font-bold text-zinc-500 uppercase tracking-wider">{isRu ? 'Спецификация' : 'Specification'}</span>
+                  <span className="font-bold text-blue-500">{selectedFw.version}</span>
+                </div>
                 <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
                   <span className="text-zinc-500">{isRu ? 'Сборка' : 'Build'}</span>
-                  <span className="font-medium">{selectedFw.build}</span>
+                  <span className="font-mono">{selectedFw.build}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
-                  <span className="text-zinc-500">{isRu ? 'Размер файла' : 'File Size'}</span>
-                  <span className="font-medium">{selectedFw.sizeGB} GB</span>
+                  <span className="text-zinc-500">{isRu ? 'Объем файла' : 'File Size'}</span>
+                  <span>{selectedFw.sizeGB} GB</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+                  <span className="text-zinc-500">{isRu ? 'Подпись TSS' : 'TSS Signing'}</span>
+                  <span className={`font-semibold ${selectedFw.isSigned ? 'text-green-500' : 'text-orange-400'}`}>
+                    {selectedFw.isSigned ? (isRu ? 'Подписана (Apple TSS)' : 'Signed (Apple TSS)') : (isRu ? 'Не подписана (SHSH2)' : 'Unsigned (SHSH2)')}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-zinc-500">{isRu ? 'Статус подписи' : 'Signature Status'}</span>
-                  <span className={`font-semibold ${selectedFw.isSigned ? 'text-green-500' : 'text-red-500'}`}>
-                    {selectedFw.isSigned ? (isRu ? 'Подписана (TSS)' : 'Signed (TSS)') : (isRu ? 'Не подписана' : 'Unsigned')}
-                  </span>
+                  <span className="text-zinc-500">{isRu ? 'SEP Совместимость' : 'SEP Compatibility'}</span>
+                  <span className="text-blue-500 font-medium">{isRu ? selectedFw.sepRu : selectedFw.sepEn}</span>
                 </div>
               </div>
 
+              {/* Restore Options */}
               <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-3`}>
-                <button
-                  onClick={startDowngrade}
-                  disabled={isDownloadingFw}
-                  className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center space-x-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>
-                    {isDownloadingFw 
-                      ? (isRu ? 'Выполняется симуляция...' : 'Simulating...') 
-                      : `${isRu ? 'Начать откат на' : 'Start Downgrade to'} ${selectedFw.version}`}
-                  </span>
-                </button>
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                  {isRu ? 'Параметры прошивки' : 'Flashing Options'}
+                </span>
 
-                {isDownloadingFw && (
-                  <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span>{isRu ? 'Сохранить данные пользователя (Update)' : 'Preserve User Data (Update)'}</span>
+                  <input type="checkbox" checked={keepUserData} onChange={e => setKeepUserData(e.target.checked)} className="rounded" />
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span>{isRu ? 'Верификация SEP & Baseband (Cryptex1)' : 'Verify SEP & Baseband (Cryptex1)'}</span>
+                  <input type="checkbox" checked={verifySep} onChange={e => setVerifySep(e.target.checked)} className="rounded" />
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span>{isRu ? 'Автогенерация Nonce / ApTicket' : 'Auto-generate Nonce / ApTicket'}</span>
+                  <input type="checkbox" checked={autoNonce} onChange={e => setAutoNonce(e.target.checked)} className="rounded" />
+                </div>
+              </div>
+
+              {/* Restore Engine & Execution */}
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-3`}>
+                {isRestoringFw ? (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-bold">{isRu ? restoreStageTitlesRu[restoreStage] : restoreStageTitlesEn[restoreStage]}</span>
+                      <span className="font-mono text-blue-500 font-bold">{Math.round(restoreProgress * 100)}%</span>
+                    </div>
+
                     <div className="w-full h-2 bg-blue-500/15 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${downloadProgress * 100}%` }} />
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all" style={{ width: `${restoreProgress * 100}%` }} />
                     </div>
+
                     <div className="flex justify-between text-[11px] text-zinc-500">
-                      <span>{Math.round(downloadProgress * 100)}%</span>
-                      <span>{(downloadProgress * selectedFw.sizeGB).toFixed(1)} / {selectedFw.sizeGB} GB</span>
+                      <span>48.5 MB/s</span>
+                      <span>{(restoreProgress * selectedFw.sizeGB).toFixed(1)} / {selectedFw.sizeGB} GB</span>
                     </div>
+
+                    {restoreLogs.length > 0 && (
+                      <div className="p-2.5 rounded-lg bg-black/90 text-cyan-400 font-mono text-[10px] space-y-0.5">
+                        {restoreLogs.slice(-2).map((l, i) => (
+                          <p key={i} className="truncate">{l}</p>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <button
+                    onClick={startFlashing}
+                    disabled={isRestoringFw}
+                    className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center space-x-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{isRu ? 'Начать откат на' : 'Start Downgrade to'} {selectedFw.version}</span>
+                  </button>
                 )}
 
-                {downgradeComplete && (
+                {restoreComplete && (
                   <div className="p-3 bg-green-500/10 text-green-500 rounded-xl text-xs flex items-center space-x-2">
                     <Check className="w-4 h-4" />
-                    <span>{isRu ? 'Симуляция отката успешно завершена!' : 'Downgrade simulation completed!'}</span>
+                    <span>{isRu ? `Восстановление на ${selectedFw.version} успешно завершено!` : `Restore to ${selectedFw.version} completed!`}</span>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* TAB 3: SETTINGS */}
+          {/* TAB 3: SETTINGS (ДИНАМИЧЕСКИЕ НАСТРОЙКИ) */}
           {activeTab === 'settings' && (
             <div className="space-y-4">
               
@@ -461,6 +687,33 @@ export default function App() {
                       English
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* System Environment Section with Dynamic User Device Info */}
+              <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#1C1C1E] border-white/5' : 'bg-white border-black/5'} shadow-sm space-y-2.5 text-xs`}>
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                  {isRu ? 'Системное окружение' : 'System Environment'}
+                </span>
+
+                <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+                  <span className="text-zinc-500">{isRu ? 'Модель устройства' : 'Device Model'}</span>
+                  <span className="font-semibold">{deviceInfo.device}</span>
+                </div>
+
+                <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+                  <span className="text-zinc-500">{isRu ? 'Версия ОС' : 'OS Version'}</span>
+                  <span className="font-semibold text-blue-500">iOS {deviceInfo.os}</span>
+                </div>
+
+                <div className="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+                  <span className="text-zinc-500">{isRu ? 'Архитектура' : 'Architecture'}</span>
+                  <span className="font-mono">arm64e (PPL Bypass)</span>
+                </div>
+
+                <div className="flex justify-between py-1">
+                  <span className="text-zinc-500">{isRu ? 'Эксплойт' : 'Exploit'}</span>
+                  <span className="font-medium">PhysPuppet / LandCast</span>
                 </div>
               </div>
 
@@ -594,4 +847,3 @@ export default function App() {
     </div>
   );
 }
-

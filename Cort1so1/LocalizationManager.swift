@@ -52,7 +52,10 @@ struct LocalizedStrings {
     var archTitle: String { lang == .ru ? "Архитектура" : "Architecture" }
     var archValue: String { "arm64e (PPL Bypass)" }
 
-    var readyTitle: String { "iOS 26.0 — " + (lang == .ru ? "Совместимо" : "Compatible") }
+    func readyTitle(for version: String) -> String {
+        "iOS \(version) — " + (lang == .ru ? "Совместимо" : "Compatible")
+    }
+    var readyTitle: String { readyTitle(for: "18.0") }
     var readySubtitle: String { lang == .ru ? "Система готова к запуску симуляции." : "System is ready to begin exploitation." }
 
     var completedTitle: String { lang == .ru ? "Джейлбрейк выполнен!" : "Jailbroken!" }
@@ -82,22 +85,32 @@ struct LocalizedStrings {
     var step5Title: String { lang == .ru ? "Развертывание Bootstrap" : "Extracting Bootstrap" }
     var step5Subtitle: String { lang == .ru ? "Развертывание Procursus и менеджеров пакетов..." : "Deploying Procursus bootstrap & Sileo package manager..." }
 
-    // MARK: - Downgrade View
+    // MARK: - Downgrade View (Reimagined)
     var downgradeTitle: String { lang == .ru ? "Откат iOS" : "iOS Downgrade" }
+    var downgradeSubtitle: String { lang == .ru ? "Восстановление и симуляция установки IPSW через Futurerestore / TSS" : "IPSW restore simulation engine via Futurerestore & TSS" }
+    var currentDeviceHeader: String { lang == .ru ? "Текущее устройство" : "Current Device" }
     var targetFirmware: String { lang == .ru ? "Целевая версия прошивки" : "Target Firmware Version" }
+    var betaBadge: String { "Beta" }
+    var signedBadge: String { lang == .ru ? "Подписана" : "Signed" }
+    var shshBadge: String { "SHSH2" }
+    var restoreOptionsSection: String { lang == .ru ? "Параметры прошивки" : "Flashing Options" }
+    var keepDataToggle: String { lang == .ru ? "Сохранение данных (Update Restore)" : "Preserve User Data (Update)" }
+    var verifySepToggle: String { lang == .ru ? "Верификация SEP & Baseband (Cryptex1)" : "Verify SEP & Baseband (Cryptex1)" }
+    var bypassNoncesToggle: String { lang == .ru ? "Генерация ApTicket / Nonce" : "Generate ApTicket / Nonce" }
     var fwInfoTitle: String { lang == .ru ? "Сведения об IPSW" : "IPSW Details" }
     var fwBuild: String { lang == .ru ? "Сборка" : "Build" }
     var fwReleaseDate: String { lang == .ru ? "Дата релиза" : "Release Date" }
     var fwSize: String { lang == .ru ? "Размер файла" : "File Size" }
     var fwSignedStatus: String { lang == .ru ? "Статус подписи" : "Signature Status" }
     var fwSigned: String { lang == .ru ? "Подписана (TSS)" : "Signed (TSS)" }
-    var fwUnsigned: String { lang == .ru ? "Не подписана" : "Unsigned" }
+    var fwUnsigned: String { lang == .ru ? "Не подписана (Нужен SHSH2)" : "Unsigned (SHSH2 Required)" }
+    var fwSepCompatibility: String { lang == .ru ? "Совместимость SEP" : "SEP Compatibility" }
     var processTitle: String { lang == .ru ? "Процесс установки" : "Installation Process" }
     var startDowngradeBtn: String { lang == .ru ? "Начать откат на" : "Start Downgrade to" }
-    var simRunning: String { lang == .ru ? "Выполняется симуляция..." : "Simulating installation..." }
+    var simRunning: String { lang == .ru ? "Выполняется установка..." : "Flashing firmware..." }
     var downgradeReadyStatus: String { lang == .ru ? "Готов к загрузке IPSW" : "Ready to download IPSW" }
     var downgradeFinished: String { lang == .ru ? "Симуляция завершена" : "Simulation Completed" }
-    var downgradeFinishedMsg: String { lang == .ru ? "Образец прошивки успешно распакован и проверен контрольной суммой SHA-256." : "Firmware image was successfully unpacked and verified with SHA-256." }
+    var downgradeFinishedMsg: String { lang == .ru ? "Образ прошивки успешно распакован и записан в APFS snapshot." : "Firmware image was successfully unpacked and flashed into APFS snapshot." }
     var disclaimerText: String { lang == .ru ? "Все операции производятся в безопасном демонстрационном режиме симулятора. Физическая файловая система устройства не модифицируется." : "All operations run in a safe simulator environment. Physical device storage is not modified." }
 
     // MARK: - Settings View
@@ -113,6 +126,7 @@ struct LocalizedStrings {
     var tweakInjectionToggle: String { lang == .ru ? "Инъекция твиков (Substrate)" : "Tweak Injection (Substrate)" }
 
     var systemSection: String { lang == .ru ? "Системное окружение" : "System Environment" }
+    var deviceModelLabel: String { lang == .ru ? "Модель устройства" : "Device Model" }
     var osVersionLabel: String { lang == .ru ? "Версия ОС" : "OS Version" }
     var exploitLabel: String { lang == .ru ? "Эксплойт" : "Exploit" }
 

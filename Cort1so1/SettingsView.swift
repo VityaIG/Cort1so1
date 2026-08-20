@@ -216,9 +216,17 @@ struct SettingsView: View {
                 .textCase(.uppercase)
 
             HStack {
+                Label(strings.deviceModelLabel, systemImage: "ipad.and.iphone")
+                Spacer()
+                Text(UIDevice.current.model)
+                    .foregroundColor(.secondary)
+                    .font(.system(.body, design: .default))
+            }
+
+            HStack {
                 Label(strings.osVersionLabel, systemImage: "iphone")
                 Spacer()
-                Text("iOS 26.0")
+                Text("iOS \(UIDevice.current.systemVersion)")
                     .foregroundColor(.secondary)
                     .font(.system(.body, design: .default))
             }
@@ -226,7 +234,7 @@ struct SettingsView: View {
             HStack {
                 Label(strings.archTitle, systemImage: "cpu")
                 Spacer()
-                Text("arm64e")
+                Text("arm64e (PPL Bypass)")
                     .foregroundColor(.secondary)
                     .font(.system(.body, design: .default))
             }
@@ -234,7 +242,7 @@ struct SettingsView: View {
             HStack {
                 Label(strings.exploitLabel, systemImage: "bolt.fill")
                 Spacer()
-                Text("PhysPuppet")
+                Text("PhysPuppet / LandCast")
                     .foregroundColor(.secondary)
                     .font(.system(.body, design: .default))
             }

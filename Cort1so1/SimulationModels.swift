@@ -41,16 +41,84 @@ struct FirmwareVersion: Identifiable, Hashable {
     let id = UUID()
     let version: String
     let build: String
-    let releaseDate: String
+    let releaseDateRu: String
+    let releaseDateEn: String
     let isSigned: Bool
+    let isBeta: Bool
     let sizeGB: Double
+    let sha256: String
+    let sepStatusRu: String
+    let sepStatusEn: String
+
+    func releaseDate(isRu: Bool) -> String {
+        isRu ? releaseDateRu : releaseDateEn
+    }
+
+    func sepStatus(isRu: Bool) -> String {
+        isRu ? sepStatusRu : sepStatusEn
+    }
 }
 
-/// Список версий для экрана отката
+/// Список версий для экрана отката согласно спецификации
 let sampleFirmwares: [FirmwareVersion] = [
-    FirmwareVersion(version: "iOS 26.0", build: "30A195", releaseDate: "Сентябрь 2025", isSigned: true, sizeGB: 7.1),
-    FirmwareVersion(version: "iOS 25.5.1", build: "29F80", releaseDate: "Июль 2025", isSigned: true, sizeGB: 6.8),
-    FirmwareVersion(version: "iOS 25.4", build: "29E210", releaseDate: "Май 2025", isSigned: false, sizeGB: 6.6),
-    FirmwareVersion(version: "iOS 25.1", build: "29B120", releaseDate: "Декабрь 2024", isSigned: false, sizeGB: 6.3),
-    FirmwareVersion(version: "iOS 18.0", build: "22A3354", releaseDate: "Сентябрь 2024", isSigned: false, sizeGB: 5.8)
+    FirmwareVersion(
+        version: "27.0 Beta 4",
+        build: "31A512",
+        releaseDateRu: "Июль 2026",
+        releaseDateEn: "July 2026",
+        isSigned: true,
+        isBeta: true,
+        sizeGB: 7.4,
+        sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        sepStatusRu: "Совместим (Beta SEP)",
+        sepStatusEn: "Compatible (Beta SEP)"
+    ),
+    FirmwareVersion(
+        version: "26.6",
+        build: "30G78",
+        releaseDateRu: "Август 2025",
+        releaseDateEn: "August 2025",
+        isSigned: true,
+        isBeta: false,
+        sizeGB: 7.1,
+        sha256: "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
+        sepStatusRu: "Совместим (Cryptex1 Match)",
+        sepStatusEn: "Compatible (Cryptex1 Match)"
+    ),
+    FirmwareVersion(
+        version: "26.0",
+        build: "30A195",
+        releaseDateRu: "Сентябрь 2024",
+        releaseDateEn: "September 2024",
+        isSigned: true,
+        isBeta: false,
+        sizeGB: 6.8,
+        sha256: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+        sepStatusRu: "Совместим (Full TSS)",
+        sepStatusEn: "Compatible (Full TSS)"
+    ),
+    FirmwareVersion(
+        version: "18.7.1",
+        build: "22H310",
+        releaseDateRu: "Октябрь 2024",
+        releaseDateEn: "October 2024",
+        isSigned: false,
+        isBeta: false,
+        sizeGB: 6.4,
+        sha256: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        sepStatusRu: "Нужны SHSH2 + Cryptex Fix",
+        sepStatusEn: "Requires SHSH2 + Cryptex Fix"
+    ),
+    FirmwareVersion(
+        version: "18.5",
+        build: "22F76",
+        releaseDateRu: "Май 2024",
+        releaseDateEn: "May 2024",
+        isSigned: false,
+        isBeta: false,
+        sizeGB: 6.1,
+        sha256: "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+        sepStatusRu: "SHSH2 Futurerestore (Gaster)",
+        sepStatusEn: "SHSH2 Futurerestore (Gaster)"
+    )
 ]

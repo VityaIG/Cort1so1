@@ -263,7 +263,7 @@ struct MainView: View {
                         .font(.system(size: 34))
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(strings.readyTitle)
+                        Text(strings.readyTitle(for: UIDevice.current.systemVersion))
                             .font(.system(.headline, design: .default))
                             .fontWeight(.bold)
                         Text(strings.readySubtitle)
