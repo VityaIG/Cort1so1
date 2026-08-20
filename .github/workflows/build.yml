@@ -1,0 +1,76 @@
+name: Build and Release Cort1so1 IPA
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -p
+
+      - name: Build Xcode Project
+        run: |
+          xcodebuild build \
+            -project Cort1so1.xcodeproj \
+            -scheme Cort1so1 \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/Cort1so1.app Payload/
+          zip -vr Cort1so1.ipa Payload
+          ls -la Cort1so1.ipa
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cort1so1-ipa
+          path: Cort1so1.ipa
+          retention-days: 30
+
+      - name: Create or Replace GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.5' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.0.5' }}
+          body: |
+            Автоматическая сборка приложения Cort1so1 (Liquid Glass HIG).
+
+            Особенности интерфейса:
+            - Перевод интерфейса на дизайн-систему iOS 26 Liquid Glass HIG.
+            - Многослойные парящие подложки с непрерывным скруглением (.clipShape(.rect(cornerRadius: 26, style: .continuous))).
+            - Нативные эффекты ультратонкого стекла (.background(.ultraThinMaterial)) и тонкие градиентные рамки.
+            - Системный TabView с материалом ультратонкого стекла (.toolbarBackground(.ultraThinMaterial, for: .tabBar)).
+            - Пружинная динамика нажатий (.spring(response: 0.3, dampingFraction: 0.7)).
+            - Вкладка Основное: пошаговый пайплайн инициализации, терминал логов и оверлей респринга NeoSpringView.
+            - Вкладка Откат iOS: каталог IPSW с симуляцией проверки подписи TSS.
+            - Вкладка Настройки: управление параметрами утилиты и темы.
+
+            Инструкция по установке:
+            1. Скачайте файл Cort1so1.ipa из блока Assets ниже.
+            2. Установите приложение через TrollStore, AltStore, SideStore или Sideloadly.
+          files: Cort1so1.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
