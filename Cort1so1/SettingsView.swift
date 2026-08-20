@@ -1,6 +1,7 @@
 import SwiftUI
+import UIKit
 
-/// Экран настроек приложения «Cort1so1» в стиле iOS HIG
+/// Полностью переработанный экран настроек «Cort1so1» в нативном стиле Apple iOS HIG
 struct SettingsView: View {
     @Binding var jailbreakState: JailbreakState
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
@@ -9,15 +10,20 @@ struct SettingsView: View {
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     @AppStorage("autoRespring") private var autoRespring: Bool = true
     @AppStorage("tweakInjection") private var tweakInjection: Bool = true
+    @AppStorage("safeMode") private var safeMode: Bool = false
 
     @State private var showRemoveJailbreakAlert: Bool = false
-    @State private var showResetToast: Bool = false
+    @State private var showToast: Bool = false
+    @State private var toastMessage: String = ""
+
+    private var isRu: Bool {
+        appLanguage == "ru"
+    }
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
     }
 
-    // Точный фирменный цвет Telegram
     private let telegramColor = Color(red: 0.165, green: 0.67, blue: 0.94)
 
     var body: some View {
@@ -27,22 +33,25 @@ struct SettingsView: View {
                     .ignoresSafeArea()
 
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        // Секция оформления и языка
-                        appearanceAndLanguageCard
+                    VStack(spacing: 18) {
+                        // 1. Профиль приложения и разработчика
+                        appHeaderCard
 
-                        // Секция управления состоянием джейлбрейка
+                        // 2. Внешний вид и язык
+                        appearanceSectionCard
+
+                        // 3. Параметры джейлбрейка
+                        utilitySectionCard
+
+                        // 4. Системные сведения
+                        systemDiagnosticsCard
+
+                        // 5. Управление джейлбрейком (Опасная зона)
                         jailbreakManagementCard
 
-                        // Секция параметров симулятора
-                        utilityOptionsCard
-
-                        // Секция системного окружения
-                        systemEnvironmentCard
-
-                        // Секция «О приложении»
-                        aboutCard
-                            .padding(.bottom, 24)
+                        // 6. О программе и сообщество
+                        aboutProjectCard
+                            .padding(.bottom, 28)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
@@ -50,6 +59,7 @@ struct SettingsView: View {
             }
             .navigationTitle(strings.settingsTitle)
             .navigationBarTitleDisplayMode(.inline)
+            // Подтверждение удаления джейлбрейка
             .alert(strings.removeJailbreakAlertTitle, isPresented: $showRemoveJailbreakAlert) {
                 Button(strings.cancelBtn, role: .cancel) { }
                 Button(strings.removeConfirmBtn, role: .destructive) {
@@ -61,38 +71,124 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Компоненты интерфейса
+    // MARK: - 1. Профиль приложения и разработчика
 
-    /// Карточка темы оформления и выбора языка
-    private var appearanceAndLanguageCard: some View {
+    private var appHeaderCard: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 14) {
+                // Иконка приложения
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.blue, Color.cyan],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 54, height: 54)
+                        .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
+
+                    Image(systemName: "shield.checkered")
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text("Cort1so1")
+                            .font(.system(.title3, design: .default))
+                            .fontWeight(.bold)
+
+                        Text("v1.0.5")
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.blue.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+
+                    Text("iOS Jailbreak & IPSW Utility")
+                        .font(.system(.caption, design: .default))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                // Статус джейлбрейка
+                VStack(alignment: .trailing, spacing: 3) {
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.4))
+                            .frame(width: 8, height: 8)
+
+                        Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Не активен" : "Stock"))
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
+                    }
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
+                    .clipShape(Capsule())
+                }
+            }
+
+            Divider()
+
+            // Карточка создателя с переходом в Telegram
+            Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(telegramColor.opacity(0.15))
+                            .frame(width: 32, height: 32)
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(telegramColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        Text("@VityaV 🇷🇺")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(telegramColor)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(telegramColor)
+                }
+                .padding(10)
+                .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+        }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    // MARK: - 2. Внешний вид и язык
+
+    private var appearanceSectionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(strings.appearanceSection)
-                .font(.system(.caption, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+            sectionHeader(title: strings.appearanceSection, icon: "paintbrush.fill", color: .purple)
 
             Toggle(isOn: $isDarkMode) {
-                Label {
-                    Text(strings.darkModeToggle)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: "moon.fill")
-                        .foregroundColor(.indigo)
-                }
+                settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
             }
             .tint(.blue)
 
             Divider()
 
             HStack {
-                Label {
-                    Text(strings.languageLabel)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: "globe")
-                        .foregroundColor(.blue)
-                }
+                settingRowLabel(title: strings.languageLabel, icon: "globe", color: .blue)
 
                 Spacer()
 
@@ -102,206 +198,137 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .labelsHidden()
                 .tint(.blue)
             }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    /// Карточка управления состоянием джейлбрейка
-    private var jailbreakManagementCard: some View {
+    // MARK: - 3. Параметры джейлбрейка
+
+    private var utilitySectionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(strings.jbManagementSection)
-                .font(.system(.caption, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
-
-            HStack {
-                Label {
-                    Text(strings.statusTitle)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: isJailbroken || jailbreakState == .completed ? "checkmark.shield.fill" : "shield.slash.fill")
-                        .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
-                }
-
-                Spacer()
-
-                Text(isJailbroken || jailbreakState == .completed ? strings.statusActive : strings.statusCompatible)
-                    .font(.system(.subheadline, design: .default))
-                    .fontWeight(.semibold)
-                    .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
-            }
-
-            Divider()
-
-            Button(role: .destructive, action: {
-                showRemoveJailbreakAlert = true
-            }) {
-                HStack {
-                    Image(systemName: "trash.fill")
-                    Text(strings.removeJailbreakBtn)
-                        .fontWeight(.semibold)
-                    Spacer()
-                }
-                .foregroundColor(.red)
-            }
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
-    /// Карточка параметров работы
-    private var utilityOptionsCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(strings.utilitySection)
-                .font(.system(.caption, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+            sectionHeader(title: strings.utilitySection, icon: "gearshape.fill", color: .blue)
 
             Toggle(isOn: $verboseLogs) {
-                Label {
-                    Text(strings.verboseLogsToggle)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: "terminal.fill")
-                        .foregroundColor(.blue)
-                }
+                settingRowLabel(title: strings.verboseLogsToggle, icon: "terminal.fill", color: .slateColor)
             }
             .tint(.blue)
 
             Divider()
 
             Toggle(isOn: $autoRespring) {
-                Label {
-                    Text(strings.autoRespringToggle)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: "arrow.clockwise.circle.fill")
-                        .foregroundColor(.green)
-                }
+                settingRowLabel(title: strings.autoRespringToggle, icon: "arrow.clockwise.circle.fill", color: .green)
             }
             .tint(.blue)
 
             Divider()
 
             Toggle(isOn: $tweakInjection) {
-                Label {
-                    Text(strings.tweakInjectionToggle)
-                        .font(.system(.body, design: .default))
-                } icon: {
-                    Image(systemName: "puzzlepiece.extension.fill")
-                        .foregroundColor(.orange)
-                }
+                settingRowLabel(title: strings.tweakInjectionToggle, icon: "puzzlepiece.extension.fill", color: .orange)
+            }
+            .tint(.blue)
+
+            Divider()
+
+            Toggle(isOn: $safeMode) {
+                settingRowLabel(title: isRu ? "Безопасный режим (Safe Mode)" : "Safe Mode Fallback", icon: "shield.lefthalf.filled", color: .cyan)
             }
             .tint(.blue)
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    /// Карточка системного окружения
-    private var systemEnvironmentCard: some View {
+    // MARK: - 4. Системные сведения
+
+    private var systemDiagnosticsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(strings.systemSection)
-                .font(.system(.caption, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+            sectionHeader(title: strings.systemSection, icon: "cpu.fill", color: .teal)
 
-            HStack {
-                Label(strings.deviceModelLabel, systemImage: "ipad.and.iphone")
-                Spacer()
-                Text(UIDevice.current.model)
-                    .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
-            }
+            infoRow(title: strings.deviceModelLabel, value: UIDevice.current.model, icon: "ipad.and.iphone", color: .blue)
+            Divider()
+            infoRow(title: strings.osVersionLabel, value: "iOS \(UIDevice.current.systemVersion)", icon: "iphone", color: .indigo)
+            Divider()
+            infoRow(title: strings.archTitle, value: "arm64e (PPL & PAC Bypass)", icon: "cpu", color: .teal)
+            Divider()
+            infoRow(title: strings.exploitLabel, value: "PhysPuppet / LandCast", icon: "bolt.fill", color: .orange)
+            Divider()
+            infoRow(title: strings.packageManagerLabel, value: "Sileo v2.6 (Procursus)", icon: "shippingbox.fill", color: .cyan)
+        }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
 
-            HStack {
-                Label(strings.osVersionLabel, systemImage: "iphone")
-                Spacer()
-                Text("iOS \(UIDevice.current.systemVersion)")
-                    .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
-            }
+    // MARK: - 5. Управление джейлбрейком (Danger Zone)
 
-            HStack {
-                Label(strings.archTitle, systemImage: "cpu")
-                Spacer()
-                Text("arm64e (PPL Bypass)")
-                    .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
-            }
+    private var jailbreakManagementCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeader(title: strings.jbManagementSection, icon: "exclamationmark.shield.fill", color: .red)
 
-            HStack {
-                Label(strings.exploitLabel, systemImage: "bolt.fill")
-                Spacer()
-                Text("PhysPuppet / LandCast")
-                    .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
+            Button(role: .destructive, action: {
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.prepare()
+                generator.impactOccurred()
+                showRemoveJailbreakAlert = true
+            }) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.red.opacity(0.12))
+                            .frame(width: 30, height: 30)
+
+                        Image(systemName: "trash.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red)
+                    }
+
+                    Text(strings.removeJailbreakBtn)
+                        .font(.system(.body, design: .default))
+                        .fontWeight(.semibold)
+                        .foregroundColor(.red)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.red.opacity(0.6))
+                }
             }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    /// Карточка «О программе»
-    private var aboutCard: some View {
+    // MARK: - 6. О программе
+
+    private var aboutProjectCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(strings.aboutSection)
-                .font(.system(.caption, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+            sectionHeader(title: strings.aboutSection, icon: "info.circle.fill", color: .blue)
 
             HStack {
-                Label(strings.appNameLabel, systemImage: "app.fill")
+                Text(strings.appNameLabel)
+                    .font(.system(.subheadline, design: .default))
                 Spacer()
                 Text("Cort1so1")
                     .fontWeight(.bold)
-                    .font(.system(.body, design: .default))
+                    .font(.system(.subheadline, design: .default))
             }
 
+            Divider()
+
             HStack {
-                Label(strings.versionLabel, systemImage: "info.circle.fill")
+                Text(strings.versionLabel)
+                    .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("1.0.5")
+                Text("1.0.5 (Build 26A101)")
                     .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
-            }
-
-            HStack {
-                Label(strings.packageManagerLabel, systemImage: "shippingbox.fill")
-                Spacer()
-                Text("Sileo v2.6")
-                    .foregroundColor(.secondary)
-                    .font(.system(.body, design: .default))
-            }
-
-            HStack {
-                Label {
-                    Text(strings.creatorLabel)
-                } icon: {
-                    Image(systemName: "paperplane.fill")
-                        .foregroundColor(telegramColor)
-                }
-                Spacer()
-                Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
-                    HStack(spacing: 4) {
-                        Text("@VityaV 🇷🇺")
-                            .font(.system(.body, design: .default))
-                            .fontWeight(.medium)
-                            .foregroundColor(telegramColor)
-                    }
-                }
+                    .font(.system(.subheadline, design: .monospaced))
             }
 
             Divider()
@@ -309,20 +336,72 @@ struct SettingsView: View {
             Text(strings.aboutDisclaimer)
                 .font(.system(.caption, design: .default))
                 .foregroundColor(.secondary)
+                .lineSpacing(3)
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    // MARK: - Вспомогательные компоненты разметки
+
+    private func sectionHeader(title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(color)
+
+            Text(title)
+                .font(.system(.caption, design: .default))
+                .fontWeight(.bold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+        }
+    }
+
+    private func settingRowLabel(title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(color)
+                    .frame(width: 30, height: 30)
+
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+
+            Text(title)
+                .font(.system(.body, design: .default))
+        }
+    }
+
+    private func infoRow(title: String, value: String, icon: String, color: Color) -> some View {
+        HStack {
+            settingRowLabel(title: title, icon: icon, color: color)
+            Spacer()
+            Text(value)
+                .foregroundColor(.secondary)
+                .font(.system(.subheadline, design: .default))
+        }
     }
 
     // MARK: - Логика действий
 
     private func removeJailbreak() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.success)
+
         withAnimation(.easeInOut(duration: 0.25)) {
             isJailbroken = false
             jailbreakState = .idle
         }
     }
+}
+
+extension Color {
+    static let slateColor = Color(red: 0.35, green: 0.45, blue: 0.55)
 }
 
 #Preview {

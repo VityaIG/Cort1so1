@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Фазы процесса джейлбрейка в стиле Dopamine
 enum DopamineProcessPhase {
@@ -9,7 +10,7 @@ enum DopamineProcessPhase {
     case respring
 }
 
-/// Модальное окно процесса джейлбрейка в стиле Dopamine
+/// Модальное окно процесса джейлбрейка в стиле Dopamine с нативными тактильными откликами и анимациями
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "ru"
     var onComplete: () -> Void
@@ -21,13 +22,17 @@ struct DopamineProcessView: View {
     @State private var appleRedOpacity: Double = 0.0
     @State private var respringProgress: Double = 0.0
 
+    private var isRu: Bool {
+        appLanguage == "ru"
+    }
+
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
     }
 
     /// Строго заданные строки логов процесса согласно спецификации
     private var logSequence: [String] {
-        if appLanguage == "ru" {
+        if isRu {
             return [
                 "Инициализация Cort1so1",
                 "Проверка совместимости устройства",
@@ -53,7 +58,7 @@ struct DopamineProcessView: View {
     var body: some View {
         ZStack {
             // Глубокий темный фон в стиле Dopamine
-            Color(red: 0.07, green: 0.07, blue: 0.09)
+            Color(red: 0.06, green: 0.06, blue: 0.08)
                 .ignoresSafeArea()
 
             switch phase {
@@ -71,7 +76,7 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
 
             case .appleRed:
-                appleLogoView(color: .red, opacity: appleRedOpacity)
+                appleLogoView(color: Color(red: 0.95, green: 0.22, blue: 0.22), opacity: appleRedOpacity)
                     .transition(.opacity)
 
             case .respring:
@@ -79,7 +84,6 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
             }
         }
-        // Блокировка интерактивного свайпа и закрытия
         .interactiveDismissDisabled(true)
         .preferredColorScheme(.dark)
         .task {
@@ -91,32 +95,41 @@ struct DopamineProcessView: View {
 
     private var loggingInterface: some View {
         VStack(spacing: 0) {
-            // Верхняя панель Dopamine
-            HStack(spacing: 8) {
+            // Верхняя акриловая панель Dopamine
+            HStack(spacing: 10) {
                 HStack(spacing: 6) {
-                    Circle().fill(Color.red.opacity(0.85)).frame(width: 10, height: 10)
-                    Circle().fill(Color.yellow.opacity(0.85)).frame(width: 10, height: 10)
-                    Circle().fill(Color.green.opacity(0.85)).frame(width: 10, height: 10)
+                    Circle().fill(Color(red: 0.95, green: 0.35, blue: 0.35)).frame(width: 11, height: 11)
+                    Circle().fill(Color(red: 0.95, green: 0.75, blue: 0.25)).frame(width: 11, height: 11)
+                    Circle().fill(Color(red: 0.35, green: 0.85, blue: 0.45)).frame(width: 11, height: 11)
                 }
 
                 Spacer()
 
-                Text("Cort1so1")
-                    .font(.system(size: 13, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.9))
+                HStack(spacing: 6) {
+                    Image(systemName: "shield.checkered")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.blue)
+                    Text("Cort1so1")
+                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .foregroundColor(.white)
+                }
 
                 Spacer()
 
                 Text("[\(currentStepNumber)/\(logSequence.count)]")
-                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    .foregroundColor(.blue)
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(.cyan)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.cyan.opacity(0.12))
+                    .clipShape(Capsule())
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color(red: 0.11, green: 0.11, blue: 0.14))
+            .background(Color(red: 0.10, green: 0.10, blue: 0.13))
 
             Divider()
-                .background(Color.white.opacity(0.1))
+                .background(Color.white.opacity(0.08))
 
             // Прогресс-бар сверху
             GeometryReader { geo in
@@ -128,7 +141,7 @@ struct DopamineProcessView: View {
                     Rectangle()
                         .fill(
                             LinearGradient(
-                                colors: [.blue, .cyan],
+                                colors: [Color.blue, Color.cyan],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -137,7 +150,7 @@ struct DopamineProcessView: View {
                             width: max(8, geo.size.width * CGFloat(Double(currentStepNumber) / Double(max(1, logSequence.count)))),
                             height: 3
                         )
-                        .animation(.easeInOut(duration: 0.25), value: currentStepNumber)
+                        .animation(.easeInOut(duration: 0.3), value: currentStepNumber)
                 }
             }
             .frame(height: 3)
@@ -149,22 +162,22 @@ struct DopamineProcessView: View {
                         ForEach(Array(visibleLogs.enumerated()), id: \.offset) { index, line in
                             let isPhaseSuccess = line.starts(with: ">")
 
-                            HStack(alignment: .top, spacing: 10) {
+                            HStack(alignment: .top, spacing: 12) {
                                 if isPhaseSuccess {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(.green)
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(Color(red: 0.3, green: 0.85, blue: 0.45))
                                         .padding(.top, 2)
                                 } else {
                                     Circle()
                                         .fill(Color.blue)
-                                        .frame(width: 6, height: 6)
+                                        .frame(width: 7, height: 7)
                                         .padding(.top, 7)
                                 }
 
                                 Text(line)
                                     .font(.system(size: isPhaseSuccess ? 14 : 13.5, weight: isPhaseSuccess ? .semibold : .regular, design: .monospaced))
-                                    .foregroundColor(isPhaseSuccess ? .green : .white.opacity(0.92))
+                                    .foregroundColor(isPhaseSuccess ? Color(red: 0.35, green: 0.9, blue: 0.5) : .white.opacity(0.92))
                                     .lineSpacing(4)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -190,24 +203,29 @@ struct DopamineProcessView: View {
             Spacer()
 
             // Нижняя информационная плашка
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 ProgressView()
                     .tint(.blue)
                     .scaleEffect(0.8)
 
                 Text(strings.statusRunning)
                     .font(.system(size: 12, weight: .medium, design: .default))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.white.opacity(0.7))
 
                 Spacer()
 
-                Text("iOS \(UIDevice.current.systemVersion)")
-                    .font(.system(size: 11, weight: .regular, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.4))
+                HStack(spacing: 4) {
+                    Image(systemName: "cpu")
+                        .font(.system(size: 11))
+                        .foregroundColor(.blue)
+                    Text("iOS \(UIDevice.current.systemVersion)")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.5))
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color(red: 0.10, green: 0.10, blue: 0.12))
+            .background(Color(red: 0.09, green: 0.09, blue: 0.11))
         }
     }
 
@@ -219,7 +237,7 @@ struct DopamineProcessView: View {
                 .ignoresSafeArea()
 
             Image(systemName: "applelogo")
-                .font(.system(size: 84, weight: .regular))
+                .font(.system(size: 88, weight: .regular))
                 .foregroundColor(color)
                 .opacity(opacity)
         }
@@ -232,28 +250,29 @@ struct DopamineProcessView: View {
             Color.black
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.6)
 
                 Text(strings.respringText)
                     .font(.system(size: 13, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.75))
+                    .foregroundColor(.white.opacity(0.8))
             }
         }
     }
 
-    // MARK: - 4. Асинхронный пайплайн выполнения (async/await)
+    // MARK: - 4. Асинхронный пайплайн выполнения с тактильным откликом (Haptics)
 
     private func runExecutionPipeline() async {
         // Фаза 1: Последовательный вывод логов с реалистичными задержками
         for (idx, line) in logSequence.enumerated() {
-            // Задержка перед строкой
-            let delayNanos: UInt64 = line.starts(with: ">") ? 900_000_000 : 700_000_000
+            let isPhaseSuccess = line.starts(with: ">")
+            let delayNanos: UInt64 = isPhaseSuccess ? 950_000_000 : 750_000_000
             try? await Task.sleep(nanoseconds: delayNanos)
 
             await MainActor.run {
+                triggerHaptic(isMajor: isPhaseSuccess)
                 withAnimation(.easeOut(duration: 0.25)) {
                     visibleLogs.append(line)
                     currentStepNumber = idx + 1
@@ -261,11 +280,12 @@ struct DopamineProcessView: View {
             }
         }
 
-        // Небольшая пауза после окончания вывода всех логов
+        // Пауза перед переходом к экранам Apple
         try? await Task.sleep(nanoseconds: 800_000_000)
 
         // Фаза 2: Появление белого логотипа Apple
         await MainActor.run {
+            triggerImpact(style: .light)
             withAnimation(.easeInOut(duration: 0.4)) {
                 phase = .appleWhite
             }
@@ -295,6 +315,7 @@ struct DopamineProcessView: View {
 
         // Фаза 4: Появление красного логотипа Apple
         await MainActor.run {
+            triggerImpact(style: .medium)
             phase = .appleRed
         }
         await MainActor.run {
@@ -321,13 +342,40 @@ struct DopamineProcessView: View {
             }
         }
 
-        // Время респринга перед возвратом в систему
+        // Время респринга
         try? await Task.sleep(nanoseconds: 2_200_000_000)
 
-        // Завершение сценария
+        // Успешный финальный отклик и завершение
         await MainActor.run {
+            triggerNotificationSuccess()
             onComplete()
         }
+    }
+
+    // MARK: - Тактильные эффекты (Haptics)
+
+    private func triggerHaptic(isMajor: Bool) {
+        if isMajor {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.prepare()
+            generator.impactOccurred()
+        } else {
+            let generator = UISelectionFeedbackGenerator()
+            generator.prepare()
+            generator.selectionChanged()
+        }
+    }
+
+    private func triggerImpact(style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+
+    private func triggerNotificationSuccess() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.success)
     }
 }
 
