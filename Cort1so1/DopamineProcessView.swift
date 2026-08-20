@@ -275,21 +275,28 @@ struct DopamineProcessView: View {
             }
             .frame(height: 2)
 
-            // Компактный список логов: просто иконка и текст лога
+            // Список логов: анимация загрузки (ProgressView) и увеличенный размер шрифта
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 12) {
                         ForEach(visibleLogs) { step in
-                            HStack(alignment: .center, spacing: 10) {
-                                // Компактная иконка
-                                Image(systemName: step.iconName)
-                                    .font(.system(size: step.isMajorPhase ? 14 : 12, weight: step.isMajorPhase ? .bold : .medium))
-                                    .foregroundColor(step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5) : Color.white.opacity(0.7))
-                                    .frame(width: 18, height: 18)
+                            HStack(alignment: .center, spacing: 12) {
+                                // Анимация загрузки (ProgressView) перед каждым логом
+                                if step.isMajorPhase {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
+                                        .frame(width: 20, height: 20)
+                                } else {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white.opacity(0.85)))
+                                        .scaleEffect(0.85)
+                                        .frame(width: 20, height: 20)
+                                }
 
-                                // Текст лога
+                                // Текст лога увеличенного размера под стать индикатору загрузки
                                 Text(isRu ? step.titleRu : step.titleEn)
-                                    .font(.system(size: step.isMajorPhase ? 14 : 13, weight: step.isMajorPhase ? .bold : .regular))
+                                    .font(.system(size: step.isMajorPhase ? 16 : 15, weight: step.isMajorPhase ? .bold : .medium))
                                     .foregroundColor(step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5) : Color.white)
                                     .lineLimit(2)
 
@@ -297,15 +304,15 @@ struct DopamineProcessView: View {
 
                                 if step.isMajorPhase {
                                     Text(isRu ? "OK" : "DONE")
-                                        .font(.system(size: 9, weight: .bold))
+                                        .font(.system(size: 10, weight: .bold))
                                         .foregroundColor(.black)
-                                        .padding(.horizontal, 5)
-                                        .padding(.vertical, 1.5)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
                                         .background(Color(red: 0.35, green: 0.9, blue: 0.5))
                                         .clipShape(Capsule())
                                 }
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 3)
                             .id(step.id)
                             .transition(.asymmetric(
                                 insertion: .opacity.combined(with: .move(edge: .bottom)),
@@ -313,8 +320,8 @@ struct DopamineProcessView: View {
                             ))
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .onChange(of: visibleLogs.count) { _ in
@@ -335,13 +342,13 @@ struct DopamineProcessView: View {
                     .scaleEffect(0.8)
 
                 Text(isRu ? "Выполняется джейлбрейк..." : "Jailbreak in progress...")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white.opacity(0.8))
 
                 Spacer()
 
-                Text("iOS 18 • rootless")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                Text("rootless")
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundColor(.white.opacity(0.5))
             }
             .padding(.horizontal, 16)
