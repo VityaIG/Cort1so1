@@ -186,6 +186,24 @@ struct SettingsView: View {
                     .font(.system(.body, design: .default))
             }
 
+            HStack {
+                Label {
+                    Text("Создатель")
+                } icon: {
+                    Image(systemName: "paperplane.fill")
+                        .foregroundColor(.blue)
+                }
+                Spacer()
+                Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
+                    HStack(spacing: 4) {
+                        Text("@VityaV 🇷🇺")
+                            .font(.system(.body, design: .default))
+                            .fontWeight(.medium)
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+
             Divider()
 
             Text("Cort1so1 — развлекательное демонстрационное приложение-симулятор. Проект создан исключительно в ознакомительных целях.")
