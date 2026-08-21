@@ -282,29 +282,6 @@ struct TweaksView: View {
                         binding: $invisibilityCloak
                     )
                 }
-
-                Section {
-                    Button(action: {
-                        self.applyTweaks()
-                    }) {
-                        HStack {
-                            Spacer()
-                            if isApplying {
-                                ProgressView().accentColor(AppTheme.resolveColor(name: appThemeColor))
-                            } else {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "checkmark.seal.fill")
-                                    Text(strings.tweaksApplyBtn)
-                                        .font(.system(size: 17, weight: .semibold))
-                                }
-                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 2)
-                    }
-                    .disabled(isApplying)
-                }
             }
             .navigationTitle(strings.tweaksTitle)
             .toolbar {
@@ -319,25 +296,10 @@ struct TweaksView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        Button {
-                            self.showAddSheet = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-
-                        Button {
-                            self.applyTweaks()
-                        } label: {
-                            if isApplying {
-                                ProgressView()
-                                    .scaleEffect(0.75)
-                            } else {
-                                Text(strings.tweaksApplyBtn)
-                                    .fontWeight(.bold)
-                            }
-                        }
-                        .disabled(isApplying)
+                    Button {
+                        self.showAddSheet = true
+                    } label: {
+                        Image(systemName: "plus")
                     }
                 }
             }
