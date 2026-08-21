@@ -39,6 +39,9 @@ struct DowngradeView: View {
     @State private var updateBaseband: Bool = true
     @State private var verboseRestore: Bool = false
     
+    @State private var selectedExploit: String = "checkm8 (Bootrom)"
+    private let exploits = ["checkm8 (Bootrom)", "Cryptex1 Bypass", "SEP Exploit", "Tethered Boot"]
+    
     private var isRu: Bool {
         appLanguage == "ru"
     }
@@ -65,6 +68,18 @@ struct DowngradeView: View {
                         Text(UIDevice.current.hardwareIdentifier)
                             .foregroundColor(.secondary)
                     }
+                    HStack {
+                        Text("ECID")
+                        Spacer()
+                        Text("0x0000001234ABCDEF")
+                            .foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text("APNonce")
+                        Spacer()
+                        Text("0x1111111111111111")
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Section(
@@ -75,6 +90,46 @@ struct DowngradeView: View {
                         ForEach(sampleFirmwares) { fw in
                             Text("\(fw.version) (\(fw.build))").tag(fw.id as UUID?)
                         }
+                    }
+                }
+                
+                Section(header: Text(isRu ? "Статус подписи (TSS)" : "TSS Status")) {
+                    HStack {
+                        Text(isRu ? "Статус окна" : "Signing Window")
+                        Spacer()
+                        if let fw = sampleFirmwares.first(where: { $0.id == selectedFirmwareId }), fw.version == "iOS 18.0" {
+                            Text(isRu ? "Открыто" : "Signed")
+                                .foregroundColor(.green)
+                        } else {
+                            Text(isRu ? "Закрыто" : "Unsigned")
+                                .foregroundColor(.red)
+                        }
+                    }
+                    HStack {
+                        Text("SHSH2 Blobs")
+                        Spacer()
+                        Text(isRu ? "Найдены локально" : "Found Locally")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Section(header: Text(isRu ? "Метод отката" : "Downgrade Method")) {
+                    Picker(isRu ? "Эксплойт" : "Exploit", selection: $selectedExploit) {
+                        ForEach(exploits, id: \.self) { method in
+                            Text(method).tag(method)
+                        }
+                    }
+                }
+                
+                Section(
+                    header: Text(isRu ? "Резервная копия" : "Backup & Safety"),
+                    footer: Text(isRu ? "Откат на несовместимый SEP может привести к поломке FaceID или код-пароля." : "Downgrading to an incompatible SEP may corrupt FaceID or Passcode data.")
+                ) {
+                    HStack {
+                        Text(isRu ? "Последняя копия" : "Last Backup")
+                        Spacer()
+                        Text(isRu ? "Сегодня в 10:42" : "Today at 10:42 AM")
+                            .foregroundColor(.secondary)
                     }
                 }
                 
