@@ -24,6 +24,7 @@ struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("installedOS") private var installedOS: String = "iOS"
+    @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     var method: JailbreakMethod = .dopamine
     var onComplete: () -> Void
 
@@ -49,7 +50,7 @@ struct DopamineProcessView: View {
 
     /// Список последовательных логов джейлбрейка
     private var logSteps: [JailbreakLogStep] {
-        method.logs(isRu: isRu)
+        method.logs(isRu: isRu, verbose: verboseLogs)
     }
 
     private var progressRatio: Double {
@@ -307,7 +308,8 @@ struct DopamineProcessView: View {
             }
             self.triggerHaptic(isMajor: step.isMajorPhase)
             
-            let delay: Double = step.isMajorPhase ? (method.stepDelay * 1.5) : method.stepDelay
+            let baseDelay = method.stepDelay(verbose: verboseLogs)
+            let delay: Double = step.isMajorPhase ? (baseDelay * 1.5) : baseDelay
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
             }

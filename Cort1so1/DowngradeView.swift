@@ -37,7 +37,7 @@ struct DowngradeView: View {
     // Options
     @State private var preserveData: Bool = true
     @State private var updateBaseband: Bool = true
-    @State private var verboseRestore: Bool = false
+    @AppStorage("verboseLogs") private var verboseRestore: Bool = true
     
     @State private var selectedExploit: String = "checkm8 (Bootrom)"
     private let exploits = ["checkm8 (Bootrom)", "Cryptex1 Bypass", "SEP Exploit", "Tethered Boot"]
@@ -272,6 +272,7 @@ struct DowngradeExecutionSheet: View {
     let verbose: Bool
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("installedOS") private var installedOS: String = "iOS"
+    @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     
     private var isRu: Bool {
         appLanguage == "ru"
@@ -283,13 +284,10 @@ struct DowngradeExecutionSheet: View {
     @State private var restoreSpeedMBs: Double = 0.0
     @State private var terminalLogs: [String] = []
     @State private var currentStageIndex: Int = -1
-    @State private var isRespringing = false
-    
-    // Alerts
+    @State private var restoreTimer: Timer? = nil
     @State private var showCancelAlert = false
     @State private var showSuccessAlert = false
-    
-    @State private var restoreTimer: Timer?
+    @State private var isRespringing = false
     
     struct RestoreStage {
         let title: String
@@ -496,6 +494,7 @@ struct DowngradeExecutionSheet: View {
     // MARK: - Logic
     
     private func start60SecondsFlashingSequence() {
+        let isVerbose = verbose || verboseLogs
         triggerMajorHaptic()
         isRestoring = true
         elapsedSeconds = 0.0
@@ -506,53 +505,37 @@ struct DowngradeExecutionSheet: View {
             "[00:01] [TSS] Handshake with gs.apple.com:443 established"
         ]
         
-        if verbose {
-            terminalLogs.append("[00:01] [VERBOSE] Setting verbose boot arguments...")
+        if isVerbose {
+            terminalLogs.append("[00:01] [VERBOSE] Sending TSS request for BoardConfig D73AP (ApBoardID: 0x14)...")
+        }
+        
+        var emittedSeconds = Set<Int>()
+        if isVerbose {
+            emittedSeconds.insert(1)
         }
         
         restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             elapsedSeconds += 0.1
-            let currentSecondsInt = Int(elapsedSeconds)
-            let formattedTime = String(format: "[%02d:%02d]", currentSecondsInt / 60, currentSecondsInt % 60)
+            let sec = Int(elapsedSeconds)
+            let formattedTime = String(format: "[%02d:%02d]", sec / 60, sec % 60)
             
+            // Stages & Speeds
             if elapsedSeconds <= 10.0 {
                 if currentStageIndex != 0 { currentStageIndex = 0; triggerSelectionHaptic() }
                 restoreSpeedMBs = Double.random(in: 44.0...54.0)
-                if currentSecondsInt == 3 && terminalLogs.count < 3 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket payload")
-                } else if currentSecondsInt == 7 && terminalLogs.count < 4 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(firmware.sha256.prefix(10))...")
-                }
-            }
-            else if elapsedSeconds <= 25.0 {
+            } else if elapsedSeconds <= 25.0 {
                 if currentStageIndex != 1 { currentStageIndex = 1; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1") }
                 restoreSpeedMBs = Double.random(in: 55.0...68.0)
-                if currentSecondsInt == 18 && terminalLogs.count < 6 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
-                }
-            }
-            else if elapsedSeconds <= 40.0 {
+            } else if elapsedSeconds <= 40.0 {
                 if currentStageIndex != 2 { currentStageIndex = 2; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode...") }
                 restoreSpeedMBs = Double.random(in: 52.0...64.0)
-                if currentSecondsInt == 33 && terminalLogs.count < 8 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
-                }
-            }
-            else if elapsedSeconds <= 52.0 {
+            } else if elapsedSeconds <= 52.0 {
                 if currentStageIndex != 3 { currentStageIndex = 3; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update") }
                 restoreSpeedMBs = Double.random(in: 60.0...75.0)
-                if currentSecondsInt == 47 && terminalLogs.count < 10 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
-                }
-            }
-            else if elapsedSeconds < 60.0 {
+            } else if elapsedSeconds < 60.0 {
                 if currentStageIndex != 4 { currentStageIndex = 4; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1") }
                 restoreSpeedMBs = Double.random(in: 25.0...40.0)
-                if currentSecondsInt == 56 && terminalLogs.count < 12 + (verbose ? 1 : 0) {
-                    terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
-                }
-            }
-            else {
+            } else {
                 elapsedSeconds = 60.0
                 restoreSpeedMBs = 0.0
                 currentStageIndex = 5 // Fully done
@@ -564,6 +547,59 @@ struct DowngradeExecutionSheet: View {
                 installedOS = firmware.version
                 UserDefaults.standard.set(firmware.version, forKey: "installedOS")
                 showSuccessAlert = true
+                return
+            }
+            
+            // Timed verbose / standard events
+            if !emittedSeconds.contains(sec) {
+                emittedSeconds.insert(sec)
+                
+                switch sec {
+                case 3:
+                    terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket payload")
+                case 4:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Nonce generator: 0x1111111111111111 (ApNonce match: OK)") }
+                case 6:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] ECID: 0x0012A3B4C5D6 — Cryptographic signature valid") }
+                case 8:
+                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(firmware.sha256.prefix(10))...")
+                case 9:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] TSS response payload verified with Apple Root CA") }
+                case 12:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Extracting Restore.ipsw root filesystem partition...") }
+                case 15:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Verifying chunk hashes: 4,096 / 4,096 chunks OK") }
+                case 18:
+                    terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
+                case 21:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Dynamic TrustCache size: 18.4 MB (3,412 Mach-O binaries)") }
+                case 24:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] RootFS volume mounted rw: /private/preboot/restore_rootfs") }
+                case 28:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] SEP FW: sep-firmware.d73.RELEASE.im4p (Cryptex1 valid)") }
+                case 30:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Uploading modem image: ICE23-4.02.01.Release.bbfw...") }
+                case 33:
+                    terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
+                case 36:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Verifying Baseband NVM checksum and calibration blocks...") }
+                case 38:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Secure Enclave Processor reset vectors aligned: OK") }
+                case 43:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Sealing APFS container snapshot with Apple Root Certificate...") }
+                case 47:
+                    terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
+                case 50:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] KernelCache: kernelcache.release.iPhone15,2 flashed") }
+                case 54:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Syncing devicetree parameters and hardware ID register...") }
+                case 56:
+                    terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
+                case 58:
+                    if isVerbose { terminalLogs.append("\(formattedTime) [VERBOSE] Preparing system watchdog and reboot vectors...") }
+                default:
+                    break
+                }
             }
         }
     }

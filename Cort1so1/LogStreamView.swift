@@ -3,6 +3,7 @@ import SwiftUI
 /// Представление полноэкранного потока системных логов (Фаза 2)
 struct LogStreamView: View {
     var onCompleted: () -> Void
+    @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     
     @State private var visibleLogs: [String] = []
     @State private var currentLogIndex: Int = 0
@@ -73,9 +74,12 @@ struct LogStreamView: View {
     private func startStreamingLogs() {
         visibleLogs.removeAll()
         currentLogIndex = 0
-        let allLogs = LogData.systemLogs
+        let allLogs = verboseLogs
+            ? LogData.systemLogs
+            : LogData.systemLogs.filter { $0.hasPrefix("[+]") || $0.contains("v1.2") || $0.contains("NeoSpringView") }
+        let interval = verboseLogs ? 0.05 : 0.12
         
-        self.timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
+        self.timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { t in
             if self.currentLogIndex < allLogs.count {
                 self.visibleLogs.append(allLogs[self.currentLogIndex])
                 self.currentLogIndex += 1
