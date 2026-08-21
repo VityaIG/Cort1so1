@@ -8,6 +8,8 @@ struct MainView: View {
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
+    @AppStorage("customCardColorHex") private var customCardColorHex: String = ""
     @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
 
@@ -31,7 +33,7 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                AppBgTheme.resolveColor(id: customAppBgTheme)
+                AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
                     .ignoresSafeArea()
 
                 ScrollView(.vertical, showsIndicators: false) {
@@ -160,7 +162,7 @@ struct MainView: View {
             }
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -176,15 +178,17 @@ struct MainView: View {
                 VStack(spacing: 14) {
                     HStack(spacing: 14) {
                         ZStack {
-                            Circle()
-                                .fill(Color.green.opacity(0.15))
-                                .frame(width: 52, height: 52)
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundColor(.green)
-                                .font(.system(size: 32, weight: .semibold))
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .fill(Color.green)
+                                .frame(width: 48, height: 48)
+                                .shadow(color: Color.green.opacity(0.4), radius: 6, x: 0, y: 3)
+
+                            Image(systemName: "checkmark.shield.fill")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.white)
                         }
 
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 3) {
                             Text(strings.completedTitle)
                                 .font(.system(.headline, design: .default))
                                 .fontWeight(.bold)
@@ -194,37 +198,29 @@ struct MainView: View {
                         }
                         Spacer()
                     }
-
-                    Divider()
-
-                    HStack(spacing: 10) {
-                        Label("Procursus", systemImage: "cube.fill")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Label("Cort1so1", systemImage: "shippingbox.fill")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Label("tfp0: OK", systemImage: "terminal.fill")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.green)
-                    }
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
             } else {
-                // Исходное состояние готовности
+                // Состояние готовности к джейлбрейку
                 HStack(spacing: 14) {
                     ZStack {
-                        Circle()
-                            .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
-                            .frame(width: 50, height: 50)
+                        RoundedRectangle(cornerRadius: 13, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        AppTheme.resolveColor(name: appThemeColor),
+                                        AppTheme.resolveColor(name: appThemeColor).opacity(0.8)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 48, height: 48)
+                            .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.35), radius: 6, x: 0, y: 3)
+
                         Image(systemName: "lock.open.fill")
-                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                            .font(.system(size: 26, weight: .bold))
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
                     }
 
                     VStack(alignment: .leading, spacing: 3) {
@@ -242,7 +238,7 @@ struct MainView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -331,7 +327,7 @@ struct MainView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)

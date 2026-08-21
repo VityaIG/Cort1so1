@@ -26,6 +26,7 @@ struct ContentView: View {
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
     @AppStorage("easterEggChancePercent") private var easterEggChancePercent: Int = 1
 
     @State private var jailbreakState: JailbreakState = .idle
@@ -43,7 +44,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            AppBgTheme.resolveColor(id: customAppBgTheme)
+            AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
                 .ignoresSafeArea()
 
             // Нативный системный TabView

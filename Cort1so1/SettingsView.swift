@@ -28,6 +28,9 @@ struct SettingsView: View {
     @AppStorage("isAdminUnlocked") private var isAdminUnlocked: Bool = false
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
+    @AppStorage("customCardColorHex") private var customCardColorHex: String = ""
+    @AppStorage("customTextColorHex") private var customTextColorHex: String = ""
     @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
     @AppStorage("customPackageManager") private var customPackageManager: String = ""
@@ -38,7 +41,7 @@ struct SettingsView: View {
 
     @State private var adminTapCount: Int = 0
     @State private var lastAdminTapDate: Date = Date.distantPast
-    @State private var showAdminUnlockedAlert: Bool = false
+    @State private var showAdminDashboardSheet: Bool = false
 
     @State private var showRemoveJailbreakAlert: Bool = false
     @State private var showToast: Bool = false
@@ -60,15 +63,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                AppBgTheme.resolveColor(id: customAppBgTheme)
+                AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
                     .ignoresSafeArea()
 
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 18) {
-                            // Секретная панель ADMIN (появляется при 5 тапах по названию «Настройки»)
+                            // Кнопка перехода в отдельный раздел ADMIN (если разблокирован)
                             if isAdminUnlocked {
-                                adminSectionCard
+                                adminEntryCard
                                     .transition(.scale(scale: 0.95).combined(with: .opacity))
                             }
 
@@ -124,16 +127,11 @@ struct SettingsView: View {
                         }
                 }
             }
+            .fullScreenCover(isPresented: $showAdminDashboardSheet) {
+                AdminDashboardView()
+            }
             .fullScreenCover(isPresented: $showEasterEggVideo) {
                 EasterEggVideoPlayerView(isPresented: $showEasterEggVideo, hasPlayedEasterEgg: $hasPlayedEasterEgg)
-            }
-            // Алерт разблокировки режима ADMIN
-            .alert(isPresented: $showAdminUnlockedAlert) {
-                Alert(
-                    title: Text("ADMIN MODE"),
-                    message: Text(isRu ? "Секретный раздел ADMIN разблокирован! Теперь вам доступны расширенные параметры приложения, смена фона и переименование." : "Secret ADMIN section unlocked! Advanced tuning, app renaming, and background customization are now available."),
-                    dismissButton: .default(Text("OK"))
-                )
             }
             // Подтверждение удаления джейлбрейка
             .alert(isPresented: $showRemoveJailbreakAlert) {
@@ -168,9 +166,70 @@ struct SettingsView: View {
             haptic.notificationOccurred(.success)
             withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
                 isAdminUnlocked = true
-                showAdminUnlockedAlert = true
+                showAdminDashboardSheet = true
             }
         }
+    }
+
+    // MARK: - 0. Карточка входа в отдельный раздел ADMIN
+    private var adminEntryCard: some View {
+        Button(action: {
+            self.showAdminDashboardSheet = true
+        }) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.purple, Color.indigo],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 44, height: 44)
+                        .shadow(color: Color.purple.opacity(0.4), radius: 6, x: 0, y: 3)
+
+                    Image(systemName: "terminal.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text("ADMIN")
+                            .font(.system(size: 15, weight: .heavy, design: .monospaced))
+                            .foregroundColor(.primary)
+
+                        Text("OPEN")
+                            .font(.system(size: 9, weight: .black, design: .monospaced))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.purple)
+                            .clipShape(Capsule())
+                    }
+
+                    Text(isRu ? "Нажмите для входа в отдельный раздел ADMIN" : "Tap to open the dedicated full ADMIN dashboard")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.purple)
+            }
+            .padding(16)
+            .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.purple.opacity(0.4), lineWidth: 1.5)
+            )
+            .shadow(color: Color.purple.opacity(0.15), radius: 8, x: 0, y: 3)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     // MARK: - 0. Секретный раздел ADMIN
