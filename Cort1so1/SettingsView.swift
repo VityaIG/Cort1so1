@@ -40,42 +40,52 @@ struct SettingsView: View {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 18) {
-                        // 1. Профиль приложения и разработчика
-                        appHeaderCard
+                ScrollViewReader { proxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 18) {
+                            // 1. Профиль приложения и разработчика
+                            appHeaderCard
+                                .id("topHeader")
 
-                        // 2. Внешний вид и язык
-                        appearanceSectionCard
+                            // 2. Внешний вид и язык
+                            appearanceSectionCard
 
-                        // 3. Параметры джейлбрейка
-                        utilitySectionCard
+                            // 3. Параметры джейлбрейка
+                            utilitySectionCard
 
-                        // 4. Системные сведения
-                        systemDiagnosticsCard
+                            // 4. Системные сведения
+                            systemDiagnosticsCard
 
-                        // 5. Управление джейлбрейком (Опасная зона)
-                        jailbreakManagementCard
+                            // 5. Управление джейлбрейком (Опасная зона)
+                            jailbreakManagementCard
 
-                        // 6. О программе и сообщество
-                        aboutProjectCard
-                        
-                        // 7. Создатель & Разработчик
-                        creatorCard
-                            .padding(.bottom, SettingsView.hasPlayedInSession ? 24 : 8)
+                            // 6. О программе и сообщество
+                            aboutProjectCard
+                            
+                            // 7. Создатель & Разработчик
+                            creatorCard
+                                .padding(.bottom, (SettingsView.hasPlayedInSession || hasPlayedEasterEgg) ? 24 : 8)
 
-                        // 8. Секретный триггер Пасхалки (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
-                        if !SettingsView.hasPlayedInSession {
-                            easterEggBottomTrigger
+                            // 8. Секретный триггер Пасхалки (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
+                            if !SettingsView.hasPlayedInSession && !hasPlayedEasterEgg {
+                                easterEggBottomTrigger
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                    }
+                    .onChange(of: showEasterEggVideo) { isShowing in
+                        if !isShowing && (SettingsView.hasPlayedInSession || hasPlayedEasterEgg) {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                proxy.scrollTo("topHeader", anchor: .top)
+                            }
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
                 }
             }
             .navigationTitle(strings.settingsTitle)
             .fullScreenCover(isPresented: $showEasterEggVideo) {
-                EasterEggVideoPlayerView(isPresented: $showEasterEggVideo)
+                EasterEggVideoPlayerView(isPresented: $showEasterEggVideo, hasPlayedEasterEgg: $hasPlayedEasterEgg)
             }
             // Подтверждение удаления джейлбрейка
             .alert(isPresented: $showRemoveJailbreakAlert) {
@@ -589,6 +599,7 @@ struct CustomAVPlayerView: UIViewRepresentable {
 /// Нативный плеер для автовоспроизведения пасхалки без возможности паузы
 struct EasterEggVideoPlayerView: View {
     @Binding var isPresented: Bool
+    @Binding var hasPlayedEasterEgg: Bool
     @State private var player: AVPlayer?
 
     var body: some View {
@@ -637,6 +648,7 @@ struct EasterEggVideoPlayerView: View {
         ) { _ in
             newPlayer.pause()
             SettingsView.hasPlayedInSession = true
+            hasPlayedEasterEgg = true
             isPresented = false
         }
 
