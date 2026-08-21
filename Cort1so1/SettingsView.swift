@@ -5,6 +5,8 @@ import AVFoundation
 
 /// Полностью переработанный экран настроек «Cort1so1» в нативном стиле Apple iOS HIG
 struct SettingsView: View {
+    static var hasPlayedInSession: Bool = false
+
     @Binding var jailbreakState: JailbreakState
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @AppStorage("appLanguage") private var appLanguage: String = "en"
@@ -20,6 +22,7 @@ struct SettingsView: View {
     @State private var toastMessage: String = ""
     @State private var showEasterEggVideo: Bool = false
     @State private var lastTriggerTime: Date = Date.distantPast
+    @State private var hasPlayedEasterEgg: Bool = SettingsView.hasPlayedInSession
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -59,11 +62,13 @@ struct SettingsView: View {
                         
                         // 7. Создатель & Разработчик
                         creatorCard
-                            .padding(.bottom, 8)
+                            .padding(.bottom, SettingsView.hasPlayedInSession ? 24 : 8)
 
                         // 8. Секретный триггер Пасхалки (прокрутка слишком далеко вниз)
-                        easterEggBottomTrigger
-                            .padding(.bottom, 24)
+                        if !SettingsView.hasPlayedInSession {
+                            easterEggBottomTrigger
+                                .padding(.bottom, 24)
+                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
@@ -426,35 +431,28 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 8. Триггер Пасхалки (прокрутка вниз)
+    // MARK: - 8. Триггер Пасхалки (автоматически при прокрутке в самый низ)
     private var easterEggBottomTrigger: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "arrow.up")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.secondary.opacity(0.35))
-            
-            Text(isRu ? "Потяните вверх для пасхалки" : "Pull up for easter egg")
-                .font(.system(size: 11, weight: .medium, design: .monospaced))
-                .foregroundColor(.secondary.opacity(0.4))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(
-            GeometryReader { geo -> Color in
-                let minY = geo.frame(in: .global).minY
-                let screenHeight = UIScreen.main.bounds.height
-                if minY < screenHeight - 50 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
-                    DispatchQueue.main.async {
-                        self.lastTriggerTime = Date()
-                        let generator = UIImpactFeedbackGenerator(style: .heavy)
-                        generator.prepare()
-                        generator.impactOccurred()
-                        self.showEasterEggVideo = true
+        Color.clear
+            .frame(height: 4)
+            .background(
+                GeometryReader { geo -> Color in
+                    let minY = geo.frame(in: .global).minY
+                    let screenHeight = UIScreen.main.bounds.height
+                    if !SettingsView.hasPlayedInSession && minY < screenHeight + 40 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                        DispatchQueue.main.async {
+                            self.lastTriggerTime = Date()
+                            SettingsView.hasPlayedInSession = true
+                            self.hasPlayedEasterEgg = true
+                            let generator = UIImpactFeedbackGenerator(style: .heavy)
+                            generator.prepare()
+                            generator.impactOccurred()
+                            self.showEasterEggVideo = true
+                        }
                     }
+                    return Color.clear
                 }
-                return Color.clear
-            }
-        )
+            )
     }
 
     // MARK: - Вспомогательные компоненты разметки
@@ -553,39 +551,52 @@ struct Cort1so1IconShape: Shape {
     }
 }
 
-/// Нативный плеер для воспроизведения пасхального видео
+/// Нативный UIViewControllerRepresentable / UIViewRepresentable для чистой полноэкранной трансляции без контроллеров и паузы
+struct CustomAVPlayerView: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> PlayerUIView {
+        let view = PlayerUIView()
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspect
+        view.backgroundColor = .black
+        return view
+    }
+
+    func updateUIView(_ uiView: PlayerUIView, context: Context) {
+        uiView.playerLayer.player = player
+    }
+
+    class PlayerUIView: UIView {
+        override class var layerClass: AnyClass {
+            return AVPlayerLayer.self
+        }
+
+        var playerLayer: AVPlayerLayer {
+            return layer as! AVPlayerLayer
+        }
+    }
+}
+
+/// Нативный плеер для автовоспроизведения пасхалки без возможности паузы
 struct EasterEggVideoPlayerView: View {
     @Binding var isPresented: Bool
     @State private var player: AVPlayer?
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack {
             Color.black.ignoresSafeArea()
 
             if let player = player {
-                VideoPlayer(player: player)
+                CustomAVPlayerView(player: player)
                     .ignoresSafeArea()
+                    .allowsHitTesting(false)
             } else {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
             }
-
-            Button(action: {
-                player?.pause()
-                isPresented = false
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.black.opacity(0.65))
-                        .frame(width: 40, height: 40)
-
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                .padding(20)
-            }
         }
+        .allowsHitTesting(false)
         .onAppear {
             setupAudioAndPlay()
         }
@@ -616,8 +627,9 @@ struct EasterEggVideoPlayerView: View {
             object: newPlayer.currentItem,
             queue: .main
         ) { _ in
-            newPlayer.seek(to: .zero)
-            newPlayer.play()
+            newPlayer.pause()
+            SettingsView.hasPlayedInSession = true
+            isPresented = false
         }
 
         newPlayer.play()
