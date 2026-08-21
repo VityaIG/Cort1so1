@@ -38,37 +38,10 @@ struct MainView: View {
                             
                         // Инфо об устройстве
                         deviceInfoCard
-                            .padding(.bottom, 48)
+                            .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
-                }
-
-                // Индикатор версии iOS в левом нижнем углу (всегда виден)
-                VStack {
-                    Spacer()
-                    HStack {
-                        HStack(spacing: 5) {
-                            Image(systemName: "apple.logo")
-                                .font(.system(size: 11, weight: .semibold))
-                            Text("iOS: \(UIDevice.current.systemVersion)")
-                                .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                        }
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.92))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(uiColor: .separator).opacity(0.3), lineWidth: 0.5)
-                        )
-                        .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
-
-                        Spacer()
-                    }
-                    .padding(.leading, 16)
-                    .padding(.bottom, 8)
                 }
             }
             .navigationTitle(strings.mainTitle)
