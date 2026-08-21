@@ -440,8 +440,8 @@ struct SettingsView: View {
                 GeometryReader { geo -> Color in
                     let minY = geo.frame(in: .global).minY
                     let screenHeight = UIScreen.main.bounds.height
-                    // Требуется глубокий оверскролл (прокрутка ОЧЕНЬ ДАЛЕКО вниз: минимум на 160pt выше нижней границы экрана)
-                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 160 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                    // Требуется очень сильный оверскролл (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
+                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 220 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
                         DispatchQueue.main.async {
                             self.lastTriggerTime = Date()
                             SettingsView.hasPlayedInSession = true
