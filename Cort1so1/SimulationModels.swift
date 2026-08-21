@@ -385,16 +385,11 @@ struct WindowsLogoView: View {
 }
 
 struct UbuntuLogoView: View {
-    var color: Color
+    var color: Color = Color(red: 0.90, green: 0.28, blue: 0.12)
     var body: some View {
-        ZStack {
-            Circle()
-                .stroke(color, lineWidth: 14)
-                .frame(width: 84, height: 84)
-            Circle().fill(color).frame(width: 20, height: 20).offset(y: -42)
-            Circle().fill(color).frame(width: 20, height: 20).offset(x: 36, y: 21)
-            Circle().fill(color).frame(width: 20, height: 20).offset(x: -36, y: 21)
-        }
+        Image(systemName: "terminal.fill")
+            .font(.system(size: 96, weight: .regular))
+            .foregroundColor(color)
     }
 }
 
