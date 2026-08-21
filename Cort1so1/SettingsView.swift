@@ -1,5 +1,7 @@
 import SwiftUI
 import UIKit
+import AVKit
+import AVFoundation
 
 /// Полностью переработанный экран настроек «Cort1so1» в нативном стиле Apple iOS HIG
 struct SettingsView: View {
@@ -16,6 +18,8 @@ struct SettingsView: View {
     @State private var showRemoveJailbreakAlert: Bool = false
     @State private var showToast: Bool = false
     @State private var toastMessage: String = ""
+    @State private var showEasterEggVideo: Bool = false
+    @State private var lastTriggerTime: Date = Date.distantPast
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -55,13 +59,20 @@ struct SettingsView: View {
                         
                         // 7. Создатель & Разработчик
                         creatorCard
-                            .padding(.bottom, 28)
+                            .padding(.bottom, 8)
+
+                        // 8. Секретный триггер Пасхалки (прокрутка слишком далеко вниз)
+                        easterEggBottomTrigger
+                            .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                 }
             }
             .navigationTitle(strings.settingsTitle)
+            .fullScreenCover(isPresented: $showEasterEggVideo) {
+                EasterEggVideoPlayerView(isPresented: $showEasterEggVideo)
+            }
             // Подтверждение удаления джейлбрейка
             .alert(isPresented: $showRemoveJailbreakAlert) {
                 Alert(
@@ -415,6 +426,37 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - 8. Триггер Пасхалки (прокрутка вниз)
+    private var easterEggBottomTrigger: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "arrow.up")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.secondary.opacity(0.35))
+            
+            Text(isRu ? "Потяните вверх для пасхалки" : "Pull up for easter egg")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundColor(.secondary.opacity(0.4))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(
+            GeometryReader { geo -> Color in
+                let minY = geo.frame(in: .global).minY
+                let screenHeight = UIScreen.main.bounds.height
+                if minY < screenHeight - 50 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                    DispatchQueue.main.async {
+                        self.lastTriggerTime = Date()
+                        let generator = UIImpactFeedbackGenerator(style: .heavy)
+                        generator.prepare()
+                        generator.impactOccurred()
+                        self.showEasterEggVideo = true
+                    }
+                }
+                return Color.clear
+            }
+        )
+    }
+
     // MARK: - Вспомогательные компоненты разметки
 
     private func sectionHeader(title: String, icon: String, color: Color) -> some View {
@@ -508,6 +550,77 @@ struct Cort1so1IconShape: Shape {
         path.addArc(center: center, radius: outerRadius, startAngle: Angle(radians: Double(endAngleOuter)), endAngle: Angle(radians: Double(startAngleOuter)), clockwise: false)
         path.closeSubpath()
         return path
+    }
+}
+
+/// Нативный плеер для воспроизведения пасхального видео
+struct EasterEggVideoPlayerView: View {
+    @Binding var isPresented: Bool
+    @State private var player: AVPlayer?
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+
+            if let player = player {
+                VideoPlayer(player: player)
+                    .ignoresSafeArea()
+            } else {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            }
+
+            Button(action: {
+                player?.pause()
+                isPresented = false
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.black.opacity(0.65))
+                        .frame(width: 40, height: 40)
+
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                .padding(20)
+            }
+        }
+        .onAppear {
+            setupAudioAndPlay()
+        }
+        .onDisappear {
+            player?.pause()
+            player = nil
+        }
+    }
+
+    private func setupAudioAndPlay() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("AudioSession configuration error: \(error)")
+        }
+
+        let videoUrl = Bundle.main.url(forResource: "easter_egg", withExtension: "mp4")
+            ?? Bundle.main.url(forResource: "input_file_0", withExtension: "mp4")
+
+        guard let url = videoUrl else { return }
+
+        let newPlayer = AVPlayer(url: url)
+        self.player = newPlayer
+
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: newPlayer.currentItem,
+            queue: .main
+        ) { _ in
+            newPlayer.seek(to: .zero)
+            newPlayer.play()
+        }
+
+        newPlayer.play()
     }
 }
 
