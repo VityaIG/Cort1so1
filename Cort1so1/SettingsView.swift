@@ -306,9 +306,6 @@ struct SettingsView: View {
             sectionHeader(title: strings.jbManagementSection, icon: "exclamationmark.shield.fill", color: .red)
 
             Button(action: {
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.prepare()
-                generator.impactOccurred()
                 self.showRemoveJailbreakAlert = true
             }) {
                 HStack(spacing: 12) {
@@ -519,21 +516,11 @@ struct SettingsView: View {
     // MARK: - Логика действий
 
     private func removeJailbreak() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.prepare()
-        generator.notificationOccurred(.success)
-
         isJailbroken = false
         UserDefaults.standard.set(false, forKey: "isJailbroken")
 
-        if autoRespring {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                jailbreakState = .respring
-            }
-        } else {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                jailbreakState = .idle
-            }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            jailbreakState = .idle
         }
     }
 }
