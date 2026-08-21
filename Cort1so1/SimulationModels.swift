@@ -397,3 +397,20 @@ struct UbuntuLogoView: View {
         }
     }
 }
+
+struct AndroidRobotHead: View {
+    var color: Color? = nil
+    var body: some View {
+        Group {
+            if let image = UIImage(named: "androidlogo") ?? UIImage(contentsOfFile: Bundle.main.path(forResource: "androidlogo", ofType: "png") ?? "") {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                Image("androidlogo")
+                    .resizable()
+                    .scaledToFit()
+            }
+        }
+    }
+}

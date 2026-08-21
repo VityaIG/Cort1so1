@@ -728,50 +728,6 @@ struct DopamineProcessView: View {
     DopamineProcessView(onComplete: {})
 }
 
-// MARK: - Easter Egg Logo
-struct AndroidRobotHead: View {
-    var color: Color
-    var body: some View {
-        GeometryReader { geometry in
-            let w = geometry.size.width
-            let h = geometry.size.height
-            ZStack {
-                // Head (Semi-circle)
-                Path { path in
-                    path.addArc(center: CGPoint(x: w/2, y: h/2), radius: w/4, startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false)
-                }
-                .fill(color)
-                
-                // Left Eye
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: w * 0.05, height: w * 0.05)
-                    .offset(x: -w * 0.1, y: -w * 0.05)
-                
-                // Right Eye
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: w * 0.05, height: w * 0.05)
-                    .offset(x: w * 0.1, y: -w * 0.05)
-                
-                // Left Antenna
-                Capsule()
-                    .fill(color)
-                    .frame(width: w * 0.03, height: w * 0.15)
-                    .rotationEffect(.degrees(-30))
-                    .offset(x: -w * 0.15, y: -w * 0.22)
-                
-                // Right Antenna
-                Capsule()
-                    .fill(color)
-                    .frame(width: w * 0.03, height: w * 0.15)
-                    .rotationEffect(.degrees(30))
-                    .offset(x: w * 0.15, y: -w * 0.22)
-            }
-        }
-    }
-}
-
 // MARK: - View Helper for MPVolumeSlider
 private extension UIView {
     func findVolumeSlider() -> UISlider? {

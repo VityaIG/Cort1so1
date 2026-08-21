@@ -24,6 +24,7 @@
 		B10010982C74000100000001 /* bigalert.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F10010982C74000100000001 /* bigalert.mp3 */; };
 		B10010992C74000100000001 /* easter_egg.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F10010992C74000100000001 /* easter_egg.mp4 */; };
 		B100109B2C74000100000001 /* easter2.png in Resources */ = {isa = PBXBuildFile; fileRef = F100109B2C74000100000001 /* easter2.png */; };
+		B100109C2C74000100000001 /* androidlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = F100109C2C74000100000001 /* androidlogo.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		F10010982C74000100000001 /* bigalert.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bigalert.mp3; sourceTree = "<group>"; };
 		F10010992C74000100000001 /* easter_egg.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = easter_egg.mp4; sourceTree = "<group>"; };
 		F100109B2C74000100000001 /* easter2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = easter2.png; sourceTree = "<group>"; };
+		F100109C2C74000100000001 /* androidlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = androidlogo.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +90,7 @@
 				F10010982C74000100000001 /* bigalert.mp3 */,
 				F10010992C74000100000001 /* easter_egg.mp4 */,
 				F100109B2C74000100000001 /* easter2.png */,
+				F100109C2C74000100000001 /* androidlogo.png */,
 			);
 			path = Cort1so1;
 			sourceTree = "<group>";
@@ -162,6 +165,7 @@
 				B10010982C74000100000001 /* bigalert.mp3 in Resources */,
 				B10010992C74000100000001 /* easter_egg.mp4 in Resources */,
 				B100109B2C74000100000001 /* easter2.png in Resources */,
+				B100109C2C74000100000001 /* androidlogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
