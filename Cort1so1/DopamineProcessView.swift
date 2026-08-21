@@ -4,9 +4,8 @@ import UIKit
 /// Фазы процесса джейлбрейка в стиле Dopamine
 enum DopamineProcessPhase {
     case logging
-    case appleWhite
-    case blackScreen
-    case appleRed
+    case restoreWhite
+    case glitchRedMultiply
     case respring
 }
 
@@ -19,7 +18,16 @@ struct JailbreakLogStep: Identifiable, Equatable {
     let iconName: String
 }
 
-/// Модальное окно процесса джейлбрейка в стиле Dopamine с ультра-плавными нативными анимациями
+/// Модель клона для глитч-эффекта телепортации и размножения
+struct GlitchClone: Identifiable {
+    let id = UUID()
+    var offset: CGSize
+    var scale: CGFloat
+    var rotation: Double
+    var opacity: Double
+}
+
+/// Модальное окно процесса джейлбрейка с 10-секундным экраном восстановления Apple и 500мс глитчем
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
@@ -32,13 +40,13 @@ struct DopamineProcessView: View {
     @State private var visibleLogs: [JailbreakLogStep] = []
     @State private var currentStepIndex: Int = 0
     
-    // Анимационные параметры для логотипов Apple и респринга
-    @State private var appleWhiteOpacity: Double = 0.0
-    @State private var appleWhiteScale: CGFloat = 0.88
-    @State private var appleRedOpacity: Double = 0.0
-    @State private var appleRedScale: CGFloat = 0.92
-    @State private var appleRedGlow: CGFloat = 0.0
-    @State private var isPulsing: Bool = false
+    // Параметры экрана восстановления (10 секунд)
+    @State private var restoreProgress: Double = 0.0
+    @State private var restoreTimer: Timer? = nil
+    
+    // Параметры глитч-эффекта размножения (500 мс)
+    @State private var glitchClones: [GlitchClone] = []
+    @State private var glitchTimer: Timer? = nil
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -64,7 +72,7 @@ struct DopamineProcessView: View {
             let current = logSteps[currentStepIndex - 1]
             return isRu ? current.titleRu : current.titleEn
         } else {
-            return isRu ? "Среда подготовлена. Перезапуск..." : "Environment ready. Restarting..."
+            return isRu ? "Среда подготовлена." : "Environment ready."
         }
     }
 
@@ -79,18 +87,13 @@ struct DopamineProcessView: View {
                 loggingInterface
                     .transition(.opacity)
 
-            case .appleWhite:
-                appleLogoView(color: .white, opacity: appleWhiteOpacity, scale: appleWhiteScale, glowRadius: 0)
+            case .restoreWhite:
+                restoreAppleView(color: .white, progress: restoreProgress)
                     .transition(.opacity)
 
-            case .blackScreen:
-                Color.black
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-
-            case .appleRed:
-                appleLogoView(color: Color(red: 0.98, green: 0.22, blue: 0.26), opacity: appleRedOpacity, scale: appleRedScale, glowRadius: appleRedGlow)
-                    .transition(.opacity)
+            case .glitchRedMultiply:
+                glitchMultiplyView
+                    .transition(.identity)
 
             case .respring:
                 NeoSpringView(onFinished: {
@@ -102,6 +105,10 @@ struct DopamineProcessView: View {
         .preferredColorScheme(.dark)
         .onAppear {
             runExecutionPipeline(stepIndex: 0)
+        }
+        .onDisappear {
+            restoreTimer?.invalidate()
+            glitchTimer?.invalidate()
         }
     }
 
@@ -260,31 +267,65 @@ struct DopamineProcessView: View {
         .background(Color.black)
     }
 
-    // MARK: - Экран с логотипом Apple
+    // MARK: - Экран восстановления Apple (Яблоко + полоска снизу без текста на 10 сек)
 
-    private func appleLogoView(color: Color, opacity: Double, scale: CGFloat, glowRadius: CGFloat) -> some View {
+    private func restoreAppleView(color: Color, progress: Double) -> some View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
 
-            if installedOS == "Android 17 Beta" {
-                AndroidRobotHead(color: color)
-                    .frame(width: 100, height: 100)
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-                    .shadow(color: color.opacity(0.6), radius: glowRadius)
-            } else {
-                Image(systemName: "applelogo")
-                    .font(.system(size: 100, weight: .regular))
-                    .foregroundColor(color)
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-                    .shadow(color: color.opacity(0.7), radius: glowRadius)
+            VStack(spacing: 48) {
+                // Логотип Apple (или Android head при пасхалке)
+                if installedOS == "Android 17 Beta" {
+                    AndroidRobotHead(color: color)
+                        .frame(width: 96, height: 96)
+                } else {
+                    Image(systemName: "applelogo")
+                        .font(.system(size: 96, weight: .regular))
+                        .foregroundColor(color)
+                }
+
+                // Нативная полоса восстановления в стиле iOS (без текста)
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color(white: 0.22))
+                        .frame(width: 210, height: 4.5)
+
+                    Capsule()
+                        .fill(color)
+                        .frame(width: max(4.5, 210 * CGFloat(min(1.0, max(0.0, progress)))), height: 4.5)
+                }
+                .frame(width: 210, height: 4.5)
             }
         }
     }
 
-    // MARK: - Замедленный асинхронный пайплайн выполнения
+    // MARK: - Экран глитча (Красное яблоко + полоса телепортируются и размножаются 500 мс)
+
+    private var glitchMultiplyView: some View {
+        let redColor = Color(red: 0.98, green: 0.22, blue: 0.26)
+
+        return ZStack {
+            Color.black
+                .ignoresSafeArea()
+
+            // Основной красный центральный объект
+            restoreAppleView(color: redColor, progress: 1.0)
+                .shadow(color: redColor.opacity(0.8), radius: 24)
+
+            // Размноженные телепортирующиеся красные копии
+            ForEach(glitchClones) { clone in
+                restoreAppleView(color: redColor, progress: 1.0)
+                    .scaleEffect(clone.scale)
+                    .rotationEffect(.degrees(clone.rotation))
+                    .offset(clone.offset)
+                    .opacity(clone.opacity)
+                    .shadow(color: redColor.opacity(0.6), radius: 16)
+            }
+        }
+    }
+
+    // MARK: - Асинхронный пайплайн выполнения
 
     private func runExecutionPipeline(stepIndex: Int) {
         if stepIndex < logSteps.count {
@@ -301,44 +342,88 @@ struct DopamineProcessView: View {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
             }
         } else {
-            // Завершение логов -> Переход к белому логотипу
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    self.phase = .appleWhite
+            // Завершение логов -> Переход к экрану восстановления с белым яблоком и полосой
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    self.phase = .restoreWhite
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation(.easeInOut(duration: 0.9)) {
-                        self.appleWhiteOpacity = 1.0
-                        self.appleWhiteScale = 1.0
-                    }
-                    self.triggerHaptic(isMajor: true)
-                    
-                    // Переход к красному логотипу
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-                        withAnimation(.easeInOut(duration: 0.4)) {
-                            self.phase = .appleRed
-                            self.appleRedOpacity = 1.0
-                            self.appleRedScale = 1.0
-                        }
-                        
-                        withAnimation(.easeOut(duration: 1.6)) {
-                            self.appleRedScale = 1.15
-                            self.appleRedGlow = 22.0
-                        }
-                        self.triggerImpact(style: .heavy)
-                        
-                        // Сохранение состояния и запуск респринга
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-                            UserDefaults.standard.set(true, forKey: "isJailbroken")
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                self.phase = .respring
-                            }
-                        }
-                    }
+                self.start10SecondsRestoreSequence()
+            }
+        }
+    }
+
+    /// Запуск 10-секундной полосы восстановления
+    private func start10SecondsRestoreSequence() {
+        self.restoreProgress = 0.0
+        let totalDuration: Double = 10.0
+        let interval: Double = 0.05
+        let increment: Double = interval / totalDuration
+        
+        self.restoreTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
+            self.restoreProgress += increment
+            
+            // Периодические тактильные отклики
+            let currentSec = Int(self.restoreProgress * 10.0)
+            if currentSec == 3 || currentSec == 6 || currentSec == 9 {
+                self.triggerHaptic(isMajor: false)
+            }
+            
+            if self.restoreProgress >= 1.0 {
+                self.restoreProgress = 1.0
+                timer.invalidate()
+                self.restoreTimer = nil
+                
+                // Переход к 500мс красному глитч-эффекту
+                self.triggerImpact(style: .heavy)
+                withAnimation(.none) {
+                    self.phase = .glitchRedMultiply
+                }
+                self.start500msGlitchMultiplySequence()
+            }
+        }
+    }
+
+    /// Запуск 500мс эффекта телепортации и размножения
+    private func start500msGlitchMultiplySequence() {
+        self.generateRandomGlitchClones()
+        
+        // Быстрое мерцание/телепортация клонов каждые 60 мс
+        var ticks = 0
+        self.glitchTimer = Timer.scheduledTimer(withTimeInterval: 0.06, repeats: true) { timer in
+            ticks += 1
+            self.generateRandomGlitchClones()
+            self.triggerImpact(style: .rigid)
+            
+            // 500 мс (примерно 8 тиков по 60 мс)
+            if ticks >= 8 {
+                timer.invalidate()
+                self.glitchTimer = nil
+                
+                // Сохранение состояния и запуск реального респринга
+                UserDefaults.standard.set(true, forKey: "isJailbroken")
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    self.phase = .respring
                 }
             }
         }
+    }
+
+    /// Генерация случайных координат телепортации для размноженных копий
+    private func generateRandomGlitchClones() {
+        var clones: [GlitchClone] = []
+        let count = Int.random(in: 8...12)
+        for _ in 0..<count {
+            let offset = CGSize(
+                width: CGFloat.random(in: -160...160),
+                height: CGFloat.random(in: -280...280)
+            )
+            let scale = CGFloat.random(in: 0.65...1.45)
+            let rotation = Double.random(in: -30...30)
+            let opacity = Double.random(in: 0.6...0.95)
+            clones.append(GlitchClone(offset: offset, scale: scale, rotation: rotation, opacity: opacity))
+        }
+        self.glitchClones = clones
     }
 
     // MARK: - Haptics
@@ -359,12 +444,6 @@ struct DopamineProcessView: View {
         let generator = UIImpactFeedbackGenerator(style: style)
         generator.prepare()
         generator.impactOccurred()
-    }
-
-    private func triggerNotificationSuccess() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.prepare()
-        generator.notificationOccurred(.success)
     }
 }
 

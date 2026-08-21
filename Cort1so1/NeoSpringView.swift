@@ -2,49 +2,27 @@ import SwiftUI
 import WebKit
 import Darwin
 
-/// Представление выполнения перезапуска SpringBoard (Respring)
+/// Выполнение реального перезапуска SpringBoard (Respring) без искусственных спиннеров
 struct NeoSpringView: View {
     var onFinished: (() -> Void)? = nil
-    @AppStorage("appLanguage") private var appLanguage: String = "en"
-    @State private var startsRespring: Bool = false
-
-    private var strings: LocalizedStrings {
-        LocalizedStrings(langCode: appLanguage)
-    }
 
     var body: some View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
 
-            VStack(spacing: 26) {
-                // Системный индикатор перезагрузки (Respring Spinner)
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.7)
-
-                Text(strings.respringText)
-                    .font(.system(size: 14, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.85))
-            }
-
-            if startsRespring {
-                NeoSpringWebView()
-                    .brightness(-1.0)
-                    .ignoresSafeArea()
-            }
+            NeoSpringWebView()
+                .brightness(-1.0)
+                .ignoresSafeArea()
         }
         .ignoresSafeArea()
-        .task {
-            // 1. Попытка нативного перезапуска SpringBoard (для TrollStore / Jailbroken)
+        .onAppear {
+            // 1. Попытка мгновенного нативного перезапуска SpringBoard (для TrollStore / Jailbroken)
             triggerNativeRespring()
-
-            // 2. Активация WebKit RenderServer респринга для обычных сред
-            try? await Task.sleep(nanoseconds: 200_000_000)
-            startsRespring = true
-
-            // 3. Фоллбэк таймаут для сред без креша SpringBoard (симулятор)
-            try? await Task.sleep(nanoseconds: 3_000_000_000)
+        }
+        .task {
+            // 2. Фоллбэк таймаут для сред без креша SpringBoard (симулятор)
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
             onFinished?()
         }
     }

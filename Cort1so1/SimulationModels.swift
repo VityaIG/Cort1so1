@@ -10,15 +10,15 @@ enum JailbreakMethod: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-        case .dopamine: return "Dopamine (Old)"
-        case .cortisol: return "Cortisol (New)"
+        case .dopamine: return "Dopamine"
+        case .cortisol: return "Cortisol"
         }
     }
     
     var subtitle: String {
         switch self {
-        case .dopamine: return "Классический метод с изумрудной темой и PPL"
-        case .cortisol: return "Инновационный метод с неон-циан темой и обходом PAC/PPL"
+        case .dopamine: return "Классический метод джейлбрейка"
+        case .cortisol: return "Инновационный метод джейлбрейка"
         }
     }
     

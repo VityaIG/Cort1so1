@@ -60,23 +60,22 @@ struct MainView: View {
                     secondaryButton: .cancel(Text(strings.cancelBtn))
                 )
             }
-            // 2. Вторичный диалог выбора метода установки (Action Sheet / Pop-up)
             .confirmationDialog(
                 isRu ? "Выберите метод джейлбрейка" : "Select Jailbreak Method",
                 isPresented: $showingMethodDialog,
                 titleVisibility: .visible
             ) {
-                Button("Dopamine (Old) — Emerald & PPL") {
+                Button("Dopamine") {
                     self.selectedMethod = .dopamine
                     self.showingProcessModal = true
                 }
-                Button("Cortisol (New) — Neon Cyan & PAC/PPL") {
+                Button("Cortisol") {
                     self.selectedMethod = .cortisol
                     self.showingProcessModal = true
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
-                Text(isRu ? "Выберите желаемый алгоритм и конфигурацию инсталляции" : "Select desired installation engine and environment setup")
+                Text(isRu ? "Выберите желаемый метод джейлбрейка" : "Select desired jailbreak method")
             }
             // 3. Модальное окно процесса (Dopamine style, non-dismissible)
             .fullScreenCover(isPresented: $showingProcessModal) {
