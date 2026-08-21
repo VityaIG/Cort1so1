@@ -36,6 +36,8 @@ struct DowngradeView: View {
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
     @AppStorage("customArch") private var customArch: String = ""
     @State private var activeFirmware: FirmwareVersion? = nil
+    @State private var activeEasterAlert: DowngradeEasterAlert? = nil
+    @State private var activeEasterFlashingFirmware: EasterFirmware? = nil
     
     @State private var selectedFirmwareId: UUID? = sampleFirmwares.first?.id
     
@@ -224,35 +226,74 @@ struct DowngradeView: View {
                 
                 // Easter Egg
                 Section {
-                    VStack(alignment: .center, spacing: 16) {
-                        easter2ImageView
-
+                    VStack(alignment: .center, spacing: 14) {
+                        // easter2.png without rounded corners
                         Button(action: {
-                            let androidFirmware = FirmwareVersion(
-                                version: "Android 17 Beta",
-                                build: "SWEET_CAT",
-                                features: "Easter Egg Bypass",
-                                badgeText: "SECRET",
-                                badgeColor: .green,
-                                group: "EASTER EGG",
-                                sha256: "deadbeef00000000000000000000000000000000000000000000000000000000"
-                            )
-                            activeFirmware = androidFirmware
+                            self.activeEasterAlert = .easter2Warning
                         }) {
-                            VStack(spacing: 8) {
+                            Image("easter2")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
+                        // 1. Green Button - Install Android 17
+                        Button(action: {
+                            self.activeEasterAlert = .confirmInstall(.android)
+                        }) {
+                            HStack(spacing: 8) {
                                 Image(systemName: "ladybug.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(.green)
-                                Text("android_build_override")
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 16, weight: .bold))
+                                Text(isRu ? "Установить Android 17" : "Install Android 17")
+                                    .font(.system(size: 16, weight: .bold))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                            .padding(.vertical, 14)
+                            .foregroundColor(.white)
+                            .background(Color(red: 0.24, green: 0.86, blue: 0.36))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         }
+                        .buttonStyle(PlainButtonStyle())
+
+                        // 2. Blue Button - Install Windows 11
+                        Button(action: {
+                            self.activeEasterAlert = .confirmInstall(.windows)
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "desktopcomputer")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text(isRu ? "Установить Windows 11" : "Install Windows 11")
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .foregroundColor(.white)
+                            .background(Color(red: 0.00, green: 0.47, blue: 0.84))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
+                        // 3. Orange Button - Install Ubuntu 26.04
+                        Button(action: {
+                            self.activeEasterAlert = .confirmInstall(.ubuntu)
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "terminal.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text(isRu ? "Установить Ubuntu 26.04" : "Install Ubuntu 26.04")
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .foregroundColor(.white)
+                            .background(Color(red: 0.90, green: 0.28, blue: 0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 24, trailing: 16))
                 }
             }
             .scrollContentBackground(.hidden)
@@ -261,19 +302,33 @@ struct DowngradeView: View {
             .sheet(item: $activeFirmware) { firmware in
                 DowngradeExecutionSheet(firmware: firmware, appLanguage: appLanguage, verbose: verboseRestore)
             }
+            .alert(item: $activeEasterAlert) { alertType in
+                switch alertType {
+                case .easter2Warning:
+                    return Alert(
+                        title: Text(isRu ? "Снизу находится пиздец" : "Everything below is deep friend pls no install"),
+                        dismissButton: .default(Text(isRu ? "Понятно" : "Ok, son"))
+                    )
+                case .confirmInstall(let fw):
+                    return Alert(
+                        title: Text(isRu ? "Вы серьезно хотите установить \(fw.name) на свое устройство?" : "Are you seriously sure you want to install \(fw.name) on your device?"),
+                        primaryButton: .default(Text(isRu ? "Дай мне его" : "Yes pls")) {
+                            self.activeEasterFlashingFirmware = fw
+                        },
+                        secondaryButton: .cancel(Text(isRu ? "Нет, нахуй" : "No, wtf"))
+                    )
+                }
+            }
+            .fullScreenCover(item: $activeEasterFlashingFirmware) { fw in
+                EasterFirmwareProcessView(firmware: fw) {
+                    self.activeEasterFlashingFirmware = nil
+                }
+            }
             .onAppear {
                 UITableView.appearance().backgroundColor = .clear
                 UICollectionView.appearance().backgroundColor = .clear
             }
         }
-    }
-
-    @ViewBuilder
-    private var easter2ImageView: some View {
-        Image("easter2")
-            .resizable()
-            .scaledToFit()
-            .frame(maxWidth: .infinity)
     }
 }
 
@@ -628,5 +683,506 @@ struct DowngradeExecutionSheet: View {
         restoreTimer = nil
         isRestoring = false
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
+    }
+}
+
+// MARK: - Easter Egg Custom OS Firmware Models & Definitions
+
+enum EasterFirmware: String, CaseIterable, Identifiable {
+    case android = "Android 17"
+    case windows = "Windows 11"
+    case ubuntu = "Ubuntu 26.04"
+
+    var id: String { rawValue }
+    var name: String { rawValue }
+
+    var buttonTitleRu: String {
+        "Установить " + name
+    }
+
+    var buttonTitleEn: String {
+        "Install " + name
+    }
+
+    var primaryColor: Color {
+        switch self {
+        case .android: return Color(red: 0.24, green: 0.86, blue: 0.36) // Android Green
+        case .windows: return Color(red: 0.00, green: 0.47, blue: 0.84) // Windows Blue
+        case .ubuntu: return Color(red: 0.90, green: 0.28, blue: 0.12)  // Ubuntu Orange
+        }
+    }
+
+    var systemIcon: String {
+        switch self {
+        case .android: return "ladybug.fill"
+        case .windows: return "desktopcomputer"
+        case .ubuntu: return "terminal.fill"
+        }
+    }
+
+    func logs(isRu: Bool) -> [JailbreakLogStep] {
+        switch self {
+        case .android:
+            return [
+                JailbreakLogStep(id: 1, titleRu: "[Fastboot] Подключение устройства в EDL Mode (9008)...", titleEn: "[Fastboot] Connecting device in EDL Mode (9008)...", isMajorPhase: false, iconName: "cable.connector"),
+                JailbreakLogStep(id: 2, titleRu: "[Bootloader] Разблокировка Knox и OEM загрузчика...", titleEn: "[Bootloader] Unlocking Knox & OEM bootloader verification...", isMajorPhase: false, iconName: "lock.open.fill"),
+                JailbreakLogStep(id: 3, titleRu: "[VBMeta] Патчинг vbmeta.img (--disable-verity)...", titleEn: "[VBMeta] Patching vbmeta.img (--disable-verity)...", isMajorPhase: false, iconName: "shield.slash.fill"),
+                JailbreakLogStep(id: 4, titleRu: "[Partition] Разметка динамического Super раздела (system/vendor)...", titleEn: "[Partition] Repartitioning dynamic Super partition...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                JailbreakLogStep(id: 5, titleRu: "[Kernel] Прошивка GKI ядра (Linux 6.6-android)...", titleEn: "[Kernel] Flashing GKI (Generic Kernel Image 6.6-android)...", isMajorPhase: false, iconName: "cpu"),
+                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "⭐️ Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 7, titleRu: "[System] Распаковка system_ext.img (Android 17 SWEET_CAT)...", titleEn: "[System] Extracting system_ext.img (Android 17 SWEET_CAT)...", isMajorPhase: false, iconName: "archivebox.fill"),
+                JailbreakLogStep(id: 8, titleRu: "[Vendor] Инъекция Apple Bionic HAL и драйверов дисплея...", titleEn: "[Vendor] Injecting Apple Bionic HAL & display drivers...", isMajorPhase: false, iconName: "memorychip"),
+                JailbreakLogStep(id: 9, titleRu: "[Magisk] Установка Magisk v27.0 root демона в init.rc...", titleEn: "[Magisk] Injecting Magisk v27.0 root daemon into init.rc...", isMajorPhase: false, iconName: "crown.fill"),
+                JailbreakLogStep(id: 10, titleRu: "[Zygote] Инициализация среды ART runtime и Dalvik VM...", titleEn: "[Zygote] Initializing ART runtime & Dalvik VM...", isMajorPhase: false, iconName: "bolt.fill"),
+                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "⭐️ Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 12, titleRu: "[GMS] Установка сервисов Google Play и MicroG framework...", titleEn: "[GMS] Installing Google Play Services & MicroG framework...", isMajorPhase: false, iconName: "shippingbox.fill"),
+                JailbreakLogStep(id: 13, titleRu: "[SELinux] Перевод политик безопасности в Permissive mode...", titleEn: "[SELinux] Setting SELinux state: Permissive mode...", isMajorPhase: false, iconName: "checkmark.shield.fill"),
+                JailbreakLogStep(id: 14, titleRu: "[Sync] Очистка кэш-разделов и сборка dalvik-cache...", titleEn: "[Sync] Wiping cache partition & rebuilding dalvik-cache...", isMajorPhase: false, iconName: "arrow.clockwise"),
+                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "⭐️ Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+            ]
+        case .windows:
+            return [
+                JailbreakLogStep(id: 1, titleRu: "[UEFI] Загрузка ACPI таблиц и прошивки EDK2 UEFI...", titleEn: "[UEFI] Loading ACPI tables and EDK2 UEFI firmware...", isMajorPhase: false, iconName: "cpu"),
+                JailbreakLogStep(id: 2, titleRu: "[GPT] Конвертация APFS контейнера в разметку GPT...", titleEn: "[GPT] Converting APFS container to GPT partition table...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                JailbreakLogStep(id: 3, titleRu: "[DISM] Развертывание install.wim (Windows 11 ARM64 Build 26100)...", titleEn: "[DISM] Applying install.wim (Windows 11 ARM64 Build 26100)...", isMajorPhase: false, iconName: "archivebox.fill"),
+                JailbreakLogStep(id: 4, titleRu: "[BCDBoot] Инициализация EFI системного раздела (ESP)...", titleEn: "[BCDBoot] Initializing EFI System Partition (ESP)...", isMajorPhase: false, iconName: "folder.badge.gearshape"),
+                JailbreakLogStep(id: 5, titleRu: "[Drivers] Интеграция драйверов ARM64 SoC и дисплея...", titleEn: "[Drivers] Injecting ARM64 SoC & display drivers...", isMajorPhase: false, iconName: "memorychip"),
+                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "⭐️ Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 7, titleRu: "[Registry] Инъекция кустов реестра SYSTEM и SOFTWARE...", titleEn: "[Registry] Injecting SYSTEM & SOFTWARE registry hives...", isMajorPhase: false, iconName: "doc.badge.gearshape"),
+                JailbreakLogStep(id: 8, titleRu: "[Bypass] Обход требований TPM 2.0 и SecureBoot checks...", titleEn: "[Bypass] Bypassing TPM 2.0 & SecureBoot verification checks...", isMajorPhase: false, iconName: "lock.open.fill"),
+                JailbreakLogStep(id: 9, titleRu: "[Winlogon] Создание профиля Администратора (OOBE Bypass)...", titleEn: "[Winlogon] Creating Administrator profile (OOBE Bypass)...", isMajorPhase: false, iconName: "person.crop.circle.badge.checkmark"),
+                JailbreakLogStep(id: 10, titleRu: "[DirectX] Инициализация графического конвейера DX12 / WDDM...", titleEn: "[DirectX] Initializing DX12 & WDDM graphics pipeline...", isMajorPhase: false, iconName: "bolt.fill"),
+                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "⭐️ Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 12, titleRu: "[Services] Запуск служб Windows Explorer и DWM...", titleEn: "[Services] Enabling Windows Explorer & DWM shell services...", isMajorPhase: false, iconName: "server.rack"),
+                JailbreakLogStep(id: 13, titleRu: "[BSOD] Подавление системных вотчдогов CRITICAL_PROCESS_DIED...", titleEn: "[BSOD] Suppressing CRITICAL_PROCESS_DIED watchdogs...", isMajorPhase: false, iconName: "shield.fill"),
+                JailbreakLogStep(id: 14, titleRu: "[Bootmgr] Обновление BCD: режим без проверки подписи...", titleEn: "[Bootmgr] Updating BCD: /nointegritychecks enabled...", isMajorPhase: false, iconName: "arrow.clockwise"),
+                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Windows 11 готова к первому запуску", titleEn: "⭐️ Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
+            ]
+        case .ubuntu:
+            return [
+                JailbreakLogStep(id: 1, titleRu: "[U-Boot] Инициализация device tree blob (dtb) для Apple Silicon...", titleEn: "[U-Boot] Initializing device tree blob (dtb) for Apple Silicon...", isMajorPhase: false, iconName: "cpu"),
+                JailbreakLogStep(id: 2, titleRu: "[Ext4] Форматирование /dev/nvme0n1p2 в файловую систему ext4...", titleEn: "[Ext4] Formatting /dev/nvme0n1p2 filesystem to ext4 (64k)...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                JailbreakLogStep(id: 3, titleRu: "[debootstrap] Распаковка базовой rootfs Ubuntu 26.04 LTS...", titleEn: "[debootstrap] Unpacking Ubuntu 26.04 Noble LTS rootfs...", isMajorPhase: false, iconName: "archivebox.fill"),
+                JailbreakLogStep(id: 4, titleRu: "[Kernel] Установка ядра Linux 6.10-noble-arm64...", titleEn: "[Kernel] Installing Linux Kernel 6.10-noble-arm64...", isMajorPhase: false, iconName: "memorychip"),
+                JailbreakLogStep(id: 5, titleRu: "[initramfs] Генерация initramfs образа (zstd сжатие)...", titleEn: "[initramfs] Generating initramfs image with zstd compression...", isMajorPhase: false, iconName: "bolt.horizontal.fill"),
+                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "⭐️ Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 7, titleRu: "[systemd] Настройка systemd таргетов и служб multi-user...", titleEn: "[systemd] Configuring systemd targets and multi-user services...", isMajorPhase: false, iconName: "server.rack"),
+                JailbreakLogStep(id: 8, titleRu: "[Sudo] Настройка прав sudo для пользователя 'cort1so1'...", titleEn: "[Sudo] Granting root sudoers privileges to user 'cort1so1'...", isMajorPhase: false, iconName: "crown.fill"),
+                JailbreakLogStep(id: 9, titleRu: "[APT] Обновление репозиториев и установка базовых утилит...", titleEn: "[APT] Updating repository sources and installing essential packages...", isMajorPhase: false, iconName: "shippingbox.fill"),
+                JailbreakLogStep(id: 10, titleRu: "[Mesa] Инициализация Gallium GPU и Wayland композитора...", titleEn: "[Mesa] Initializing Asahi GPU Gallium driver & Wayland compositor...", isMajorPhase: false, iconName: "bolt.fill"),
+                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "⭐️ Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 12, titleRu: "[GNOME] Развертывание окружения рабочего стола GNOME 47...", titleEn: "[GNOME] Deploying GNOME 47 Desktop Environment & Shell...", isMajorPhase: false, iconName: "macwindow"),
+                JailbreakLogStep(id: 13, titleRu: "[Network] Запуск NetworkManager и демона wpa_supplicant...", titleEn: "[Network] Starting NetworkManager & wpa_supplicant daemon...", isMajorPhase: false, iconName: "wifi"),
+                JailbreakLogStep(id: 14, titleRu: "[GRUB] Установка загрузчика GRUB-EFI в /boot/efi...", titleEn: "[GRUB] Installing GRUB-EFI bootloader into /boot/efi...", isMajorPhase: false, iconName: "arrow.triangle.merge"),
+                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "⭐️ Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+            ]
+        }
+    }
+}
+
+enum DowngradeEasterAlert: Identifiable {
+    case easter2Warning
+    case confirmInstall(EasterFirmware)
+
+    var id: String {
+        switch self {
+        case .easter2Warning: return "easter2Warning"
+        case .confirmInstall(let fw): return "confirm_\(fw.rawValue)"
+        }
+    }
+}
+
+// MARK: - Custom Logos for OS Recovery Screen
+
+struct WindowsLogoView: View {
+    var color: Color
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Rectangle().fill(color).frame(width: 44, height: 44)
+                Rectangle().fill(color).frame(width: 44, height: 44)
+            }
+            HStack(spacing: 6) {
+                Rectangle().fill(color).frame(width: 44, height: 44)
+                Rectangle().fill(color).frame(width: 44, height: 44)
+            }
+        }
+    }
+}
+
+struct UbuntuLogoView: View {
+    var color: Color
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(color, lineWidth: 14)
+                .frame(width: 84, height: 84)
+            Circle().fill(color).frame(width: 20, height: 20).offset(y: -42)
+            Circle().fill(color).frame(width: 20, height: 20).offset(x: 36, y: 21)
+            Circle().fill(color).frame(width: 20, height: 20).offset(x: -36, y: 21)
+        }
+    }
+}
+
+// MARK: - EasterFirmwareProcessView (Dopamine-style installation pipeline for custom OS)
+
+struct EasterFirmwareProcessView: View {
+    let firmware: EasterFirmware
+    var onComplete: () -> Void
+
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
+    @AppStorage("installedOS") private var installedOS: String = "iOS"
+    @AppStorage("safeMode") private var safeMode: Bool = false
+
+    @State private var phase: DopamineProcessPhase = .logging
+    @State private var visibleLogs: [JailbreakLogStep] = []
+    @State private var currentStepIndex: Int = 0
+    @State private var restoreProgress: Double = 0.0
+    @State private var restoreTimer: Timer? = nil
+
+    private var isRu: Bool {
+        appLanguage == "ru"
+    }
+
+    private var logSteps: [JailbreakLogStep] {
+        firmware.logs(isRu: isRu)
+    }
+
+    private var progressRatio: Double {
+        Double(currentStepIndex) / Double(max(1, logSteps.count))
+    }
+
+    private var currentPhaseDescription: String {
+        if currentStepIndex == 0 {
+            return isRu ? "Прошивка, удачи!" : "Flashing, good luck!"
+        } else if currentStepIndex < logSteps.count {
+            let current = logSteps[currentStepIndex - 1]
+            return isRu ? current.titleRu : current.titleEn
+        } else {
+            return isRu ? "Прошивка, удачи!" : "Flashing, good luck!"
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            switch phase {
+            case .logging:
+                loggingView
+                    .transition(.opacity)
+
+            case .restoreWhite, .glitchRedMultiply:
+                restoreFirmwareView
+                    .transition(.opacity)
+
+            case .respring:
+                NeoSpringView(onFinished: {
+                    self.onComplete()
+                })
+                .transition(.opacity)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .statusBarHidden(phase != .logging)
+        .onAppear {
+            runExecutionPipeline(stepIndex: 0)
+        }
+        .onDisappear {
+            restoreTimer?.invalidate()
+        }
+    }
+
+    // MARK: - Logging Interface
+    private var loggingView: some View {
+        VStack(spacing: 0) {
+            // Top Bar
+            HStack(alignment: .center) {
+                HStack(spacing: 6) {
+                    Circle().fill(firmware.primaryColor).frame(width: 8, height: 8)
+                    Circle().fill(firmware.primaryColor.opacity(0.7)).frame(width: 8, height: 8)
+                    Circle().fill(firmware.primaryColor.opacity(0.4)).frame(width: 8, height: 8)
+                }
+
+                Spacer()
+
+                Text(String(format: "%d%% • %d/%d", Int(progressRatio * 100), currentStepIndex, logSteps.count))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.7))
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Image(systemName: firmware.systemIcon)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(firmware.primaryColor)
+                    Text(firmware.name)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color(white: 0.05))
+
+            // Progress bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 2.5)
+
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [firmware.primaryColor.opacity(0.8), firmware.primaryColor],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(
+                            width: max(8, geo.size.width * CGFloat(progressRatio)),
+                            height: 2.5
+                        )
+                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentStepIndex)
+                }
+            }
+            .frame(height: 2.5)
+
+            // Log stream
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 9) {
+                        ForEach(Array(visibleLogs.enumerated().reversed()), id: \.element.id) { index, step in
+                            let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
+
+                            HStack(alignment: .center, spacing: 12) {
+                                if isCurrentRunning {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: firmware.primaryColor))
+                                        .scaleEffect(0.85)
+                                        .frame(width: 22, height: 22)
+                                } else if step.isMajorPhase {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundColor(firmware.primaryColor)
+                                        .frame(width: 22, height: 22)
+                                } else {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(firmware.primaryColor.opacity(0.9))
+                                        .frame(width: 22, height: 22)
+                                }
+
+                                Text(isRu ? step.titleRu : step.titleEn)
+                                    .font(.system(
+                                        size: step.isMajorPhase ? 14 : 13,
+                                        weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular),
+                                        design: .monospaced
+                                    ))
+                                    .foregroundColor(
+                                        step.isMajorPhase
+                                            ? firmware.primaryColor
+                                            : (isCurrentRunning ? Color.white : Color.white.opacity(0.8))
+                                    )
+                                    .lineLimit(2)
+
+                                Spacer(minLength: 0)
+
+                                if step.isMajorPhase {
+                                    Text(isRu ? "OK" : "DONE")
+                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 7)
+                                        .padding(.vertical, 2.5)
+                                        .background(firmware.primaryColor)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(
+                                isCurrentRunning
+                                    ? firmware.primaryColor.opacity(0.12)
+                                    : (step.isMajorPhase ? firmware.primaryColor.opacity(0.08) : Color.clear)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .id(step.id)
+                            .scaleEffect(x: 1, y: -1, anchor: .center)
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .move(edge: .top)),
+                                removal: .opacity
+                            ))
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .scaleEffect(x: 1, y: -1, anchor: .center)
+            }
+
+            Spacer(minLength: 0)
+
+            // Bottom bar
+            HStack(spacing: 10) {
+                Text(isRu ? "Прошивка, удачи!" : "Flashing, good luck!")
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(firmware.primaryColor)
+
+                Text("•")
+                    .foregroundColor(.white.opacity(0.4))
+
+                Text(currentPhaseDescription)
+                    .font(.system(size: 11.5, weight: .medium, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.85))
+                    .lineLimit(1)
+
+                Spacer()
+
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: firmware.primaryColor))
+                    .scaleEffect(0.75)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .background(Color(white: 0.05))
+            .overlay(
+                Rectangle()
+                    .fill(Color.white.opacity(0.1))
+                    .frame(height: 0.5),
+                alignment: .top
+            )
+        }
+        .background(Color.black)
+    }
+
+    // MARK: - Restore View (OS Logo + Progress bar)
+    private var restoreFirmwareView: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 48) {
+                switch firmware {
+                case .android:
+                    AndroidRobotHead(color: firmware.primaryColor)
+                        .frame(width: 96, height: 96)
+                case .windows:
+                    WindowsLogoView(color: firmware.primaryColor)
+                        .frame(width: 96, height: 96)
+                case .ubuntu:
+                    UbuntuLogoView(color: firmware.primaryColor)
+                        .frame(width: 96, height: 96)
+                }
+
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color(white: 0.22))
+                        .frame(width: 210, height: 4.5)
+
+                    Capsule()
+                        .fill(firmware.primaryColor)
+                        .frame(width: max(4.5, 210 * CGFloat(min(1.0, max(0.0, restoreProgress)))), height: 4.5)
+                }
+                .frame(width: 210, height: 4.5)
+            }
+        }
+    }
+
+    // Pipeline
+    private func runExecutionPipeline(stepIndex: Int) {
+        let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
+        if stepIndex < logSteps.count {
+            let step = logSteps[stepIndex]
+            self.currentStepIndex = stepIndex + 1
+
+            if step.isMajorPhase {
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.prepare()
+                generator.impactOccurred()
+            }
+
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                self.visibleLogs.append(step)
+            }
+
+            let baseDelay = 0.38 / speed
+            let delay = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.runExecutionPipeline(stepIndex: stepIndex + 1)
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (0.8 / speed)) {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    self.phase = .restoreWhite
+                }
+                self.startRestoreSequence()
+            }
+        }
+    }
+
+    private func startRestoreSequence() {
+        let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
+        self.restoreProgress = 0.0
+        let totalDuration: Double = 40.0 / speed
+        let interval: Double = 0.05
+        var elapsed: Double = 0.0
+
+        self.restoreTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
+            elapsed += interval
+            let normalizedTime = (elapsed / totalDuration) * 40.0
+            self.restoreProgress = calculateRestoreProgress(at: normalizedTime)
+
+            if elapsed >= totalDuration || self.restoreProgress >= 1.0 {
+                self.restoreProgress = 1.0
+                timer.invalidate()
+                self.restoreTimer = nil
+
+                // Save installed OS
+                self.installedOS = firmware.name
+                UserDefaults.standard.set(firmware.name, forKey: "installedOS")
+
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.phase = .respring
+                }
+            }
+        }
+    }
+
+    private func calculateRestoreProgress(at elapsedNormalizedTime: Double) -> Double {
+        let t = max(0.0, min(40.0, elapsedNormalizedTime))
+        if t >= 40.0 { return 1.0 }
+
+        let keyframes: [(time: Double, progress: Double)] = [
+            (0.0, 0.0),
+            (4.5, 0.12),
+            (6.0, 0.12),
+            (10.5, 0.28),
+            (12.5, 0.28),
+            (17.5, 0.46),
+            (19.0, 0.46),
+            (24.5, 0.65),
+            (26.5, 0.65),
+            (31.0, 0.80),
+            (32.5, 0.80),
+            (37.0, 0.93),
+            (38.5, 0.93),
+            (40.0, 1.00)
+        ]
+
+        for i in 0..<(keyframes.count - 1) {
+            let k1 = keyframes[i]
+            let k2 = keyframes[i + 1]
+
+            if t >= k1.time && t <= k2.time {
+                let duration = k2.time - k1.time
+                if duration <= 0 { return k2.progress }
+                let fraction = (t - k1.time) / duration
+                return k1.progress + (k2.progress - k1.progress) * fraction
+            }
+        }
+        return 1.0
     }
 }
