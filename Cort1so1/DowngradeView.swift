@@ -116,7 +116,7 @@ struct DowngradeView: View {
                                 .font(.caption)
                         }
                         Spacer()
-                        if let fw = sampleFirmwares.first(where: { $0.id == selectedFirmwareId }), fw.version == "iOS 18.0" {
+                        if let fw = sampleFirmwares.first(where: { $0.id == selectedFirmwareId }), fw.version.contains("26") {
                             HStack(spacing: 4) {
                                 Circle().fill(Color.green).frame(width: 6, height: 6)
                                 Text(isRu ? "Открыто" : "Signed")

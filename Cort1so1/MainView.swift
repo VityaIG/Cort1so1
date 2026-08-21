@@ -166,12 +166,7 @@ struct MainView: View {
             }
         }
         .padding(16)
-        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-        )
+        .liquidGlassStyle(cornerRadius: 16)
     }
 
     /// Карточка статуса Dopamine
@@ -250,12 +245,7 @@ struct MainView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-        )
+        .liquidGlassStyle(cornerRadius: 16)
     }
 
     /// Секция кнопок действий
@@ -346,12 +336,7 @@ struct MainView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
-        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-        )
+        .liquidGlassStyle(cornerRadius: 16)
     }
 
     private func infoRow(title: String, value: String, icon: String, color: Color, isLast: Bool) -> some View {

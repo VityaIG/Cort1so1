@@ -80,7 +80,7 @@ struct LocalizedStrings {
     func readyTitle(for version: String) -> String {
         "iOS \(version) — " + (lang == .ru ? "Совместимо" : "Compatible")
     }
-    var readyTitle: String { readyTitle(for: "18.0") }
+    var readyTitle: String { readyTitle(for: "26.0") }
     var readySubtitle: String { lang == .ru ? "Система готова к запуску." : "System is ready to begin exploitation." }
 
     var completedTitle: String { lang == .ru ? "Джейлбрейк выполнен!" : "Jailbroken!" }
