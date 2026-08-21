@@ -7,6 +7,10 @@ struct MainView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
 
+    private var isRu: Bool {
+        appLanguage == "ru"
+    }
+
     @State private var showingConfirmAlert: Bool = false
     @State private var showingProcessModal: Bool = false
 
