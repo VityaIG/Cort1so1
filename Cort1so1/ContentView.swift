@@ -38,12 +38,21 @@ struct ContentView: View {
         appLanguage == "ru"
     }
 
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        appearance.shadowColor = UIColor.white.withAlphaComponent(0.12)
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     var body: some View {
         ZStack {
             AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
                 .ignoresSafeArea()
 
-            // Нативный системный TabView
+            // Нативный системный TabView в формате Liquid Glass
             TabView(selection: $selectedTab) {
                 MainView(jailbreakState: $jailbreakState)
                     .tabItem {
@@ -73,6 +82,8 @@ struct ContentView: View {
                     .tag(3)
             }
             .id("tabview-\(isJailbroken)-\(jailbreakState == .completed)")
+            .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
 
             // Оверлей выполнения респринга SpringBoard
             if jailbreakState == .respring {

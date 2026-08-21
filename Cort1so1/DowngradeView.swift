@@ -195,8 +195,11 @@ struct DowngradeView: View {
                     footer: Text(isRu ? "Откат с сохранением данных может привести к нестабильной работе системы, если версии несовместимы." : "Preserving data during downgrade may cause system instability if versions are incompatible.")
                 ) {
                     Toggle(isRu ? "Сохранить данные" : "Preserve Data", isOn: $preserveData)
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
                     Toggle(isRu ? "Обновить модем (Baseband)" : "Update Baseband", isOn: $updateBaseband)
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
                     Toggle(isRu ? "Подробный лог (Verbose)" : "Verbose Restore", isOn: $verboseRestore)
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
                 }
                 
                 Section {

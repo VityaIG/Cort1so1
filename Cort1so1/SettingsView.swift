@@ -297,14 +297,14 @@ struct SettingsView: View {
             Toggle(isOn: $isDarkMode) {
                 settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
 
             Divider()
 
             Toggle(isOn: $hideStatusBar) {
                 settingRowLabel(title: strings.hideStatusBarToggle, icon: "eye.slash.circle.fill", color: .purple)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
 
             Divider()
             
@@ -367,28 +367,28 @@ struct SettingsView: View {
             Toggle(isOn: $verboseLogs) {
                 settingRowLabel(title: strings.verboseLogsToggle, icon: "terminal.fill", color: .slateColor)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
 
             Divider()
 
             Toggle(isOn: $autoRespring) {
                 settingRowLabel(title: strings.autoRespringToggle, icon: "arrow.clockwise.circle.fill", color: .green)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
 
             Divider()
 
             Toggle(isOn: $tweakInjection) {
                 settingRowLabel(title: strings.tweakInjectionToggle, icon: "puzzlepiece.extension.fill", color: .orange)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
 
             Divider()
 
             Toggle(isOn: $safeMode) {
                 settingRowLabel(title: isRu ? "Безопасный режим (Safe Mode)" : "Safe Mode Fallback", icon: "shield.lefthalf.filled", color: .cyan)
             }
-            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+            .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
         }
         .padding(16)
         .liquidGlassStyle(cornerRadius: 16)

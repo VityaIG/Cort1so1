@@ -410,82 +410,43 @@ struct AndroidRobotHead: View {
     }
 }
 
-// MARK: - Liquid Glass System (iOS 26+)
+// MARK: - Liquid Glass Format (iOS 26+)
 
 struct LiquidGlassModifier: ViewModifier {
-    @State private var touchLocation: CGPoint = CGPoint(x: 0.5, y: 0.5)
-    @State private var isInteracting: Bool = false
-    
-    var cornerRadius: CGFloat = 20
-    var refractionIntensity: CGFloat = 0.4
+    var cornerRadius: CGFloat = 16
+    var opacity: Double = 0.85
     
     func body(content: Content) -> some View {
         content
             .background {
-                ZStack {
-                    // Базовый стеклующийся слой Liquid Glass
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.85)
-                    
-                    // Хроматическое преломление и динамический блик
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(
-                            RadialGradient(
-                                gradient: Gradient(colors: [
-                                    Color.white.opacity(isInteracting ? 0.35 : 0.15),
-                                    Color.clear
-                                ]),
-                                center: UnitPoint(
-                                    x: touchLocation.x,
-                                    y: touchLocation.y
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .opacity(opacity)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.40), location: 0.0),
+                                        .init(color: .white.opacity(0.12), location: 0.4),
+                                        .init(color: .white.opacity(0.04), location: 0.7),
+                                        .init(color: .white.opacity(0.20), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 ),
-                                startRadius: 10,
-                                endRadius: 160
+                                lineWidth: 1.0
                             )
-                        )
-                        .blendMode(.overlay)
-                    
-                    // Спекулярный кант
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .white.opacity(0.7), location: 0),
-                                    .init(color: .white.opacity(0.1), location: 0.5),
-                                    .init(color: .clear, location: 1)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.2
-                        )
-                }
-                .shadow(color: .black.opacity(0.12), radius: 20, x: 0, y: 10)
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 14, x: 0, y: 6)
             }
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        touchLocation = CGPoint(
-                            x: max(0, min(1, value.location.x / 300)),
-                            y: max(0, min(1, value.location.y / 150))
-                        )
-                        isInteracting = true
-                    }
-                    .onEnded { _ in
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                            touchLocation = CGPoint(x: 0.5, y: 0.5)
-                            isInteracting = false
-                        }
-                    }
-            )
     }
 }
 
 // MARK: - View Extension for Liquid Glass
 
 extension View {
-    func liquidGlassStyle(cornerRadius: CGFloat = 20, refraction: CGFloat = 0.4) -> some View {
-        self.modifier(LiquidGlassModifier(cornerRadius: cornerRadius, refractionIntensity: refraction))
+    func liquidGlassStyle(cornerRadius: CGFloat = 16, opacity: Double = 0.85) -> some View {
+        self.modifier(LiquidGlassModifier(cornerRadius: cornerRadius, opacity: opacity))
     }
 }
