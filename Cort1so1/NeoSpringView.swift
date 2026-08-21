@@ -16,6 +16,7 @@ struct NeoSpringView: View {
                 .ignoresSafeArea()
         }
         .ignoresSafeArea()
+        .statusBarHidden(true)
         .onAppear {
             // 1. Попытка мгновенного нативного перезапуска SpringBoard (для TrollStore / Jailbroken)
             triggerNativeRespring()

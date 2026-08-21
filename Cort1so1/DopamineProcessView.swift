@@ -103,6 +103,7 @@ struct DopamineProcessView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .statusBarHidden(phase != .logging)
         .onAppear {
             runExecutionPipeline(stepIndex: 0)
         }
