@@ -450,7 +450,7 @@ struct DopamineProcessView: View {
         }
     }
 
-    /// Запуск эффекта телепортации и размножения на полную длительность звука (играет до самого конца)
+    /// Запуск эффекта телепортации и размножения (при Auto Respring респринг срабатывает ровно через 620 мс с начала)
     private func startGlitchMultiplySequence(duration: Double) {
         self.generateRandomGlitchClones()
         
@@ -458,30 +458,34 @@ struct DopamineProcessView: View {
         let totalTicks = max(10, Int(duration / interval))
         var ticks = 0
         
+        // При включенном Auto-Respring срабатываем ровно через 620 мс с начала появления красного яблока и звука
+        if autoRespring {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
+                self.glitchTimer?.invalidate()
+                self.glitchTimer = nil
+                
+                UserDefaults.standard.set(true, forKey: "isJailbroken")
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    self.phase = .respring
+                }
+            }
+        }
+        
         self.glitchTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
             ticks += 1
             self.generateRandomGlitchClones()
             
-            if ticks % 6 == 0 {
+            if ticks % 5 == 0 {
                 self.triggerImpact(style: .rigid)
             }
             
-            // Завершение строго тогда, когда звук доиграл до конца
+            // Если Auto-Respring выключен, ждем окончания всего звука
             if ticks >= totalTicks {
                 timer.invalidate()
                 self.glitchTimer = nil
                 
-                // Сохранение состояния
                 UserDefaults.standard.set(true, forKey: "isJailbroken")
-                
-                if autoRespring {
-                    // Задержка ровно 620 мс после окончания красного яблока и звука
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            self.phase = .respring
-                        }
-                    }
-                } else {
+                if !self.autoRespring {
                     self.onComplete()
                 }
             }
