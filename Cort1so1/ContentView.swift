@@ -3,6 +3,7 @@ import SwiftUI
 /// Корневой контейнер приложения с нативным TabView в стиле iOS HIG
 struct ContentView: View {
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
+    @AppStorage("hideStatusBar") private var hideStatusBar: Bool = false
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
@@ -65,6 +66,7 @@ struct ContentView: View {
         // Поддержка двух режимов оформления
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .accentColor(AppTheme.resolveColor(name: appThemeColor))
+        .statusBarHidden(hideStatusBar || jailbreakState == .respring)
     }
 }
 

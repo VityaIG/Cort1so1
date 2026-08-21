@@ -146,6 +146,7 @@ struct LocalizedStrings {
     var settingsTitle: String { lang == .ru ? "Настройки" : "Settings" }
     var appearanceSection: String { lang == .ru ? "Внешний вид" : "Appearance" }
     var darkModeToggle: String { lang == .ru ? "Темная тема" : "Dark Mode" }
+    var hideStatusBarToggle: String { lang == .ru ? "Скрыть строку состояния" : "Hide Status Bar" }
     var languageSection: String { lang == .ru ? "Язык интерфейса" : "Language" }
     var languageLabel: String { lang == .ru ? "Язык" : "Language" }
 

@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @Binding var jailbreakState: JailbreakState
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
+    @AppStorage("hideStatusBar") private var hideStatusBar: Bool = false
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
@@ -185,6 +186,13 @@ struct SettingsView: View {
 
             Toggle(isOn: $isDarkMode) {
                 settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
+            }
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
+
+            Divider()
+
+            Toggle(isOn: $hideStatusBar) {
+                settingRowLabel(title: strings.hideStatusBarToggle, icon: "eye.slash.circle.fill", color: .purple)
             }
             .accentColor(AppTheme.resolveColor(name: appThemeColor))
 
