@@ -25,6 +25,7 @@ jobs:
 
       - name: Build Xcode Project
         run: |
+          set -o pipefail
           xcodebuild build \
             -project Cort1so1.xcodeproj \
             -scheme Cort1so1 \
@@ -33,16 +34,16 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" > xcodebuild.log 2>&1
-      - name: Upload logs on failure
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO | tee xcodebuild.log
+
+      - name: Upload build log on failure
         if: failure()
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git checkout -b build-logs
-          git add xcodebuild.log
-          git commit -m "Add xcodebuild.log"
-          git push -f origin build-logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: xcodebuild.log
 
       - name: Package IPA
         run: |
