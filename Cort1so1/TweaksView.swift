@@ -101,6 +101,30 @@ struct TweaksView: View {
     var body: some View {
         NavigationView {
             Form {
+                // Верхняя кнопка применения для мгновенного доступа
+                Section {
+                    Button(action: {
+                        self.applyTweaks()
+                    }) {
+                        HStack {
+                            Spacer()
+                            if isApplying {
+                                ProgressView().accentColor(AppTheme.resolveColor(name: appThemeColor))
+                            } else {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.seal.fill")
+                                    Text(strings.tweaksApplyBtn)
+                                        .font(.system(size: 17, weight: .semibold))
+                                }
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .disabled(isApplying)
+                }
+
                 if !customTweaks.isEmpty {
                     Section(header: Text(strings.tweaksSectionCustom)) {
                         // 100% безопасный вариант ForEach: берем по значению и ищем индекс динамически
@@ -261,31 +285,31 @@ struct TweaksView: View {
 
                 Section {
                     Button(action: {
-                        self.isApplying = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            self.isApplying = false
-                            self.activeAlert = .applied
-                        }
+                        self.applyTweaks()
                     }) {
                         HStack {
                             Spacer()
                             if isApplying {
                                 ProgressView().accentColor(AppTheme.resolveColor(name: appThemeColor))
                             } else {
-                                Text(strings.tweaksApplyBtn)
-                                    .font(.system(size: 17, weight: .medium))
-                                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.seal.fill")
+                                    Text(strings.tweaksApplyBtn)
+                                        .font(.system(size: 17, weight: .semibold))
+                                }
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                             }
                             Spacer()
                         }
+                        .padding(.vertical, 2)
                     }
                     .disabled(isApplying)
                 }
             }
             .navigationTitle(strings.tweaksTitle)
             .toolbar {
-                if !customTweaks.isEmpty {
-                    ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if !customTweaks.isEmpty {
                         Button {
                             self.showManageSheet = true
                         } label: {
@@ -295,10 +319,25 @@ struct TweaksView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        self.showAddSheet = true
-                    } label: {
-                        Image(systemName: "plus")
+                    HStack(spacing: 12) {
+                        Button {
+                            self.showAddSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+
+                        Button {
+                            self.applyTweaks()
+                        } label: {
+                            if isApplying {
+                                ProgressView()
+                                    .scaleEffect(0.75)
+                            } else {
+                                Text(strings.tweaksApplyBtn)
+                                    .fontWeight(.bold)
+                            }
+                        }
+                        .disabled(isApplying)
                     }
                 }
             }
@@ -332,6 +371,15 @@ struct TweaksView: View {
                 exist = true
                 loadCustomTweaks()
             }
+        }
+    }
+
+    private func applyTweaks() {
+        guard !isApplying else { return }
+        self.isApplying = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.isApplying = false
+            self.activeAlert = .applied
         }
     }
 
@@ -476,6 +524,7 @@ struct CustomTweakEditorSheet: View {
     @State private var selectedColor: String
     @State private var alertButtonText: String
     @State private var alertTitleText: String
+    @State private var showTestAlert: Bool = false
     
     init(initialTweak: CustomTweak? = nil, onSave: @escaping (CustomTweak) -> Void) {
         self.initialTweak = initialTweak
@@ -523,6 +572,17 @@ struct CustomTweakEditorSheet: View {
                         text: $alertTitleText
                     )
                     .font(.system(.body, design: .default))
+
+                    Button(action: {
+                        self.showTestAlert = true
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.seal.fill")
+                            Text(isRu ? "Проверить поп-ап (Apply)" : "Test Apply Pop-up")
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(AppTheme.resolveColor(name: selectedColor))
+                    }
                 }
 
                 // Выбор цвета
@@ -571,6 +631,23 @@ struct CustomTweakEditorSheet: View {
                     }
                     .accentColor(AppTheme.resolveColor(name: selectedColor))
                 }
+
+                // Кнопка сохранения и применения внизу формы
+                Section {
+                    Button(action: {
+                        self.saveTweak()
+                    }) {
+                        HStack {
+                            Spacer()
+                            Text(isRu ? "Сохранить и применить" : "Save & Apply")
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundColor(AppTheme.resolveColor(name: selectedColor))
+                            Spacer()
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
             }
             .navigationTitle(isRu ? (initialTweak == nil ? "Новый твик" : "Редактирование") : (initialTweak == nil ? "New Tweak" : "Edit Tweak"))
             .toolbar {
@@ -582,27 +659,37 @@ struct CustomTweakEditorSheet: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button(strings.tweaksAddSaveBtn) {
-                        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-                        let trimmedDesc = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !trimmedTitle.isEmpty else { return }
-
-                        let newTweak = CustomTweak(
-                            id: initialTweak?.id ?? UUID().uuidString,
-                            title: trimmedTitle,
-                            subtitle: trimmedDesc,
-                            icon: "",
-                            colorName: selectedColor,
-                            isEnabled: initialTweak?.isEnabled ?? true,
-                            alertButtonText: alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines),
-                            alertTitleText: alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
-                        )
-                        self.onSave(newTweak)
-                        self.presentationMode.wrappedValue.dismiss()
+                        self.saveTweak()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .fontWeight(.bold)
                 }
             }
+            .alert(isPresented: $showTestAlert) {
+                Alert(
+                    title: Text(alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? strings.tweaksAppliedTitle : alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)),
+                    dismissButton: .default(Text(alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? strings.tweaksAppliedButton : alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines)))
+                )
+            }
         }
+    }
+
+    private func saveTweak() {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDesc = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTitle.isEmpty else { return }
+
+        let newTweak = CustomTweak(
+            id: initialTweak?.id ?? UUID().uuidString,
+            title: trimmedTitle,
+            subtitle: trimmedDesc,
+            icon: "",
+            colorName: selectedColor,
+            isEnabled: initialTweak?.isEnabled ?? true,
+            alertButtonText: alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines),
+            alertTitleText: alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        self.onSave(newTweak)
+        self.presentationMode.wrappedValue.dismiss()
     }
 }
