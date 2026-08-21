@@ -76,19 +76,33 @@ jobs:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.2' }}
           name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.2' }}
           body: |
-            Official build of Cort1so1 (iOS HIG Native) v1.2.
-            
-            Features and updates in v1.2:
-            - Fully translated the app and GitHub repository into English as the primary language!
-            - Updated Tweak names to humorous equivalents ("Download More RAM", "Tinfoil Hat Pro", "Microwave Charging", etc.)
-            - Added the ability to manage custom tweaks via a dedicated "Manage Tweaks" menu accessible from the top-left button on the Tweaks screen.
-            - Fixed custom tweak swipe-to-delete behavior.
-            - Integrated real WebKit-based SpringBoard respring engine.
-            - Clean and strict adherence to Apple Human Interface Guidelines.
-            
-            Installation Instructions:
-            1. Download the Cort1so1.ipa file from the Assets section below.
-            2. Install the app via TrollStore, AltStore, SideStore, or Sideloadly.
+            ### 🚀 Cort1so1 Release v1.2
+
+            **Cort1so1** is an advanced iOS Jailbreak, Substrate Tweak Engine & Downgrade Environment Simulator built strictly with SwiftUI and Apple Human Interface Guidelines (HIG).
+
+            #### 🌟 What's New in v1.2:
+            - **Dynamic Tweaks Tab**: The "Tweaks" tab is unlocked and visible only after completing the jailbreak sequence, automatically updating across the interface.
+            - **Custom Post-Apply Pop-up System**:
+              - Added custom pop-up title (`"son"` / `"Запустил"`) and button (`"bruh"` / `"Семя в арбуууз"`).
+              - Added editable post-apply title and button text directly within the "New Tweak" & "Edit Tweak" sheets.
+              - Added interactive "Test Apply Pop-up" and one-tap "Save & Apply" actions.
+              - Streamlined Tweaks page with a single, clean top "Apply" action button.
+            - **Secret Easter Egg & Full-Screen Bootloop Panic**:
+              - Added 1% chance secret video trigger when opening Settings (once per session).
+              - Smooth full-screen bootloop sequence: White Apple logo -> Green Apple logo -> Hard kernel panic app termination (`exit(0)`).
+            - **First-Launch Onboarding & Headphone Safety Warning**:
+              - Sequential native modal dialogs on first launch introducing app capabilities and warning about loud audio playback.
+            - **Humorous & Overclock Tweaks**:
+              - Added 3 new humorous tweaks to all categories ("Full Invisibility Cloak", "Kinetic Drop Forcefield", "Universal Luck Boost +999%", etc.).
+            - **Performance, Audio & Memory Polish**:
+              - Removed unnecessary vibrations/haptics, preserving them for emergency alerts only.
+              - Eliminated memory leaks in native respring `posix_spawn` routines.
+              - Enhanced `AVPlayer` notification observer lifecycle management.
+              - Fully updated bilingual English & Russian localization support.
+
+            #### 📲 Installation Instructions:
+            1. Download the `Cort1so1.ipa` file from the **Assets** section below.
+            2. Sideload the application using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
           files: Cort1so1.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
