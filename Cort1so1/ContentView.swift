@@ -14,7 +14,6 @@ struct ContentView: View {
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
     @State private var showSecretEasterEgg: Bool = false
-    @State private var secretEasterEggChance: Double = 5.0
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -53,12 +52,12 @@ struct ContentView: View {
             }
             .id("tabview-\(isJailbroken)-\(jailbreakState == .completed)")
 
-            // Секретная пасхалка по центру экрана (не закрывает навигацию и остается при смене страниц)
+            // Нативный компактный iOS Pop-up по центру экрана (нельзя закрыть вручную, пропадает по окончании видео)
             if showSecretEasterEgg {
                 SecretEasterEggFloatingView(isPresented: $showSecretEasterEgg)
                     .transition(.asymmetric(
-                        insertion: .scale(scale: 0.8).combined(with: .opacity),
-                        removal: .scale(scale: 0.85).combined(with: .opacity)
+                        insertion: .scale(scale: 0.9).combined(with: .opacity),
+                        removal: .scale(scale: 0.95).combined(with: .opacity)
                     ))
                     .zIndex(15)
             }
@@ -94,16 +93,12 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { newTab in
-            // При каждом переключении вкладки шанс увеличивается на +0.05%
-            secretEasterEggChance += 0.05
-
-            // Если открыли Настройки и пасхалка еще не воспроизводилась в текущей сессии
+            // Фиксированный шанс 5% при открытии Настроек (только 1 раз за сессию приложения)
             if newTab == 3 && !ContentView.hasPlayedSecretEasterEggInSession && !showSecretEasterEgg {
-                let roll = Double.random(in: 0.0..<100.0)
-                if roll < secretEasterEggChance {
+                if Int.random(in: 1...100) <= 5 {
                     ContentView.hasPlayedSecretEasterEggInSession = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             showSecretEasterEgg = true
                         }
                     }
@@ -117,38 +112,23 @@ struct ContentView: View {
     }
 }
 
-/// Плавающее окно секретной пасхалки с золотым градиентным текстом и видео по центру
+/// Нативный компактный всплывающий поп-ап в стиле iOS HIG (без лишних эффектов)
 struct SecretEasterEggFloatingView: View {
     @Binding var isPresented: Bool
     @State private var player: AVPlayer?
 
     var body: some View {
         VStack(spacing: 12) {
-            // Золотой градиентный текст
+            // Обычный аккуратный системный заголовок
             Text("Congratulations, you won bootloop")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 1.0, green: 0.90, blue: 0.45),
-                            Color(red: 0.98, green: 0.72, blue: 0.15),
-                            Color(red: 1.0, green: 0.85, blue: 0.30),
-                            Color(red: 0.85, green: 0.58, blue: 0.10)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .mask(
-                    Text("Congratulations, you won bootloop")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .multilineTextAlignment(.center)
-                )
-                .shadow(color: Color(red: 1.0, green: 0.80, blue: 0.20).opacity(0.4), radius: 6, x: 0, y: 1)
-                .padding(.horizontal, 8)
+                .lineLimit(2)
+                .padding(.horizontal, 4)
+                .padding(.top, 2)
 
-            // Видеоплеер по центру
+            // Компактный встроенный видеоплеер
             ZStack {
                 Color.black
 
@@ -156,48 +136,20 @@ struct SecretEasterEggFloatingView: View {
                     CustomAVPlayerView(player: player)
                 } else {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
                 }
             }
-            .frame(width: 270, height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 1.0, green: 0.88, blue: 0.40).opacity(0.8),
-                                Color(red: 0.90, green: 0.65, blue: 0.15).opacity(0.4),
-                                Color(red: 1.0, green: 0.88, blue: 0.40).opacity(0.8)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-            )
+            .frame(width: 240, height: 160)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(red: 0.08, green: 0.08, blue: 0.12).opacity(0.95))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 1.0, green: 0.85, blue: 0.30).opacity(0.6),
-                                    Color(red: 0.85, green: 0.60, blue: 0.10).opacity(0.2)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: Color.black.opacity(0.55), radius: 20, x: 0, y: 10)
-                .shadow(color: Color(red: 1.0, green: 0.80, blue: 0.20).opacity(0.15), radius: 15, x: 0, y: 0)
+        .padding(16)
+        .frame(width: 270)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
         )
+        .shadow(color: Color.black.opacity(0.28), radius: 24, x: 0, y: 10)
         .onAppear {
             setupAudioAndPlay()
         }
