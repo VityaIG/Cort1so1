@@ -526,8 +526,14 @@ struct SettingsView: View {
         isJailbroken = false
         UserDefaults.standard.set(false, forKey: "isJailbroken")
 
-        withAnimation(.easeInOut(duration: 0.25)) {
-            jailbreakState = .respring
+        if autoRespring {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                jailbreakState = .respring
+            }
+        } else {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                jailbreakState = .idle
+            }
         }
     }
 }

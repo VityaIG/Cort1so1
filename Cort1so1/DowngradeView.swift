@@ -273,6 +273,7 @@ struct DowngradeExecutionSheet: View {
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("installedOS") private var installedOS: String = "iOS"
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
+    @AppStorage("autoRespring") private var autoRespring: Bool = true
     
     private var isRu: Bool {
         appLanguage == "ru"
@@ -470,8 +471,11 @@ struct DowngradeExecutionSheet: View {
                 Alert(
                     title: Text(isRu ? "Откат Завершён!" : "Downgrade Complete!"),
                     message: Text(isRu ? "Устройство было успешно восстановлено на \(firmware.version). Для применения изменений требуется перезагрузка SpringBoard." : "Your device was successfully restored to \(firmware.version). SpringBoard will now restart to apply changes."),
-                    dismissButton: .default(Text(isRu ? "Перезагрузить" : "Respring")) {
+                    primaryButton: .default(Text(isRu ? "Респринг" : "Respring")) {
                         self.isRespringing = true
+                    },
+                    secondaryButton: .cancel(Text(isRu ? "Закрыть" : "Close")) {
+                        presentationMode.wrappedValue.dismiss()
                     }
                 )
             }
@@ -546,7 +550,11 @@ struct DowngradeExecutionSheet: View {
                 triggerNotificationSuccess()
                 installedOS = firmware.version
                 UserDefaults.standard.set(firmware.version, forKey: "installedOS")
-                showSuccessAlert = true
+                if autoRespring {
+                    self.isRespringing = true
+                } else {
+                    showSuccessAlert = true
+                }
                 return
             }
             

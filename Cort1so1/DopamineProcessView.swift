@@ -33,6 +33,7 @@ struct DopamineProcessView: View {
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("installedOS") private var installedOS: String = "iOS"
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
+    @AppStorage("autoRespring") private var autoRespring: Bool = true
     var method: JailbreakMethod = .dopamine
     var onComplete: () -> Void
 
@@ -354,7 +355,7 @@ struct DopamineProcessView: View {
         }
     }
 
-    /// Запуск 10-секундной полосы восстановления
+    /// Запуск 10-секундной полосы восстановления (без вибрации во время заполнения)
     private func start10SecondsRestoreSequence() {
         self.restoreProgress = 0.0
         let totalDuration: Double = 10.0
@@ -363,12 +364,6 @@ struct DopamineProcessView: View {
         
         self.restoreTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
             self.restoreProgress += increment
-            
-            // Периодические тактильные отклики
-            let currentSec = Int(self.restoreProgress * 10.0)
-            if currentSec == 3 || currentSec == 6 || currentSec == 9 {
-                self.triggerHaptic(isMajor: false)
-            }
             
             if self.restoreProgress >= 1.0 {
                 self.restoreProgress = 1.0
@@ -401,10 +396,15 @@ struct DopamineProcessView: View {
                 timer.invalidate()
                 self.glitchTimer = nil
                 
-                // Сохранение состояния и запуск реального респринга
+                // Сохранение состояния
                 UserDefaults.standard.set(true, forKey: "isJailbroken")
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    self.phase = .respring
+                
+                if autoRespring {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        self.phase = .respring
+                    }
+                } else {
+                    self.onComplete()
                 }
             }
         }
