@@ -205,7 +205,8 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
             .padding(14)
-            .liquidGlassStyle(cornerRadius: 16)
+            .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -285,7 +286,12 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
     // MARK: - 2. Внешний вид и язык
@@ -341,7 +347,8 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func localizedThemeName(_ name: String) -> String {
@@ -391,7 +398,8 @@ struct SettingsView: View {
             .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - 4. Системные сведения
@@ -411,7 +419,8 @@ struct SettingsView: View {
             infoRow(title: strings.packageManagerLabel, value: customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1 Installer (Procursus)" : customPackageManager, icon: "shippingbox.fill", color: .cyan)
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - 5. Управление джейлбрейком (Danger Zone)
@@ -448,7 +457,8 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - 6. О программе
@@ -487,7 +497,8 @@ struct SettingsView: View {
                 .lineSpacing(3)
         }
         .padding(16)
-        .liquidGlassStyle(cornerRadius: 16)
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - 7. Создатель & Разработчик
@@ -543,7 +554,12 @@ struct SettingsView: View {
                 .clipShape(Capsule())
             }
             .padding(16)
-            .liquidGlassStyle(cornerRadius: 16)
+            .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(telegramColor.opacity(0.15), lineWidth: 1)
+            )
         }
     }
 
