@@ -623,6 +623,23 @@ struct EasterEggVideoPlayerView: View {
             player?.pause()
             player = nil
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            resumePlayback()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            player?.pause()
+        }
+    }
+
+    private func resumePlayback() {
+        guard let player = player else { return }
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("AudioSession resume error: \(error)")
+        }
+        player.play()
     }
 
     private func setupAudioAndPlay() {
