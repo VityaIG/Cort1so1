@@ -45,12 +45,11 @@ struct ContentView: View {
                     .tag(3)
             }
 
-            // Оверлей симуляции нативного респринга SpringBoard
+            // Оверлей выполнения респринга SpringBoard
             if jailbreakState == .respring {
                 NeoSpringView(onFinished: {
-                    isJailbroken = true
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        jailbreakState = .completed
+                        jailbreakState = isJailbroken ? .completed : .idle
                     }
                 })
                 .transition(.opacity)

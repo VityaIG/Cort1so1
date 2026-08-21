@@ -81,8 +81,10 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
 
             case .respring:
-                respringView
-                    .transition(.opacity)
+                NeoSpringView(onFinished: {
+                    self.onComplete()
+                })
+                .transition(.opacity)
             }
         }
         
@@ -333,11 +335,9 @@ struct DopamineProcessView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                            UserDefaults.standard.set(true, forKey: "isJailbroken")
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 self.phase = .respring
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                self.onComplete()
                             }
                         }
                     }

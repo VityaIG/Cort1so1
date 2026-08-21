@@ -283,6 +283,7 @@ struct DowngradeExecutionSheet: View {
     @State private var restoreSpeedMBs: Double = 0.0
     @State private var terminalLogs: [String] = []
     @State private var currentStageIndex: Int = -1
+    @State private var isRespringing = false
     
     // Alerts
     @State private var showCancelAlert = false
@@ -303,60 +304,61 @@ struct DowngradeExecutionSheet: View {
     ]
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    if isRestoring {
-                        Button(action: {
-                            cancelFlashing()
-                        }) {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "stop.fill")
-                                Text(isRu ? "Прервать Откат" : "Stop Flashing")
-                                    .fontWeight(.bold)
-                                Spacer()
+        ZStack {
+            NavigationView {
+                Form {
+                    Section {
+                        if isRestoring {
+                            Button(action: {
+                                cancelFlashing()
+                            }) {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "stop.fill")
+                                    Text(isRu ? "Прервать Откат" : "Stop Flashing")
+                                        .fontWeight(.bold)
+                                    Spacer()
+                                }
+                                .foregroundColor(.red)
                             }
-                            .foregroundColor(.red)
-                        }
-                    } else if elapsedSeconds > 0 && elapsedSeconds < 60 {
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Закрыть" : "Close")
-                                    .fontWeight(.semibold)
-                                Spacer()
+                        } else if elapsedSeconds > 0 && elapsedSeconds < 60 {
+                            Button(action: {
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                HStack {
+                                    Spacer()
+                                    Text(isRu ? "Закрыть" : "Close")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                }
+                                .foregroundColor(.blue)
                             }
-                            .foregroundColor(.blue)
-                        }
-                    } else if elapsedSeconds == 60 {
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Завершить" : "Done")
-                                    .fontWeight(.semibold)
-                                Spacer()
+                        } else if elapsedSeconds == 60 {
+                            Button(action: {
+                                self.isRespringing = true
+                            }) {
+                                HStack {
+                                    Spacer()
+                                    Text(isRu ? "Завершить и перезагрузить" : "Finish & Respring")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                }
+                                .foregroundColor(.green)
                             }
-                            .foregroundColor(.green)
-                        }
-                    } else {
-                        Button(action: { start60SecondsFlashingSequence() }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Начать установку (60 сек)" : "Start Flashing (60s)")
-                                    .fontWeight(.semibold)
-                                Spacer()
+                        } else {
+                            Button(action: { start60SecondsFlashingSequence() }) {
+                                HStack {
+                                    Spacer()
+                                    Text(isRu ? "Начать установку (60 сек)" : "Start Flashing (60s)")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                }
+                                .foregroundColor(firmware.badgeColor)
                             }
-                            .foregroundColor(firmware.badgeColor)
                         }
                     }
-                }
 
-                Section(header: Text(isRu ? "Прогресс" : "Progress")) {
+                    Section(header: Text(isRu ? "Прогресс" : "Progress")) {
                     VStack(spacing: 16) {
                         ZStack {
                             Circle()
@@ -469,14 +471,23 @@ struct DowngradeExecutionSheet: View {
             .alert(isPresented: $showSuccessAlert) {
                 Alert(
                     title: Text(isRu ? "Откат Завершён!" : "Downgrade Complete!"),
-                    message: Text(isRu ? "Устройство было успешно восстановлено на \(firmware.version)." : "Your device was successfully restored to \(firmware.version)."),
-                    dismissButton: .default(Text("OK")) {
-                        presentationMode.wrappedValue.dismiss()
+                    message: Text(isRu ? "Устройство было успешно восстановлено на \(firmware.version). Для применения изменений требуется перезагрузка SpringBoard." : "Your device was successfully restored to \(firmware.version). SpringBoard will now restart to apply changes."),
+                    dismissButton: .default(Text(isRu ? "Перезагрузить" : "Respring")) {
+                        self.isRespringing = true
                     }
                 )
             }
             .onDisappear {
                 restoreTimer?.invalidate()
+            }
+            
+            if isRespringing {
+                NeoSpringView(onFinished: {
+                    self.isRespringing = false
+                    presentationMode.wrappedValue.dismiss()
+                })
+                .ignoresSafeArea()
+                .zIndex(100)
             }
         }
     }
@@ -550,6 +561,7 @@ struct DowngradeExecutionSheet: View {
                 isRestoring = false
                 triggerNotificationSuccess()
                 installedOS = firmware.version
+                UserDefaults.standard.set(firmware.version, forKey: "installedOS")
                 showSuccessAlert = true
             }
         }

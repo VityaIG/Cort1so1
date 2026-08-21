@@ -523,9 +523,11 @@ struct SettingsView: View {
         generator.prepare()
         generator.notificationOccurred(.success)
 
+        isJailbroken = false
+        UserDefaults.standard.set(false, forKey: "isJailbroken")
+
         withAnimation(.easeInOut(duration: 0.25)) {
-            isJailbroken = false
-            jailbreakState = .idle
+            jailbreakState = .respring
         }
     }
 }
