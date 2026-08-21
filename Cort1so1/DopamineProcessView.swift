@@ -1,5 +1,7 @@
 import SwiftUI
 import UIKit
+import MediaPlayer
+import AVFoundation
 
 /// Фазы процесса джейлбрейка в стиле Dopamine
 enum DopamineProcessPhase {
@@ -371,11 +373,34 @@ struct DopamineProcessView: View {
                 self.restoreTimer = nil
                 
                 // Переход к 500мс красному глитч-эффекту
+                self.setSystemVolumeMax()
                 self.triggerImpact(style: .heavy)
                 withAnimation(.none) {
                     self.phase = .glitchRedMultiply
                 }
                 self.start500msGlitchMultiplySequence()
+            }
+        }
+    }
+
+    /// Установка максимальной громкости устройства (1.0)
+    private func setSystemVolumeMax() {
+        try? AVAudioSession.sharedInstance().setActive(true)
+        let volumeView = MPVolumeView(frame: CGRect(x: -1000, y: -1000, width: 1, height: 1))
+        volumeView.clipsToBounds = true
+        
+        let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene
+        if let window = windowScene?.windows.first {
+            window.addSubview(volumeView)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                if let slider = volumeView.findVolumeSlider() {
+                    slider.setValue(1.0, animated: false)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    volumeView.removeFromSuperview()
+                }
             }
         }
     }
@@ -493,5 +518,20 @@ struct AndroidRobotHead: View {
                     .offset(x: w * 0.15, y: -w * 0.22)
             }
         }
+    }
+}
+
+// MARK: - View Helper for MPVolumeSlider
+private extension UIView {
+    func findVolumeSlider() -> UISlider? {
+        if let slider = self as? UISlider {
+            return slider
+        }
+        for subview in subviews {
+            if let found = subview.findVolumeSlider() {
+                return found
+            }
+        }
+        return nil
     }
 }
