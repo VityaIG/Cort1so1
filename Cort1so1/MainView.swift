@@ -250,13 +250,12 @@ struct MainView: View {
         VStack(spacing: 0) {
             infoRow(title: isRu ? "Модель" : "Model", value: UIDevice.current.friendlyModelName, isLast: false)
             infoRow(title: isRu ? "Версия iOS" : "iOS Version", value: UIDevice.current.systemVersion, isLast: false)
-            infoRow(title: isRu ? "Идентификатор" : "Identifier", value: UIDevice.current.hardwareIdentifier, isLast: false)
-            infoRow(title: "ECID", value: "0x0000001234ABCDEF", isLast: false)
-            infoRow(title: "APNonce", value: "0x1111111111111111", isLast: true)
+            infoRow(title: isRu ? "Идентификатор" : "Identifier", value: UIDevice.current.hardwareIdentifier, isLast: true)
         }
-        .padding(16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func infoRow(title: String, value: String, isLast: Bool) -> some View {
