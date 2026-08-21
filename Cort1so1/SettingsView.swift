@@ -67,8 +67,6 @@ struct SettingsView: View {
                         // 8. Секретный триггер Пасхалки (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
                         if !SettingsView.hasPlayedInSession {
                             easterEggBottomTrigger
-                                .padding(.top, 40)
-                                .padding(.bottom, 60)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -432,29 +430,37 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 8. Триггер Пасхалки (только при прокрутке ОЧЕНЬ ДАЛЕКО вниз / overscroll)
+    // MARK: - 8. Триггер Пасхалки (невидимый иконка глубоко внизу)
     private var easterEggBottomTrigger: some View {
-        Color.clear
-            .frame(height: 10)
-            .background(
-                GeometryReader { geo -> Color in
-                    let minY = geo.frame(in: .global).minY
-                    let screenHeight = UIScreen.main.bounds.height
-                    // Требуется очень сильный оверскролл (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
-                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 220 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
-                        DispatchQueue.main.async {
-                            self.lastTriggerTime = Date()
-                            SettingsView.hasPlayedInSession = true
-                            self.hasPlayedEasterEgg = true
-                            let generator = UIImpactFeedbackGenerator(style: .heavy)
-                            generator.prepare()
-                            generator.impactOccurred()
-                            self.showEasterEggVideo = true
+        VStack(spacing: 0) {
+            // Огромный отступ вниз, чтобы верхний интерфейс ушел далеко наверх
+            Spacer()
+                .frame(height: 1000)
+
+            // Невидимая иконка в самом низу
+            Image(systemName: "sparkles")
+                .font(.system(size: 24))
+                .opacity(0.001)
+                .background(
+                    GeometryReader { geo -> Color in
+                        let minY = geo.frame(in: .global).minY
+                        let screenHeight = UIScreen.main.bounds.height
+                        if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 20 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                            DispatchQueue.main.async {
+                                self.lastTriggerTime = Date()
+                                SettingsView.hasPlayedInSession = true
+                                self.hasPlayedEasterEgg = true
+                                let generator = UIImpactFeedbackGenerator(style: .heavy)
+                                generator.prepare()
+                                generator.impactOccurred()
+                                self.showEasterEggVideo = true
+                            }
                         }
+                        return Color.clear
                     }
-                    return Color.clear
-                }
-            )
+                )
+        }
+        .padding(.bottom, 100)
     }
 
     // MARK: - Вспомогательные компоненты разметки
