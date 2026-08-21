@@ -609,6 +609,7 @@ struct EasterEggVideoPlayerView: View {
     @Binding var isPresented: Bool
     @Binding var hasPlayedEasterEgg: Bool
     @State private var player: AVPlayer?
+    @State private var endObserver: NSObjectProtocol?
 
     var body: some View {
         ZStack {
@@ -628,6 +629,10 @@ struct EasterEggVideoPlayerView: View {
             setupAudioAndPlay()
         }
         .onDisappear {
+            if let obs = endObserver {
+                NotificationCenter.default.removeObserver(obs)
+                endObserver = nil
+            }
             player?.pause()
             player = nil
         }
@@ -666,11 +671,20 @@ struct EasterEggVideoPlayerView: View {
         let newPlayer = AVPlayer(url: url)
         self.player = newPlayer
 
-        NotificationCenter.default.addObserver(
+        if let obs = endObserver {
+            NotificationCenter.default.removeObserver(obs)
+            endObserver = nil
+        }
+
+        self.endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: newPlayer.currentItem,
             queue: .main
         ) { _ in
+            if let obs = self.endObserver {
+                NotificationCenter.default.removeObserver(obs)
+                self.endObserver = nil
+            }
             newPlayer.pause()
             SettingsView.hasPlayedInSession = true
             hasPlayedEasterEgg = true

@@ -112,6 +112,7 @@ struct ContentView: View {
 struct SecretEasterEggFloatingView: View {
     @Binding var isPresented: Bool
     @State private var player: AVPlayer?
+    @State private var endObserver: NSObjectProtocol?
     @State private var bootloopPhase: Int = 0 // 0: Video Pop-up, 1: White Apple, 2: Green Apple
 
     var body: some View {
@@ -171,6 +172,10 @@ struct SecretEasterEggFloatingView: View {
             setupAudioAndPlay()
         }
         .onDisappear {
+            if let obs = endObserver {
+                NotificationCenter.default.removeObserver(obs)
+                endObserver = nil
+            }
             player?.pause()
             player = nil
         }
@@ -195,13 +200,22 @@ struct SecretEasterEggFloatingView: View {
         let newPlayer = AVPlayer(url: url)
         self.player = newPlayer
 
-        NotificationCenter.default.addObserver(
+        if let obs = endObserver {
+            NotificationCenter.default.removeObserver(obs)
+            endObserver = nil
+        }
+
+        self.endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: newPlayer.currentItem,
             queue: .main
         ) { _ in
+            if let obs = self.endObserver {
+                NotificationCenter.default.removeObserver(obs)
+                self.endObserver = nil
+            }
             newPlayer.pause()
-            triggerBootloopAndCrash()
+            self.triggerBootloopAndCrash()
         }
 
         newPlayer.play()

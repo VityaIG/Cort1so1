@@ -41,19 +41,19 @@ struct NeoSpringView: View {
             if FileManager.default.fileExists(atPath: binary) {
                 var pid: pid_t = 0
                 if binary.contains("killall") {
-                    var args: [UnsafeMutablePointer<CChar>?] = [
-                        strdup(binary),
-                        strdup("-9"),
-                        strdup("SpringBoard"),
-                        nil
-                    ]
+                    let arg0 = strdup(binary)
+                    let arg1 = strdup("-9")
+                    let arg2 = strdup("SpringBoard")
+                    var args: [UnsafeMutablePointer<CChar>?] = [arg0, arg1, arg2, nil]
                     posix_spawn(&pid, binary, nil, nil, &args, nil)
+                    free(arg0)
+                    free(arg1)
+                    free(arg2)
                 } else {
-                    var args: [UnsafeMutablePointer<CChar>?] = [
-                        strdup(binary),
-                        nil
-                    ]
+                    let arg0 = strdup(binary)
+                    var args: [UnsafeMutablePointer<CChar>?] = [arg0, nil]
                     posix_spawn(&pid, binary, nil, nil, &args, nil)
+                    free(arg0)
                 }
             }
         }
@@ -141,7 +141,7 @@ struct NeoSpringWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(respringHTMLDocument, baseURL: nil)
+        // Оставляем пустым, чтобы не перезагружать HTML при каждом обновлении состояния SwiftUI
     }
 }
 

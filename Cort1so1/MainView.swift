@@ -53,7 +53,7 @@ struct MainView: View {
                     title: Text(strings.confirmAlertTitle),
                     message: Text(strings.confirmAlertMessage),
                     primaryButton: .default(Text(strings.confirmYesBtn)) {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             self.showingMethodDialog = true
                         }
                     },
