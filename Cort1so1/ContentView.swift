@@ -76,6 +76,18 @@ struct ContentView: View {
                 jailbreakState = .completed
             }
         }
+        .onChange(of: selectedTab) { newTab in
+            // Проверка 5% шанса при каждом переключении на вкладку «Настройки»
+            if newTab == 3 && !showSecretEasterEgg {
+                if Int.random(in: 1...100) <= 5 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                            showSecretEasterEgg = true
+                        }
+                    }
+                }
+            }
+        }
         // Поддержка двух режимов оформления
         .preferredColorScheme(isDarkMode ? .dark : .light)
         .accentColor(AppTheme.resolveColor(name: appThemeColor))
