@@ -91,9 +91,6 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(strings.settingsTitle)
-            .onAppear {
-                checkSecretEasterEgg()
-            }
             .fullScreenCover(isPresented: $showEasterEggVideo) {
                 EasterEggVideoPlayerView(isPresented: $showEasterEggVideo, hasPlayedEasterEgg: $hasPlayedEasterEgg)
             }
@@ -538,19 +535,6 @@ struct SettingsView: View {
 
         withAnimation(.easeInOut(duration: 0.25)) {
             jailbreakState = .idle
-        }
-    }
-
-    private func checkSecretEasterEgg() {
-        guard !showSecretEasterEgg else { return }
-        // 5% шанс появления секретной пасхалки при переходе в настройки
-        let roll = Int.random(in: 1...100)
-        if roll <= 5 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
-                    self.showSecretEasterEgg = true
-                }
-            }
         }
     }
 }

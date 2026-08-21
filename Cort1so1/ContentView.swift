@@ -4,6 +4,8 @@ import AVKit
 
 /// Корневой контейнер приложения с нативным TabView в стиле iOS HIG
 struct ContentView: View {
+    static var hasPlayedSecretEasterEggInSession: Bool = false
+
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @AppStorage("hideStatusBar") private var hideStatusBar: Bool = false
     @AppStorage("appLanguage") private var appLanguage: String = "en"
@@ -12,6 +14,7 @@ struct ContentView: View {
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
     @State private var showSecretEasterEgg: Bool = false
+    @State private var secretEasterEggChance: Double = 5.0
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -49,7 +52,7 @@ struct ContentView: View {
                     .tag(3)
             }
 
-            // Секретная пасхалка по центру экрана (5% шанс из настроек, не закрывает навигацию и остается при смене страниц)
+            // Секретная пасхалка по центру экрана (не закрывает навигацию и остается при смене страниц)
             if showSecretEasterEgg {
                 SecretEasterEggFloatingView(isPresented: $showSecretEasterEgg)
                     .transition(.asymmetric(
@@ -77,9 +80,14 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { newTab in
-            // Проверка 5% шанса при каждом переключении на вкладку «Настройки»
-            if newTab == 3 && !showSecretEasterEgg {
-                if Int.random(in: 1...100) <= 5 {
+            // При каждом переключении вкладки шанс увеличивается на +0.05%
+            secretEasterEggChance += 0.05
+
+            // Если открыли Настройки и пасхалка еще не воспроизводилась в текущей сессии
+            if newTab == 3 && !ContentView.hasPlayedSecretEasterEggInSession && !showSecretEasterEgg {
+                let roll = Double.random(in: 0.0..<100.0)
+                if roll < secretEasterEggChance {
+                    ContentView.hasPlayedSecretEasterEggInSession = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
                             showSecretEasterEgg = true
