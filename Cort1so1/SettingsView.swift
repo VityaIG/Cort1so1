@@ -439,7 +439,7 @@ struct SettingsView: View {
                 GeometryReader { geo -> Color in
                     let minY = geo.frame(in: .global).minY
                     let screenHeight = UIScreen.main.bounds.height
-                    if !SettingsView.hasPlayedInSession && minY < screenHeight + 40 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 10 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
                         DispatchQueue.main.async {
                             self.lastTriggerTime = Date()
                             SettingsView.hasPlayedInSession = true
