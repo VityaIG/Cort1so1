@@ -8,9 +8,6 @@ struct AdminDashboardView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
-    @AppStorage("verboseLogs") private var verboseLogs: Bool = true
-    @AppStorage("autoRespring") private var autoRespring: Bool = true
-    @AppStorage("safeMode") private var safeMode: Bool = false
     @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
 
     // ADMIN Настройки
@@ -33,17 +30,11 @@ struct AdminDashboardView: View {
     @AppStorage("customExploitName") private var customExploitName: String = ""
     @AppStorage("customPackageManager") private var customPackageManager: String = ""
 
-    // Тюнинг движка
-    @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
-    @AppStorage("easterEggChancePercent") private var easterEggChancePercent: Int = 1
-    @AppStorage("customRespringDuration") private var customRespringDuration: Double = 2.5
+    // Кастомизация сообщений
     @AppStorage("custom_apply_button_text") private var customApplyButtonText: String = ""
     @AppStorage("custom_apply_title_text") private var customApplyTitleText: String = ""
 
-    // Локальные состояния
-    @State private var bgColorPicker: Color = Color(uiColor: .systemGroupedBackground)
-    @State private var cardColorPicker: Color = Color(uiColor: .secondarySystemGroupedBackground)
-    @State private var textColorPicker: Color = .primary
+    // Локальные состояния для модальных окон
     @State private var showResetConfirmationAlert: Bool = false
     @State private var showSecretVideoModal: Bool = false
     @State private var showSecretBootloopModal: Bool = false
@@ -52,6 +43,48 @@ struct AdminDashboardView: View {
 
     private var isRu: Bool {
         appLanguage == "ru"
+    }
+
+    private var bgColorBinding: Binding<Color> {
+        Binding<Color>(
+            get: {
+                if !customBgColorHex.isEmpty && customBgColorHex != "default" {
+                    return Color(hex: customBgColorHex)
+                }
+                return AppBgTheme.resolveColor(id: customAppBgTheme)
+            },
+            set: { newColor in
+                customBgColorHex = newColor.toHex()
+            }
+        )
+    }
+
+    private var cardColorBinding: Binding<Color> {
+        Binding<Color>(
+            get: {
+                if !customCardColorHex.isEmpty && customCardColorHex != "default" {
+                    return Color(hex: customCardColorHex)
+                }
+                return Color(uiColor: .secondarySystemGroupedBackground)
+            },
+            set: { newColor in
+                customCardColorHex = newColor.toHex()
+            }
+        )
+    }
+
+    private var textColorBinding: Binding<Color> {
+        Binding<Color>(
+            get: {
+                if !customTextColorHex.isEmpty && customTextColorHex != "default" {
+                    return Color(hex: customTextColorHex)
+                }
+                return .primary
+            },
+            set: { newColor in
+                customTextColorHex = newColor.toHex()
+            }
+        )
     }
 
     var body: some View {
@@ -64,30 +97,21 @@ struct AdminDashboardView: View {
                 ) {
                     ColorPicker(
                         isRu ? "Цвет фона экрана" : "Screen Background Color",
-                        selection: $bgColorPicker,
+                        selection: bgColorBinding,
                         supportsOpacity: false
                     )
-                    .onChange(of: bgColorPicker) { newColor in
-                        customBgColorHex = newColor.toHex()
-                    }
 
                     ColorPicker(
                         isRu ? "Цвет карточек и блоков" : "Card & Block Color",
-                        selection: $cardColorPicker,
+                        selection: cardColorBinding,
                         supportsOpacity: false
                     )
-                    .onChange(of: cardColorPicker) { newColor in
-                        customCardColorHex = newColor.toHex()
-                    }
 
                     ColorPicker(
                         isRu ? "Цвет текста элементов" : "Element Text Color",
-                        selection: $textColorPicker,
+                        selection: textColorBinding,
                         supportsOpacity: false
                     )
-                    .onChange(of: textColorPicker) { newColor in
-                        customTextColorHex = newColor.toHex()
-                    }
 
                     Picker(isRu ? "Пресет темы фона" : "Background Theme Preset", selection: $customAppBgTheme) {
                         ForEach(AppBgTheme.availableThemes) { theme in
@@ -96,7 +120,6 @@ struct AdminDashboardView: View {
                     }
                     .onChange(of: customAppBgTheme) { newThemeId in
                         customBgColorHex = ""
-                        bgColorPicker = AppBgTheme.resolveColor(id: newThemeId)
                     }
 
                     if !customBgColorHex.isEmpty || !customCardColorHex.isEmpty || !customTextColorHex.isEmpty || customAppBgTheme != "default" {
@@ -106,9 +129,6 @@ struct AdminDashboardView: View {
                                 customCardColorHex = ""
                                 customTextColorHex = ""
                                 customAppBgTheme = "default"
-                                bgColorPicker = Color(uiColor: .systemGroupedBackground)
-                                cardColorPicker = Color(uiColor: .secondarySystemGroupedBackground)
-                                textColorPicker = .primary
                             }
                         }) {
                             HStack {
@@ -123,7 +143,7 @@ struct AdminDashboardView: View {
                 // MARK: 2. Идентификация приложения
                 Section(
                     header: Text(isRu ? "Идентификация приложения" : "Application Identity"),
-                    footer: Text(isRu ? "Название обновляется на всех вкладках и экранах приложения." : "Custom name applies globally across all tabs and screens.")
+                    footer: Text(isRu ? "Название и версия обновляются на всех экранах и карточках приложения." : "Custom name and version apply globally across all tabs and screens.")
                 ) {
                     HStack {
                         Text(isRu ? "Название" : "App Name")
@@ -157,7 +177,7 @@ struct AdminDashboardView: View {
                 // MARK: 3. Подмена системного окружения
                 Section(
                     header: Text(isRu ? "Подмена системных параметров" : "System & Device Overrides"),
-                    footer: Text(isRu ? "Значения подставляются на главном экране и во вкладке даунгрейда." : "Custom hardware and OS parameters override native readings.")
+                    footer: Text(isRu ? "Значения отображаются на главном экране, в настройках и во вкладке отката." : "Custom hardware and OS parameters override native readings across all views.")
                 ) {
                     HStack {
                         Text(isRu ? "Модель" : "Device")
@@ -177,7 +197,7 @@ struct AdminDashboardView: View {
                         Text(isRu ? "Архитектура" : "Arch")
                             .frame(width: 100, alignment: .leading)
                             .foregroundColor(.secondary)
-                        TextField("arm64e", text: $customArch)
+                        TextField("arm64e (SPTM & PAC Bypass)", text: $customArch)
                     }
 
                     HStack {
@@ -191,56 +211,11 @@ struct AdminDashboardView: View {
                         Text(isRu ? "Менеджер" : "Pkg Manager")
                             .frame(width: 100, alignment: .leading)
                             .foregroundColor(.secondary)
-                        TextField("Cort1so1 Installer", text: $customPackageManager)
+                        TextField("Cort1so1 Installer (Procursus)", text: $customPackageManager)
                     }
                 }
 
-                // MARK: 4. Параметры симуляции и тайминги
-                Section(
-                    header: Text(isRu ? "Параметры симуляции" : "Simulation & Timings"),
-                    footer: Text(isRu ? "Управление множителем скорости эксплойта и длительностью респринга." : "Controls exploit execution speed multiplier and respring duration.")
-                ) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text(isRu ? "Скорость симуляции" : "Exploit Speed")
-                            Spacer()
-                            Text(String(format: "%.1fx", simulationSpeedMultiplier))
-                                .foregroundColor(.secondary)
-                                .font(.system(.body, design: .monospaced))
-                        }
-                        Slider(value: $simulationSpeedMultiplier, in: 0.5...10.0, step: 0.5)
-                    }
-                    .padding(.vertical, 4)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text(isRu ? "Шанс пасхалки в настройках" : "Easter Egg Trigger Chance")
-                            Spacer()
-                            Text("\(easterEggChancePercent)%")
-                                .foregroundColor(.secondary)
-                                .font(.system(.body, design: .monospaced))
-                        }
-                        Slider(value: Binding(
-                            get: { Double(easterEggChancePercent) },
-                            set: { easterEggChancePercent = Int($0) }
-                        ), in: 0...100, step: 1)
-                    }
-                    .padding(.vertical, 4)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text(isRu ? "Длительность респринга" : "Respring Duration")
-                            Spacer()
-                            Text(String(format: "%.1f s", customRespringDuration))
-                                .foregroundColor(.secondary)
-                                .font(.system(.body, design: .monospaced))
-                        }
-                        Slider(value: $customRespringDuration, in: 0.5...10.0, step: 0.5)
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                // MARK: 5. Кастомизация сообщений
+                // MARK: 4. Кастомизация сообщений
                 Section(
                     header: Text(isRu ? "Кастомизация алертов твиков" : "Tweak Alert Overrides"),
                     footer: Text(isRu ? "Текст, отображаемый в окне после нажатия «Применить»." : "Custom text displayed in the alert when applying tweaks.")
@@ -260,7 +235,7 @@ struct AdminDashboardView: View {
                     }
                 }
 
-                // MARK: 6. Инструменты тестирования и действия
+                // MARK: 5. Инструменты тестирования и действия
                 Section(
                     header: Text(isRu ? "Диагностика и тестирование" : "Diagnostics & Live Actions")
                 ) {
@@ -303,7 +278,7 @@ struct AdminDashboardView: View {
                     }
                 }
 
-                // MARK: 7. Сброс и блокировка
+                // MARK: 6. Сброс и блокировка
                 Section {
                     Button(action: {
                         showResetConfirmationAlert = true
@@ -357,28 +332,13 @@ struct AdminDashboardView: View {
             .alert(isPresented: $showResetConfirmationAlert) {
                 Alert(
                     title: Text(isRu ? "Сбросить настройки ADMIN?" : "Reset All Admin Settings?"),
-                    message: Text(isRu ? "Все кастомные цвета, название приложения, подмены системы и тайминги будут сброшены к значениям по умолчанию." : "All custom colors, app renaming, system overrides, and timings will be restored to defaults."),
+                    message: Text(isRu ? "Все кастомные цвета, название приложения, версия и подмены системы будут сброшены к значениям по умолчанию." : "All custom colors, app renaming, version, and system overrides will be restored to defaults."),
                     primaryButton: .destructive(Text(isRu ? "Сбросить" : "Reset")) {
                         resetAllAdminSettings()
                     },
                     secondaryButton: .cancel(Text(isRu ? "Отмена" : "Cancel"))
                 )
             }
-        }
-        .onAppear {
-            syncColorPickers()
-        }
-    }
-
-    private func syncColorPickers() {
-        if !customBgColorHex.isEmpty && customBgColorHex != "default" {
-            bgColorPicker = Color(hex: customBgColorHex)
-        }
-        if !customCardColorHex.isEmpty && customCardColorHex != "default" {
-            cardColorPicker = Color(hex: customCardColorHex)
-        }
-        if !customTextColorHex.isEmpty && customTextColorHex != "default" {
-            textColorPicker = Color(hex: customTextColorHex)
         }
     }
 
@@ -397,12 +357,8 @@ struct AdminDashboardView: View {
             customArch = ""
             customExploitName = ""
             customPackageManager = ""
-            simulationSpeedMultiplier = 1.0
-            easterEggChancePercent = 1
-            customRespringDuration = 2.5
             customApplyButtonText = ""
             customApplyTitleText = ""
-            syncColorPickers()
         }
     }
 }

@@ -27,16 +27,18 @@ struct SettingsView: View {
     // ADMIN State
     @AppStorage("isAdminUnlocked") private var isAdminUnlocked: Bool = false
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
+    @AppStorage("customSubtitle") private var customSubtitle: String = ""
+    @AppStorage("customAppVersion") private var customAppVersion: String = "1.2"
+    @AppStorage("customAppBuild") private var customAppBuild: String = "26B101"
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
     @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
     @AppStorage("customCardColorHex") private var customCardColorHex: String = ""
     @AppStorage("customTextColorHex") private var customTextColorHex: String = ""
     @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
+    @AppStorage("customArch") private var customArch: String = ""
+    @AppStorage("customExploitName") private var customExploitName: String = ""
     @AppStorage("customPackageManager") private var customPackageManager: String = ""
-    @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
-    @AppStorage("easterEggChancePercent") private var easterEggChancePercent: Int = 1
-    @AppStorage("customRespringDuration") private var customRespringDuration: Double = 2.5
     @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
 
     @State private var adminTapCount: Int = 0
@@ -247,7 +249,8 @@ struct SettingsView: View {
                                 handleAdminTap()
                             }
 
-                        Text("v1.2")
+                        let versionDisplay = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "v1.2" : (customAppVersion.hasPrefix("v") ? customAppVersion : "v\(customAppVersion)")
+                        Text(versionDisplay)
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                             .padding(.horizontal, 6)
@@ -257,7 +260,7 @@ struct SettingsView: View {
                             .fixedSize(horizontal: true, vertical: false)
                     }
 
-                    Text("iOS Jailbreak & IPSW Utility")
+                    Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS Jailbreak & IPSW Utility" : customSubtitle)
                         .font(.system(size: 12, design: .default))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -407,13 +410,13 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader(title: strings.systemSection, icon: "cpu.fill", color: .teal)
 
-            infoRow(title: strings.deviceModelLabel, value: customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.model : customDeviceModel, icon: "ipad.and.iphone", color: .blue)
+            infoRow(title: strings.deviceModelLabel, value: customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.friendlyModelName : customDeviceModel, icon: "ipad.and.iphone", color: .blue)
             Divider()
-            infoRow(title: strings.osVersionLabel, value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS \(UIDevice.current.systemVersion)" : customOSVersion, icon: "iphone", color: .indigo)
+            infoRow(title: strings.osVersionLabel, value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS \(UIDevice.current.systemVersion)" : (customOSVersion.lowercased().hasPrefix("ios") ? customOSVersion : "iOS \(customOSVersion)"), icon: "iphone", color: .indigo)
             Divider()
-            infoRow(title: strings.archTitle, value: "arm64e (SPTM & PAC Bypass)", icon: "cpu", color: .teal)
+            infoRow(title: strings.archTitle, value: customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e (SPTM & PAC Bypass)" : customArch, icon: "cpu", color: .teal)
             Divider()
-            infoRow(title: strings.exploitLabel, value: "PhysPuppet / LandCast", icon: "bolt.fill", color: .orange)
+            infoRow(title: strings.exploitLabel, value: customExploitName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "PhysPuppet / LandCast" : customExploitName, icon: "bolt.fill", color: .orange)
             Divider()
             infoRow(title: strings.packageManagerLabel, value: customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1 Installer (Procursus)" : customPackageManager, icon: "shippingbox.fill", color: .cyan)
         }
@@ -481,7 +484,9 @@ struct SettingsView: View {
                 Text(strings.versionLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("1.2 (Build 26B101)")
+                let v = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "1.2" : customAppVersion
+                let b = customAppBuild.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "26B101" : customAppBuild
+                Text("\(v) (Build \(b))")
                     .foregroundColor(.secondary)
                     .font(.system(.subheadline, design: .monospaced))
             }

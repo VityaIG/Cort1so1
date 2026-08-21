@@ -7,11 +7,15 @@ struct MainView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
+    @AppStorage("customSubtitle") private var customSubtitle: String = ""
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
     @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
     @AppStorage("customCardColorHex") private var customCardColorHex: String = ""
     @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
+    @AppStorage("customArch") private var customArch: String = ""
+    @AppStorage("customExploitName") private var customExploitName: String = ""
+    @AppStorage("customPackageManager") private var customPackageManager: String = ""
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -192,7 +196,7 @@ struct MainView: View {
                             Text(strings.completedTitle)
                                 .font(.system(.headline, design: .default))
                                 .fontWeight(.bold)
-                            Text(strings.completedSubtitle)
+                            Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? strings.completedSubtitle : customSubtitle)
                                 .font(.system(.caption, design: .default))
                                 .foregroundColor(.secondary)
                         }
@@ -224,10 +228,11 @@ struct MainView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(strings.readyTitle(for: UIDevice.current.systemVersion))
+                        let os = customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.systemVersion : customOSVersion
+                        Text(strings.readyTitle(for: os))
                             .font(.system(.headline, design: .default))
                             .fontWeight(.bold)
-                        Text(strings.readySubtitle)
+                        Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? strings.readySubtitle : customSubtitle)
                             .font(.system(.caption, design: .default))
                             .foregroundColor(.secondary)
                     }
@@ -315,6 +320,13 @@ struct MainView: View {
                 value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.systemVersion : customOSVersion,
                 icon: "apple.logo",
                 color: .indigo,
+                isLast: false
+            )
+            infoRow(
+                title: isRu ? "Архитектура" : "Architecture",
+                value: customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e" : customArch,
+                icon: "cpu",
+                color: .teal,
                 isLast: false
             )
             infoRow(
