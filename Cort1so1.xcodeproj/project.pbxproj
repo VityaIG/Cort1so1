@@ -22,6 +22,7 @@
 		B10010162C74000100000001 /* TweaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010162C74000100000001 /* TweaksView.swift */; };
 		B10010982C74000100000001 /* bigalert.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F10010982C74000100000001 /* bigalert.mp3 */; };
 		B10010992C74000100000001 /* easter_egg.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F10010992C74000100000001 /* easter_egg.mp4 */; };
+		B100109A2C74000100000001 /* secreteaster.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F100109A2C74000100000001 /* secreteaster.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		F10010162C74000100000001 /* TweaksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweaksView.swift; sourceTree = "<group>"; };
 		F10010982C74000100000001 /* bigalert.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bigalert.mp3; sourceTree = "<group>"; };
 		F10010992C74000100000001 /* easter_egg.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = easter_egg.mp4; sourceTree = "<group>"; };
+		F100109A2C74000100000001 /* secreteaster.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = secreteaster.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 				F10010112C74000100000001 /* Info.plist */,
 				F10010982C74000100000001 /* bigalert.mp3 */,
 				F10010992C74000100000001 /* easter_egg.mp4 */,
+				F100109A2C74000100000001 /* secreteaster.mp4 */,
 			);
 			path = Cort1so1;
 			sourceTree = "<group>";
@@ -155,6 +158,7 @@
 				B10010102C74000100000001 /* Assets.xcassets in Resources */,
 				B10010982C74000100000001 /* bigalert.mp3 in Resources */,
 				B10010992C74000100000001 /* easter_egg.mp4 in Resources */,
+				B100109A2C74000100000001 /* secreteaster.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,6 +8,12 @@ struct SettingsView: View {
     static var hasPlayedInSession: Bool = false
 
     @Binding var jailbreakState: JailbreakState
+    @Binding var showSecretEasterEgg: Bool
+
+    init(jailbreakState: Binding<JailbreakState>, showSecretEasterEgg: Binding<Bool> = .constant(false)) {
+        self._jailbreakState = jailbreakState
+        self._showSecretEasterEgg = showSecretEasterEgg
+    }
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @AppStorage("hideStatusBar") private var hideStatusBar: Bool = false
     @AppStorage("appLanguage") private var appLanguage: String = "en"
@@ -85,6 +91,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(strings.settingsTitle)
+            .onAppear {
+                checkSecretEasterEgg()
+            }
             .fullScreenCover(isPresented: $showEasterEggVideo) {
                 EasterEggVideoPlayerView(isPresented: $showEasterEggVideo, hasPlayedEasterEgg: $hasPlayedEasterEgg)
             }
@@ -529,6 +538,19 @@ struct SettingsView: View {
 
         withAnimation(.easeInOut(duration: 0.25)) {
             jailbreakState = .idle
+        }
+    }
+
+    private func checkSecretEasterEgg() {
+        guard !showSecretEasterEgg else { return }
+        // 5% шанс появления секретной пасхалки при переходе в настройки
+        let roll = Int.random(in: 1...100)
+        if roll <= 5 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                    self.showSecretEasterEgg = true
+                }
+            }
         }
     }
 }
