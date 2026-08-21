@@ -1,5 +1,7 @@
 import SwiftUI
 import UIKit
+import MediaPlayer
+import AVFoundation
 
 // MARK: - UIDevice Extension for Real Hardware Info
 extension UIDevice {
@@ -566,7 +568,7 @@ struct DowngradeExecutionSheet: View {
     // MARK: - Logic
     
     private func start60SecondsFlashingSequence() {
-        let isVerbose = verbose || verboseLogs
+        let isVerbose = verboseLogs && verbose
         isRestoring = true
         elapsedSeconds = 0.0
         currentStageIndex = 0
@@ -720,62 +722,89 @@ enum EasterFirmware: String, CaseIterable, Identifiable {
         }
     }
 
-    func logs(isRu: Bool) -> [JailbreakLogStep] {
-        switch self {
-        case .android:
-            return [
-                JailbreakLogStep(id: 1, titleRu: "[Fastboot] Подключение устройства в EDL Mode (9008)...", titleEn: "[Fastboot] Connecting device in EDL Mode (9008)...", isMajorPhase: false, iconName: "cable.connector"),
-                JailbreakLogStep(id: 2, titleRu: "[Bootloader] Разблокировка Knox и OEM загрузчика...", titleEn: "[Bootloader] Unlocking Knox & OEM bootloader verification...", isMajorPhase: false, iconName: "lock.open.fill"),
-                JailbreakLogStep(id: 3, titleRu: "[VBMeta] Патчинг vbmeta.img (--disable-verity)...", titleEn: "[VBMeta] Patching vbmeta.img (--disable-verity)...", isMajorPhase: false, iconName: "shield.slash.fill"),
-                JailbreakLogStep(id: 4, titleRu: "[Partition] Разметка динамического Super раздела (system/vendor)...", titleEn: "[Partition] Repartitioning dynamic Super partition...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
-                JailbreakLogStep(id: 5, titleRu: "[Kernel] Прошивка GKI ядра (Linux 6.6-android)...", titleEn: "[Kernel] Flashing GKI (Generic Kernel Image 6.6-android)...", isMajorPhase: false, iconName: "cpu"),
-                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 7, titleRu: "[System] Распаковка system_ext.img (Android 17 SWEET_CAT)...", titleEn: "[System] Extracting system_ext.img (Android 17 SWEET_CAT)...", isMajorPhase: false, iconName: "archivebox.fill"),
-                JailbreakLogStep(id: 8, titleRu: "[Vendor] Инъекция Apple Bionic HAL и драйверов дисплея...", titleEn: "[Vendor] Injecting Apple Bionic HAL & display drivers...", isMajorPhase: false, iconName: "memorychip"),
-                JailbreakLogStep(id: 9, titleRu: "[Magisk] Установка Magisk v27.0 root демона в init.rc...", titleEn: "[Magisk] Injecting Magisk v27.0 root daemon into init.rc...", isMajorPhase: false, iconName: "crown.fill"),
-                JailbreakLogStep(id: 10, titleRu: "[Zygote] Инициализация среды ART runtime и Dalvik VM...", titleEn: "[Zygote] Initializing ART runtime & Dalvik VM...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 12, titleRu: "[GMS] Установка сервисов Google Play и MicroG framework...", titleEn: "[GMS] Installing Google Play Services & MicroG framework...", isMajorPhase: false, iconName: "shippingbox.fill"),
-                JailbreakLogStep(id: 13, titleRu: "[SELinux] Перевод политик безопасности в Permissive mode...", titleEn: "[SELinux] Setting SELinux state: Permissive mode...", isMajorPhase: false, iconName: "checkmark.shield.fill"),
-                JailbreakLogStep(id: 14, titleRu: "[Sync] Очистка кэш-разделов и сборка dalvik-cache...", titleEn: "[Sync] Wiping cache partition & rebuilding dalvik-cache...", isMajorPhase: false, iconName: "arrow.clockwise"),
-                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
-            ]
-        case .windows:
-            return [
-                JailbreakLogStep(id: 1, titleRu: "[UEFI] Загрузка ACPI таблиц и прошивки EDK2 UEFI...", titleEn: "[UEFI] Loading ACPI tables and EDK2 UEFI firmware...", isMajorPhase: false, iconName: "cpu"),
-                JailbreakLogStep(id: 2, titleRu: "[GPT] Конвертация APFS контейнера в разметку GPT...", titleEn: "[GPT] Converting APFS container to GPT partition table...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
-                JailbreakLogStep(id: 3, titleRu: "[DISM] Развертывание install.wim (Windows 11 ARM64 Build 26100)...", titleEn: "[DISM] Applying install.wim (Windows 11 ARM64 Build 26100)...", isMajorPhase: false, iconName: "archivebox.fill"),
-                JailbreakLogStep(id: 4, titleRu: "[BCDBoot] Инициализация EFI системного раздела (ESP)...", titleEn: "[BCDBoot] Initializing EFI System Partition (ESP)...", isMajorPhase: false, iconName: "folder.badge.gearshape"),
-                JailbreakLogStep(id: 5, titleRu: "[Drivers] Интеграция драйверов ARM64 SoC и дисплея...", titleEn: "[Drivers] Injecting ARM64 SoC & display drivers...", isMajorPhase: false, iconName: "memorychip"),
-                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 7, titleRu: "[Registry] Инъекция кустов реестра SYSTEM и SOFTWARE...", titleEn: "[Registry] Injecting SYSTEM & SOFTWARE registry hives...", isMajorPhase: false, iconName: "doc.badge.gearshape"),
-                JailbreakLogStep(id: 8, titleRu: "[Bypass] Обход требований TPM 2.0 и SecureBoot checks...", titleEn: "[Bypass] Bypassing TPM 2.0 & SecureBoot verification checks...", isMajorPhase: false, iconName: "lock.open.fill"),
-                JailbreakLogStep(id: 9, titleRu: "[Winlogon] Создание профиля Администратора (OOBE Bypass)...", titleEn: "[Winlogon] Creating Administrator profile (OOBE Bypass)...", isMajorPhase: false, iconName: "person.crop.circle.badge.checkmark"),
-                JailbreakLogStep(id: 10, titleRu: "[DirectX] Инициализация графического конвейера DX12 / WDDM...", titleEn: "[DirectX] Initializing DX12 & WDDM graphics pipeline...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 12, titleRu: "[Services] Запуск служб Windows Explorer и DWM...", titleEn: "[Services] Enabling Windows Explorer & DWM shell services...", isMajorPhase: false, iconName: "server.rack"),
-                JailbreakLogStep(id: 13, titleRu: "[BSOD] Подавление системных вотчдогов CRITICAL_PROCESS_DIED...", titleEn: "[BSOD] Suppressing CRITICAL_PROCESS_DIED watchdogs...", isMajorPhase: false, iconName: "shield.fill"),
-                JailbreakLogStep(id: 14, titleRu: "[Bootmgr] Обновление BCD: режим без проверки подписи...", titleEn: "[Bootmgr] Updating BCD: /nointegritychecks enabled...", isMajorPhase: false, iconName: "arrow.clockwise"),
-                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Windows 11 готова к первому запуску", titleEn: "Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
-            ]
-        case .ubuntu:
-            return [
-                JailbreakLogStep(id: 1, titleRu: "[U-Boot] Инициализация device tree blob (dtb) для Apple Silicon...", titleEn: "[U-Boot] Initializing device tree blob (dtb) for Apple Silicon...", isMajorPhase: false, iconName: "cpu"),
-                JailbreakLogStep(id: 2, titleRu: "[Ext4] Форматирование /dev/nvme0n1p2 в файловую систему ext4...", titleEn: "[Ext4] Formatting /dev/nvme0n1p2 filesystem to ext4 (64k)...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
-                JailbreakLogStep(id: 3, titleRu: "[debootstrap] Распаковка базовой rootfs Ubuntu 26.04 LTS...", titleEn: "[debootstrap] Unpacking Ubuntu 26.04 Noble LTS rootfs...", isMajorPhase: false, iconName: "archivebox.fill"),
-                JailbreakLogStep(id: 4, titleRu: "[Kernel] Установка ядра Linux 6.10-noble-arm64...", titleEn: "[Kernel] Installing Linux Kernel 6.10-noble-arm64...", isMajorPhase: false, iconName: "memorychip"),
-                JailbreakLogStep(id: 5, titleRu: "[initramfs] Генерация initramfs образа (zstd сжатие)...", titleEn: "[initramfs] Generating initramfs image with zstd compression...", isMajorPhase: false, iconName: "bolt.horizontal.fill"),
-                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 7, titleRu: "[systemd] Настройка systemd таргетов и служб multi-user...", titleEn: "[systemd] Configuring systemd targets and multi-user services...", isMajorPhase: false, iconName: "server.rack"),
-                JailbreakLogStep(id: 8, titleRu: "[Sudo] Настройка прав sudo для пользователя 'cort1so1'...", titleEn: "[Sudo] Granting root sudoers privileges to user 'cort1so1'...", isMajorPhase: false, iconName: "crown.fill"),
-                JailbreakLogStep(id: 9, titleRu: "[APT] Обновление репозиториев и установка базовых утилит...", titleEn: "[APT] Updating repository sources and installing essential packages...", isMajorPhase: false, iconName: "shippingbox.fill"),
-                JailbreakLogStep(id: 10, titleRu: "[Mesa] Инициализация Gallium GPU и Wayland композитора...", titleEn: "[Mesa] Initializing Asahi GPU Gallium driver & Wayland compositor...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                JailbreakLogStep(id: 12, titleRu: "[GNOME] Развертывание окружения рабочего стола GNOME 47...", titleEn: "[GNOME] Deploying GNOME 47 Desktop Environment & Shell...", isMajorPhase: false, iconName: "macwindow"),
-                JailbreakLogStep(id: 13, titleRu: "[Network] Запуск NetworkManager и демона wpa_supplicant...", titleEn: "[Network] Starting NetworkManager & wpa_supplicant daemon...", isMajorPhase: false, iconName: "wifi"),
-                JailbreakLogStep(id: 14, titleRu: "[GRUB] Установка загрузчика GRUB-EFI в /boot/efi...", titleEn: "[GRUB] Installing GRUB-EFI bootloader into /boot/efi...", isMajorPhase: false, iconName: "arrow.triangle.merge"),
-                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
-            ]
+    func logs(isRu: Bool, verbose: Bool = true) -> [JailbreakLogStep] {
+        if verbose {
+            switch self {
+            case .android:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[Fastboot] Подключение устройства в EDL Mode (9008)...", titleEn: "[Fastboot] Connecting device in EDL Mode (9008)...", isMajorPhase: false, iconName: "cable.connector"),
+                    JailbreakLogStep(id: 2, titleRu: "[Bootloader] Разблокировка Knox и OEM загрузчика...", titleEn: "[Bootloader] Unlocking Knox & OEM bootloader verification...", isMajorPhase: false, iconName: "lock.open.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "[VBMeta] Патчинг vbmeta.img (--disable-verity)...", titleEn: "[VBMeta] Patching vbmeta.img (--disable-verity)...", isMajorPhase: false, iconName: "shield.slash.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "[Partition] Разметка динамического Super раздела (system/vendor)...", titleEn: "[Partition] Repartitioning dynamic Super partition...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                    JailbreakLogStep(id: 5, titleRu: "[Kernel] Прошивка GKI ядра (Linux 6.6-android)...", titleEn: "[Kernel] Flashing GKI (Generic Kernel Image 6.6-android)...", isMajorPhase: false, iconName: "cpu"),
+                    JailbreakLogStep(id: 6, titleRu: "Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 7, titleRu: "[System] Распаковка system_ext.img (Android 17 SWEET_CAT)...", titleEn: "[System] Extracting system_ext.img (Android 17 SWEET_CAT)...", isMajorPhase: false, iconName: "archivebox.fill"),
+                    JailbreakLogStep(id: 8, titleRu: "[Vendor] Инъекция Apple Bionic HAL и драйверов дисплея...", titleEn: "[Vendor] Injecting Apple Bionic HAL & display drivers...", isMajorPhase: false, iconName: "memorychip"),
+                    JailbreakLogStep(id: 9, titleRu: "[Magisk] Установка Magisk v27.0 root демона в init.rc...", titleEn: "[Magisk] Injecting Magisk v27.0 root daemon into init.rc...", isMajorPhase: false, iconName: "crown.fill"),
+                    JailbreakLogStep(id: 10, titleRu: "[Zygote] Инициализация среды ART runtime и Dalvik VM...", titleEn: "[Zygote] Initializing ART runtime & Dalvik VM...", isMajorPhase: false, iconName: "bolt.fill"),
+                    JailbreakLogStep(id: 11, titleRu: "Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 12, titleRu: "[GMS] Установка сервисов Google Play и MicroG framework...", titleEn: "[GMS] Installing Google Play Services & MicroG framework...", isMajorPhase: false, iconName: "shippingbox.fill"),
+                    JailbreakLogStep(id: 13, titleRu: "[SELinux] Перевод политик безопасности в Permissive mode...", titleEn: "[SELinux] Setting SELinux state: Permissive mode...", isMajorPhase: false, iconName: "checkmark.shield.fill"),
+                    JailbreakLogStep(id: 14, titleRu: "[Sync] Очистка кэш-разделов и сборка dalvik-cache...", titleEn: "[Sync] Wiping cache partition & rebuilding dalvik-cache...", isMajorPhase: false, iconName: "arrow.clockwise"),
+                    JailbreakLogStep(id: 15, titleRu: "Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            case .windows:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[UEFI] Загрузка ACPI таблиц и прошивки EDK2 UEFI...", titleEn: "[UEFI] Loading ACPI tables and EDK2 UEFI firmware...", isMajorPhase: false, iconName: "cpu"),
+                    JailbreakLogStep(id: 2, titleRu: "[GPT] Конвертация APFS контейнера в разметку GPT...", titleEn: "[GPT] Converting APFS container to GPT partition table...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "[DISM] Развертывание install.wim (Windows 11 ARM64 Build 26100)...", titleEn: "[DISM] Applying install.wim (Windows 11 ARM64 Build 26100)...", isMajorPhase: false, iconName: "archivebox.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "[BCDBoot] Инициализация EFI системного раздела (ESP)...", titleEn: "[BCDBoot] Initializing EFI System Partition (ESP)...", isMajorPhase: false, iconName: "folder.badge.gearshape"),
+                    JailbreakLogStep(id: 5, titleRu: "[Drivers] Интеграция драйверов ARM64 SoC и дисплея...", titleEn: "[Drivers] Injecting ARM64 SoC & display drivers...", isMajorPhase: false, iconName: "memorychip"),
+                    JailbreakLogStep(id: 6, titleRu: "Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 7, titleRu: "[Registry] Инъекция кустов реестра SYSTEM и SOFTWARE...", titleEn: "[Registry] Injecting SYSTEM & SOFTWARE registry hives...", isMajorPhase: false, iconName: "doc.badge.gearshape"),
+                    JailbreakLogStep(id: 8, titleRu: "[Bypass] Обход требований TPM 2.0 и SecureBoot checks...", titleEn: "[Bypass] Bypassing TPM 2.0 & SecureBoot verification checks...", isMajorPhase: false, iconName: "lock.open.fill"),
+                    JailbreakLogStep(id: 9, titleRu: "[Winlogon] Создание профиля Администратора (OOBE Bypass)...", titleEn: "[Winlogon] Creating Administrator profile (OOBE Bypass)...", isMajorPhase: false, iconName: "person.crop.circle.badge.checkmark"),
+                    JailbreakLogStep(id: 10, titleRu: "[DirectX] Инициализация графического конвейера DX12 / WDDM...", titleEn: "[DirectX] Initializing DX12 & WDDM graphics pipeline...", isMajorPhase: false, iconName: "bolt.fill"),
+                    JailbreakLogStep(id: 11, titleRu: "Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 12, titleRu: "[Services] Запуск служб Windows Explorer и DWM...", titleEn: "[Services] Enabling Windows Explorer & DWM shell services...", isMajorPhase: false, iconName: "server.rack"),
+                    JailbreakLogStep(id: 13, titleRu: "[BSOD] Подавление системных вотчдогов CRITICAL_PROCESS_DIED...", titleEn: "[BSOD] Suppressing CRITICAL_PROCESS_DIED watchdogs...", isMajorPhase: false, iconName: "shield.fill"),
+                    JailbreakLogStep(id: 14, titleRu: "[Bootmgr] Обновление BCD: режим без проверки подписи...", titleEn: "[Bootmgr] Updating BCD: /nointegritychecks enabled...", isMajorPhase: false, iconName: "arrow.clockwise"),
+                    JailbreakLogStep(id: 15, titleRu: "Фаза 3: Windows 11 готова к первому запуску", titleEn: "Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            case .ubuntu:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[U-Boot] Инициализация device tree blob (dtb) для Apple Silicon...", titleEn: "[U-Boot] Initializing device tree blob (dtb) for Apple Silicon...", isMajorPhase: false, iconName: "cpu"),
+                    JailbreakLogStep(id: 2, titleRu: "[Ext4] Форматирование /dev/nvme0n1p2 в файловую систему ext4...", titleEn: "[Ext4] Formatting /dev/nvme0n1p2 filesystem to ext4 (64k)...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "[debootstrap] Распаковка базовой rootfs Ubuntu 26.04 LTS...", titleEn: "[debootstrap] Unpacking Ubuntu 26.04 Noble LTS rootfs...", isMajorPhase: false, iconName: "archivebox.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "[Kernel] Установка ядра Linux 6.10-noble-arm64...", titleEn: "[Kernel] Installing Linux Kernel 6.10-noble-arm64...", isMajorPhase: false, iconName: "memorychip"),
+                    JailbreakLogStep(id: 5, titleRu: "[initramfs] Генерация initramfs образа (zstd сжатие)...", titleEn: "[initramfs] Generating initramfs image with zstd compression...", isMajorPhase: false, iconName: "bolt.horizontal.fill"),
+                    JailbreakLogStep(id: 6, titleRu: "Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 7, titleRu: "[systemd] Настройка systemd таргетов и служб multi-user...", titleEn: "[systemd] Configuring systemd targets and multi-user services...", isMajorPhase: false, iconName: "server.rack"),
+                    JailbreakLogStep(id: 8, titleRu: "[Sudo] Настройка прав sudo для пользователя 'cort1so1'...", titleEn: "[Sudo] Granting root sudoers privileges to user 'cort1so1'...", isMajorPhase: false, iconName: "crown.fill"),
+                    JailbreakLogStep(id: 9, titleRu: "[APT] Обновление репозиториев и установка базовых утилит...", titleEn: "[APT] Updating repository sources and installing essential packages...", isMajorPhase: false, iconName: "shippingbox.fill"),
+                    JailbreakLogStep(id: 10, titleRu: "[Mesa] Инициализация Gallium GPU и Wayland композитора...", titleEn: "[Mesa] Initializing Asahi GPU Gallium driver & Wayland compositor...", isMajorPhase: false, iconName: "bolt.fill"),
+                    JailbreakLogStep(id: 11, titleRu: "Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 12, titleRu: "[GNOME] Развертывание окружения рабочего стола GNOME 47...", titleEn: "[GNOME] Deploying GNOME 47 Desktop Environment & Shell...", isMajorPhase: false, iconName: "macwindow"),
+                    JailbreakLogStep(id: 13, titleRu: "[Network] Запуск NetworkManager и демона wpa_supplicant...", titleEn: "[Network] Starting NetworkManager & wpa_supplicant daemon...", isMajorPhase: false, iconName: "wifi"),
+                    JailbreakLogStep(id: 14, titleRu: "[GRUB] Установка загрузчика GRUB-EFI в /boot/efi...", titleEn: "[GRUB] Installing GRUB-EFI bootloader into /boot/efi...", isMajorPhase: false, iconName: "arrow.triangle.merge"),
+                    JailbreakLogStep(id: 15, titleRu: "Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            }
+        } else {
+            // Concise non-verbose summary steps (4 essential phases)
+            switch self {
+            case .android:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[Подготовка разделов Super и Bootloader...]", titleEn: "[Preparing Super partitions & bootloader...]", isMajorPhase: false, iconName: "cable.connector"),
+                    JailbreakLogStep(id: 2, titleRu: "Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            case .windows:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[Инициализация UEFI и разметки GPT...]", titleEn: "[Initializing UEFI & GPT partition table...]", isMajorPhase: false, iconName: "cpu"),
+                    JailbreakLogStep(id: 2, titleRu: "Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "Фаза 3: Windows 11 готова к первому запуску", titleEn: "Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            case .ubuntu:
+                return [
+                    JailbreakLogStep(id: 1, titleRu: "[Форматирование файловой системы и ядро Linux...]", titleEn: "[Formatting filesystem & Linux kernel...]", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
+                    JailbreakLogStep(id: 2, titleRu: "Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                ]
+            }
         }
     }
 }
@@ -792,38 +821,6 @@ enum DowngradeEasterAlert: Identifiable {
     }
 }
 
-// MARK: - Custom Logos for OS Recovery Screen
-
-struct WindowsLogoView: View {
-    var color: Color
-    var body: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 6) {
-                Rectangle().fill(color).frame(width: 44, height: 44)
-                Rectangle().fill(color).frame(width: 44, height: 44)
-            }
-            HStack(spacing: 6) {
-                Rectangle().fill(color).frame(width: 44, height: 44)
-                Rectangle().fill(color).frame(width: 44, height: 44)
-            }
-        }
-    }
-}
-
-struct UbuntuLogoView: View {
-    var color: Color
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(color, lineWidth: 14)
-                .frame(width: 84, height: 84)
-            Circle().fill(color).frame(width: 20, height: 20).offset(y: -42)
-            Circle().fill(color).frame(width: 20, height: 20).offset(x: 36, y: 21)
-            Circle().fill(color).frame(width: 20, height: 20).offset(x: -36, y: 21)
-        }
-    }
-}
-
 // MARK: - EasterFirmwareProcessView (Dopamine-style installation pipeline for custom OS)
 
 struct EasterFirmwareProcessView: View {
@@ -831,8 +828,10 @@ struct EasterFirmwareProcessView: View {
     var onComplete: () -> Void
 
     @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
     @AppStorage("installedOS") private var installedOS: String = "iOS"
+    @AppStorage("autoRespring") private var autoRespring: Bool = true
     @AppStorage("safeMode") private var safeMode: Bool = false
 
     @State private var phase: DopamineProcessPhase = .logging
@@ -841,12 +840,25 @@ struct EasterFirmwareProcessView: View {
     @State private var restoreProgress: Double = 0.0
     @State private var restoreTimer: Timer? = nil
 
+    // Safe Mode DVD Parameters
+    @State private var dvdPosition: CGPoint = .zero
+    @State private var dvdRotation: Double = 0.0
+    @State private var dvdAngularVelocity: Double = 220.0
+    @State private var maxDvdOffsetX: CGFloat = 80
+    @State private var maxDvdOffsetY: CGFloat = 200
+    @State private var dvdTimer: Timer? = nil
+
+    // Glitch Parameters
+    @State private var glitchClones: [GlitchClone] = []
+    @State private var glitchTimer: Timer? = nil
+    @State private var audioPlayer: AVAudioPlayer? = nil
+
     private var isRu: Bool {
         appLanguage == "ru"
     }
 
     private var logSteps: [JailbreakLogStep] {
-        firmware.logs(isRu: isRu)
+        firmware.logs(isRu: isRu, verbose: verboseLogs)
     }
 
     private var progressRatio: Double {
@@ -873,8 +885,12 @@ struct EasterFirmwareProcessView: View {
                 loggingView
                     .transition(.opacity)
 
-            case .restoreWhite, .glitchRedMultiply:
+            case .restoreWhite:
                 restoreFirmwareView
+                    .transition(.opacity)
+
+            case .glitchRedMultiply:
+                glitchMultiplyView
                     .transition(.opacity)
 
             case .respring:
@@ -891,6 +907,9 @@ struct EasterFirmwareProcessView: View {
         }
         .onDisappear {
             restoreTimer?.invalidate()
+            dvdTimer?.invalidate()
+            glitchTimer?.invalidate()
+            audioPlayer?.stop()
         }
     }
 
@@ -1064,17 +1083,7 @@ struct EasterFirmwareProcessView: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 48) {
-                switch firmware {
-                case .android:
-                    AndroidRobotHead(color: firmware.primaryColor)
-                        .frame(width: 96, height: 96)
-                case .windows:
-                    WindowsLogoView(color: firmware.primaryColor)
-                        .frame(width: 96, height: 96)
-                case .ubuntu:
-                    UbuntuLogoView(color: firmware.primaryColor)
-                        .frame(width: 96, height: 96)
-                }
+                renderOSLogo(color: firmware.primaryColor)
 
                 ZStack(alignment: .leading) {
                     Capsule()
@@ -1090,7 +1099,62 @@ struct EasterFirmwareProcessView: View {
         }
     }
 
-    // Pipeline
+    // MARK: - Safe Mode & Glitch View
+    private var glitchMultiplyView: some View {
+        let alertColor = Color(red: 0.98, green: 0.22, blue: 0.26)
+
+        return GeometryReader { geo in
+            ZStack {
+                Color.black.ignoresSafeArea()
+
+                if safeMode {
+                    // Safe Mode: Flying DVD logo without sound
+                    renderOSLogo(color: alertColor)
+                        .rotationEffect(.degrees(dvdRotation))
+                        .shadow(color: alertColor.opacity(0.85), radius: 22)
+                        .position(
+                            x: geo.size.width / 2 + dvdPosition.x,
+                            y: geo.size.height / 2 + dvdPosition.y
+                        )
+                } else {
+                    // Normal Glitch: Clones + Sound
+                    renderOSLogo(color: alertColor)
+                        .shadow(color: alertColor.opacity(0.8), radius: 24)
+
+                    ForEach(glitchClones) { clone in
+                        renderOSLogo(color: alertColor)
+                            .scaleEffect(clone.scale)
+                            .rotationEffect(.degrees(clone.rotation))
+                            .offset(clone.offset)
+                            .opacity(clone.opacity)
+                            .shadow(color: alertColor.opacity(0.6), radius: 16)
+                    }
+                }
+            }
+            .onAppear {
+                if safeMode {
+                    initDVDBoundaries(screenSize: geo.size)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func renderOSLogo(color: Color) -> some View {
+        switch firmware {
+        case .android:
+            AndroidRobotHead(color: color)
+                .frame(width: 96, height: 96)
+        case .windows:
+            WindowsLogoView(color: color)
+                .frame(width: 96, height: 96)
+        case .ubuntu:
+            UbuntuLogoView(color: color)
+                .frame(width: 96, height: 96)
+        }
+    }
+
+    // MARK: - Pipeline
     private func runExecutionPipeline(stepIndex: Int) {
         let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
         if stepIndex < logSteps.count {
@@ -1107,7 +1171,7 @@ struct EasterFirmwareProcessView: View {
                 self.visibleLogs.append(step)
             }
 
-            let baseDelay = 0.38 / speed
+            let baseDelay = (verboseLogs ? 0.38 : 0.70) / speed
             let delay = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
 
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -1127,25 +1191,39 @@ struct EasterFirmwareProcessView: View {
         let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
         self.restoreProgress = 0.0
         let totalDuration: Double = 40.0 / speed
-        let interval: Double = 0.05
-        var elapsed: Double = 0.0
+        let interval: Double = 0.04
+        let startTime = Date()
 
         self.restoreTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
-            elapsed += interval
-            let normalizedTime = (elapsed / totalDuration) * 40.0
-            self.restoreProgress = calculateRestoreProgress(at: normalizedTime)
+            let actualElapsed = Date().timeIntervalSince(startTime)
+            let normalizedElapsed = actualElapsed * speed
+            self.restoreProgress = self.calculateRestoreProgress(at: normalizedElapsed)
 
-            if elapsed >= totalDuration || self.restoreProgress >= 1.0 {
+            if normalizedElapsed >= 40.0 || actualElapsed >= totalDuration {
                 self.restoreProgress = 1.0
                 timer.invalidate()
                 self.restoreTimer = nil
 
                 // Save installed OS
-                self.installedOS = firmware.name
-                UserDefaults.standard.set(firmware.name, forKey: "installedOS")
+                self.installedOS = self.firmware.name
+                UserDefaults.standard.set(self.firmware.name, forKey: "installedOS")
 
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    self.phase = .respring
+                if self.safeMode {
+                    withAnimation(.none) {
+                        self.phase = .glitchRedMultiply
+                    }
+                    self.startSafeModeDVDSequence()
+                } else {
+                    self.setSystemVolumeMax()
+                    let soundDuration = self.playAlertSound()
+                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                    generator.prepare()
+                    generator.impactOccurred()
+
+                    withAnimation(.none) {
+                        self.phase = .glitchRedMultiply
+                    }
+                    self.startGlitchMultiplySequence(duration: soundDuration)
                 }
             }
         }
@@ -1184,5 +1262,157 @@ struct EasterFirmwareProcessView: View {
             }
         }
         return 1.0
+    }
+
+    // MARK: - Safe Mode DVD Animation
+    private func initDVDBoundaries(screenSize: CGSize) {
+        let itemSize: CGFloat = 110
+        self.maxDvdOffsetX = max(30, (screenSize.width - itemSize) / 2)
+        self.maxDvdOffsetY = max(50, (screenSize.height - itemSize) / 2)
+        self.dvdPosition = CGPoint(
+            x: CGFloat.random(in: -maxDvdOffsetX...maxDvdOffsetX),
+            y: CGFloat.random(in: -maxDvdOffsetY...maxDvdOffsetY)
+        )
+        self.dvdRotation = 0.0
+        self.dvdAngularVelocity = Double.random(in: 180...300) * (Bool.random() ? 1 : -1)
+    }
+
+    private func startSafeModeDVDSequence() {
+        let fps: Double = 60.0
+        let dt: Double = 1.0 / fps
+        let totalDuration: Double = 10.0
+        var elapsed: Double = 0.0
+
+        var vx: CGFloat = CGFloat.random(in: 180...260) * (Bool.random() ? 1 : -1)
+        var vy: CGFloat = CGFloat.random(in: 200...290) * (Bool.random() ? 1 : -1)
+
+        self.dvdTimer = Timer.scheduledTimer(withTimeInterval: dt, repeats: true) { timer in
+            elapsed += dt
+
+            var newX = self.dvdPosition.x + vx * CGFloat(dt)
+            var newY = self.dvdPosition.y + vy * CGFloat(dt)
+
+            var bounced = false
+            if newX <= -self.maxDvdOffsetX {
+                newX = -self.maxDvdOffsetX
+                vx = -vx
+                bounced = true
+            } else if newX >= self.maxDvdOffsetX {
+                newX = self.maxDvdOffsetX
+                vx = -vx
+                bounced = true
+            }
+
+            if newY <= -self.maxDvdOffsetY {
+                newY = -self.maxDvdOffsetY
+                vy = -vy
+                bounced = true
+            } else if newY >= self.maxDvdOffsetY {
+                newY = self.maxDvdOffsetY
+                vy = -vy
+                bounced = true
+            }
+
+            if bounced {
+                let spin = Double.random(in: 150...350)
+                self.dvdAngularVelocity = (self.dvdAngularVelocity > 0 ? -spin : spin)
+            }
+
+            self.dvdPosition = CGPoint(x: newX, y: newY)
+            self.dvdRotation += self.dvdAngularVelocity * dt
+
+            if elapsed >= totalDuration {
+                timer.invalidate()
+                self.dvdTimer = nil
+
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    self.phase = .respring
+                }
+            }
+        }
+    }
+
+    // MARK: - Normal Glitch Sequence
+    private func playAlertSound() -> Double {
+        if let soundURL = Bundle.main.url(forResource: "bigalert", withExtension: "mp3") {
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .default, options: [.duckOthers, .mixWithOthers])
+                try session.setActive(true)
+
+                let player = try AVAudioPlayer(contentsOf: soundURL)
+                player.volume = 1.0
+                player.numberOfLoops = 0
+                player.prepareToPlay()
+                player.play()
+                self.audioPlayer = player
+                return max(1.0, player.duration)
+            } catch {
+                print("Failed to play alert sound: \(error)")
+            }
+        }
+        return 3.0
+    }
+
+    private func setSystemVolumeMax() {
+        typealias MRMediaRemoteSetVolumeFunction = @convention(c) (Float) -> Void
+        if let handle = dlopen("/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote", RTLD_NOW) {
+            if let sym = dlsym(handle, "MRMediaRemoteSetVolume") {
+                let mrSetVolume = unsafeBitCast(sym, to: MRMediaRemoteSetVolumeFunction.self)
+                mrSetVolume(1.0)
+            }
+            dlclose(handle)
+        }
+
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+        try? session.setActive(true)
+    }
+
+    private func startGlitchMultiplySequence(duration: Double) {
+        self.generateRandomGlitchClones()
+        let interval: Double = 0.06
+        let totalTicks = max(10, Int(duration / interval))
+        var ticks = 0
+
+        if autoRespring {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
+                self.glitchTimer?.invalidate()
+                self.glitchTimer = nil
+
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    self.phase = .respring
+                }
+            }
+        }
+
+        self.glitchTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
+            ticks += 1
+            self.generateRandomGlitchClones()
+
+            if ticks >= totalTicks {
+                timer.invalidate()
+                self.glitchTimer = nil
+                if !self.autoRespring {
+                    self.onComplete()
+                }
+            }
+        }
+    }
+
+    private func generateRandomGlitchClones() {
+        var clones: [GlitchClone] = []
+        let count = Int.random(in: 8...12)
+        for _ in 0..<count {
+            let offset = CGSize(
+                width: CGFloat.random(in: -160...160),
+                height: CGFloat.random(in: -280...280)
+            )
+            let scale = CGFloat.random(in: 0.65...1.45)
+            let rotation = Double.random(in: -30...30)
+            let opacity = Double.random(in: 0.6...0.95)
+            clones.append(GlitchClone(offset: offset, scale: scale, rotation: rotation, opacity: opacity))
+        }
+        self.glitchClones = clones
     }
 }

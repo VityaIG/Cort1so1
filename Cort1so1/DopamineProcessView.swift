@@ -300,9 +300,15 @@ struct DopamineProcessView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 48) {
-                // Логотип Apple (или Android head при пасхалке)
-                if installedOS == "Android 17 Beta" {
+                // Логотип Apple или кастомной ОС
+                if installedOS == "Android 17" || installedOS == "Android 17 Beta" {
                     AndroidRobotHead(color: color)
+                        .frame(width: 96, height: 96)
+                } else if installedOS == "Windows 11" {
+                    WindowsLogoView(color: color)
+                        .frame(width: 96, height: 96)
+                } else if installedOS == "Ubuntu 26.04" {
+                    UbuntuLogoView(color: color)
                         .frame(width: 96, height: 96)
                 } else {
                     Image(systemName: "applelogo")
@@ -325,12 +331,18 @@ struct DopamineProcessView: View {
         }
     }
 
-    // MARK: - Safe Mode Вращающийся логотип Apple
+    // MARK: - Safe Mode Вращающийся логотип
 
     private func safeModeAppleLogo(color: Color) -> some View {
         Group {
-            if installedOS == "Android 17 Beta" {
+            if installedOS == "Android 17" || installedOS == "Android 17 Beta" {
                 AndroidRobotHead(color: color)
+                    .frame(width: 100, height: 100)
+            } else if installedOS == "Windows 11" {
+                WindowsLogoView(color: color)
+                    .frame(width: 100, height: 100)
+            } else if installedOS == "Ubuntu 26.04" {
+                UbuntuLogoView(color: color)
                     .frame(width: 100, height: 100)
             } else {
                 Image(systemName: "applelogo")

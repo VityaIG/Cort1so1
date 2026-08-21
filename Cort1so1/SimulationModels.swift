@@ -108,24 +108,21 @@ enum JailbreakMethod: String, CaseIterable, Identifiable {
                 ]
             }
         } else {
-            // Concise non-verbose summary steps
+            // Concise non-verbose summary steps (4 essential phases)
             switch self {
             case .dopamine:
                 return [
-                    JailbreakLogStep(id: 1, titleRu: "[Поиск базы ядра...]", titleEn: "[Finding kernel base...]", isMajorPhase: false, iconName: "magnifyingglass"),
-                    JailbreakLogStep(id: 2, titleRu: "[Обход PAC...]", titleEn: "[Bypassing PAC...]", isMajorPhase: false, iconName: "key.fill"),
-                    JailbreakLogStep(id: 3, titleRu: "Фаза 1: База ядра найдена, PAC обход завершен", titleEn: "Phase 1: Kernel Base Found & PAC Bypassed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                    JailbreakLogStep(id: 4, titleRu: "[Настройка обхода PPL и ElleKit...]", titleEn: "[Setting up PPL bypass & ElleKit...]", isMajorPhase: false, iconName: "shield.slash.fill"),
-                    JailbreakLogStep(id: 5, titleRu: "Фаза 2: PPL и ElleKit успешно настроены", titleEn: "Phase 2: PPL & ElleKit Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                    JailbreakLogStep(id: 6, titleRu: "Джейлбрейк Dopamine подготовлен к респрингу", titleEn: "Dopamine Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
+                    JailbreakLogStep(id: 1, titleRu: "[Инициализация обхода PAC и базы ядра...]", titleEn: "[Bypassing PAC & resolving kernel base...]", isMajorPhase: false, iconName: "key.fill"),
+                    JailbreakLogStep(id: 2, titleRu: "Фаза 1: База ядра найдена, права получены", titleEn: "Phase 1: Kernel Base Found & Permissions Granted", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 3, titleRu: "Фаза 2: PPL и ElleKit успешно настроены", titleEn: "Phase 2: PPL & ElleKit Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "Джейлбрейк Dopamine подготовлен к респрингу", titleEn: "Dopamine Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
                 ]
             case .cortisol:
                 return [
-                    JailbreakLogStep(id: 1, titleRu: "[Обход PAC/PPL и поиск смещений...]", titleEn: "[Bypassing PAC/PPL & resolving offsets...]", isMajorPhase: false, iconName: "shield.slash.fill"),
+                    JailbreakLogStep(id: 1, titleRu: "[Инициализация ядра Cortisol и смещений...]", titleEn: "[Initializing Cortisol engine & resolving offsets...]", isMajorPhase: false, iconName: "shield.slash.fill"),
                     JailbreakLogStep(id: 2, titleRu: "Фаза 1: Смещения ядра Cortisol разрешены", titleEn: "Phase 1: Cortisol Kernel Offsets Resolved", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                    JailbreakLogStep(id: 3, titleRu: "[Патчинг CoreTrust и получение Root...]", titleEn: "[Patching CoreTrust & gaining Root...]", isMajorPhase: false, iconName: "crown.fill"),
-                    JailbreakLogStep(id: 4, titleRu: "Фаза 2: Права Root получены и fakefs смонтирован", titleEn: "Phase 2: Root Privileges & FakeFS Mounted", isMajorPhase: true, iconName: "checkmark.circle.fill"),
-                    JailbreakLogStep(id: 5, titleRu: "Джейлбрейк Cortisol подготовлен к респрингу", titleEn: "Cortisol Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
+                    JailbreakLogStep(id: 3, titleRu: "Фаза 2: Права Root получены и fakefs смонтирован", titleEn: "Phase 2: Root Privileges & FakeFS Mounted", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                    JailbreakLogStep(id: 4, titleRu: "Джейлбрейк Cortisol подготовлен к респрингу", titleEn: "Cortisol Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
                 ]
             }
         }
@@ -366,5 +363,37 @@ extension Color {
             }
         }
         return "#000000"
+    }
+}
+
+// MARK: - Global OS Logo Views
+
+struct WindowsLogoView: View {
+    var color: Color
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Rectangle().fill(color).frame(width: 44, height: 44)
+                Rectangle().fill(color).frame(width: 44, height: 44)
+            }
+            HStack(spacing: 6) {
+                Rectangle().fill(color).frame(width: 44, height: 44)
+                Rectangle().fill(color).frame(width: 44, height: 44)
+            }
+        }
+    }
+}
+
+struct UbuntuLogoView: View {
+    var color: Color
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(color, lineWidth: 14)
+                .frame(width: 84, height: 84)
+            Circle().fill(color).frame(width: 20, height: 20).offset(y: -42)
+            Circle().fill(color).frame(width: 20, height: 20).offset(x: 36, y: 21)
+            Circle().fill(color).frame(width: 20, height: 20).offset(x: -36, y: 21)
+        }
     }
 }
