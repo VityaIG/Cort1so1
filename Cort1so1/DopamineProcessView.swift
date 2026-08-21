@@ -456,7 +456,7 @@ struct DopamineProcessView: View {
         } else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 withAnimation(.easeInOut(duration: 0.6)) {
-                    self.showAppleLogo = true
+                    self.phase = .appleWhite
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
@@ -467,13 +467,21 @@ struct DopamineProcessView: View {
                     self.triggerHaptic(isMajor: true)
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.phase = .appleRed
+                        }
                         withAnimation(.easeIn(duration: 1.5)) {
                             self.appleRedOpacity = 1.0
                             self.appleRedScale = 1.2
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                            self.onFinished()
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                self.phase = .respring
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                self.onFinished()
+                            }
                         }
                     }
                 }
