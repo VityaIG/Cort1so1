@@ -23,6 +23,7 @@ struct JailbreakLogStep: Identifiable, Equatable {
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
+    @AppStorage("installedOS") private var installedOS: String = "iOS"
     var onComplete: () -> Void
 
     @State private var phase: DopamineProcessPhase = .logging
@@ -397,11 +398,18 @@ struct DopamineProcessView: View {
             Color.black
                 .ignoresSafeArea()
 
-            Image(systemName: "applelogo")
-                .font(.system(size: 96, weight: .regular))
-                .foregroundColor(color)
-                .scaleEffect(scale)
-                .opacity(opacity)
+            if installedOS == "Android 17 Beta" {
+                AndroidRobotHead(color: color)
+                    .frame(width: 96, height: 96)
+                    .scaleEffect(scale)
+                    .opacity(opacity)
+            } else {
+                Image(systemName: "applelogo")
+                    .font(.system(size: 96, weight: .regular))
+                    .foregroundColor(color)
+                    .scaleEffect(scale)
+                    .opacity(opacity)
+            }
         }
     }
 
@@ -410,11 +418,18 @@ struct DopamineProcessView: View {
             Color.black
                 .ignoresSafeArea()
 
-            Image(systemName: "applelogo")
-                .font(.system(size: 96, weight: .regular))
-                .foregroundColor(Color(red: 0.96, green: 0.22, blue: 0.22))
-                .scaleEffect(appleRedScale)
-                .opacity(appleRedOpacity)
+            if installedOS == "Android 17 Beta" {
+                AndroidRobotHead(color: Color(red: 0.96, green: 0.22, blue: 0.22))
+                    .frame(width: 96, height: 96)
+                    .scaleEffect(appleRedScale)
+                    .opacity(appleRedOpacity)
+            } else {
+                Image(systemName: "applelogo")
+                    .font(.system(size: 96, weight: .regular))
+                    .foregroundColor(Color(red: 0.96, green: 0.22, blue: 0.22))
+                    .scaleEffect(appleRedScale)
+                    .opacity(appleRedOpacity)
+            }
         }
     }
 
@@ -518,4 +533,48 @@ struct DopamineProcessView: View {
 
 #Preview {
     DopamineProcessView(onComplete: {})
+}
+
+// MARK: - Easter Egg Logo
+struct AndroidRobotHead: View {
+    var color: Color
+    var body: some View {
+        GeometryReader { geometry in
+            let w = geometry.size.width
+            let h = geometry.size.height
+            ZStack {
+                // Head (Semi-circle)
+                Path { path in
+                    path.addArc(center: CGPoint(x: w/2, y: h/2), radius: w/4, startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false)
+                }
+                .fill(color)
+                
+                // Left Eye
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: w * 0.05, height: w * 0.05)
+                    .offset(x: -w * 0.1, y: -w * 0.05)
+                
+                // Right Eye
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: w * 0.05, height: w * 0.05)
+                    .offset(x: w * 0.1, y: -w * 0.05)
+                
+                // Left Antenna
+                Capsule()
+                    .fill(color)
+                    .frame(width: w * 0.03, height: w * 0.15)
+                    .rotationEffect(.degrees(-30))
+                    .offset(x: -w * 0.15, y: -w * 0.22)
+                
+                // Right Antenna
+                Capsule()
+                    .fill(color)
+                    .frame(width: w * 0.03, height: w * 0.15)
+                    .rotationEffect(.degrees(30))
+                    .offset(x: w * 0.15, y: -w * 0.22)
+            }
+        }
+    }
 }

@@ -165,6 +165,7 @@ struct DowngradeExecutionSheet: View {
     let appLanguage: String
     let verbose: Bool
     @Environment(\.presentationMode) var presentationMode
+    @AppStorage("installedOS") private var installedOS: String = "iOS"
     
     private var isRu: Bool {
         appLanguage == "ru"
@@ -441,6 +442,7 @@ struct DowngradeExecutionSheet: View {
                 restoreTimer = nil
                 isRestoring = false
                 triggerNotificationSuccess()
+                installedOS = firmware.version
                 showSuccessAlert = true
             }
         }
