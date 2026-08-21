@@ -4,7 +4,7 @@ import SwiftUI
 struct NeoSpringView: View {
     var onFinished: () -> Void
     @AppStorage("appLanguage") private var appLanguage: String = "en"
-    @State private var self.isVisible = false
+    @State private var isVisible = false
     @State private var rotationAngle: Double = 0
 
     private var strings: LocalizedStrings {

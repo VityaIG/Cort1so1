@@ -258,7 +258,7 @@ struct TweaksView: View {
         self.customTweaks = decoded
     }
 
-    private func self.saveCustomTweaks() {
+    private func saveCustomTweaks() {
         if let encoded = try? JSONEncoder().encode(customTweaks),
            let jsonString = String(data: encoded, encoding: .utf8) {
             self.customTweaksJSON = jsonString

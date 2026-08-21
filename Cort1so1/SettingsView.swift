@@ -426,7 +426,7 @@ struct SettingsView: View {
 
     // MARK: - Логика действий
 
-    private func self.removeJailbreak() {
+    private func removeJailbreak() {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(.success)

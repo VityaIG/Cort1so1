@@ -162,7 +162,7 @@ struct DowngradeView: View {
         .padding(16)
     }
     
-    private func self.triggerSelectionHaptic() {
+    private func triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
@@ -402,7 +402,7 @@ struct DowngradeExecutionSheet: View {
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 4) {
-                            if terminalLogs.isEmpty {
+                            if self.terminalLogs.isEmpty {
                                 Text("Awaiting command...")
                                     .foregroundColor(Color(white: 0.3))
                             } else {
@@ -417,10 +417,10 @@ struct DowngradeExecutionSheet: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(height: 120)
-                    .onChange(of: terminalLogs.count) { _ in
-                        if !terminalLogs.isEmpty {
+                    .onChange(of: self.terminalLogs.count) { _ in
+                        if !self.terminalLogs.isEmpty {
                             withAnimation {
-                                proxy.scrollTo(terminalLogs.count - 1, anchor: .bottom)
+                                proxy.scrollTo(self.terminalLogs.count - 1, anchor: .bottom)
                             }
                         }
                     }
@@ -562,7 +562,7 @@ struct DowngradeExecutionSheet: View {
         }
     }
 
-    private func self.cancelFlashing() {
+    private func cancelFlashing() {
         restoreTimer?.invalidate()
         restoreTimer = nil
         isRestoring = false
@@ -571,7 +571,7 @@ struct DowngradeExecutionSheet: View {
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
     }
 
-    private func self.triggerSelectionHaptic() {
+    private func triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
@@ -583,7 +583,7 @@ struct DowngradeExecutionSheet: View {
         generator.impactOccurred()
     }
 
-    private func self.triggerNotificationSuccess() {
+    private func triggerNotificationSuccess() {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(.success)
