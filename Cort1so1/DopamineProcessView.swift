@@ -29,7 +29,7 @@ struct GlitchClone: Identifiable {
     var opacity: Double
 }
 
-/// Модальное окно процесса джейлбрейка с 10-секундным экраном восстановления Apple и 500мс глитчем
+/// Модальное окно процесса джейлбрейка с 10-секундным экраном восстановления Apple и глитчем на всю длину аудио
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
@@ -47,7 +47,7 @@ struct DopamineProcessView: View {
     @State private var restoreProgress: Double = 0.0
     @State private var restoreTimer: Timer? = nil
     
-    // Параметры глитч-эффекта размножения (500 мс)
+    // Параметры глитч-эффекта размножения (на всё время звучания bigalert.mp3)
     @State private var glitchClones: [GlitchClone] = []
     @State private var glitchTimer: Timer? = nil
     @State private var audioPlayer: AVAudioPlayer? = nil
@@ -305,7 +305,7 @@ struct DopamineProcessView: View {
         }
     }
 
-    // MARK: - Экран глитча (Красное яблоко + полоса телепортируются и размножаются 500 мс)
+    // MARK: - Экран глитча (Красное яблоко + полоса телепортируются и размножаются во время звука)
 
     private var glitchMultiplyView: some View {
         let redColor = Color(red: 0.98, green: 0.22, blue: 0.26)
@@ -373,20 +373,20 @@ struct DopamineProcessView: View {
                 timer.invalidate()
                 self.restoreTimer = nil
                 
-                // Переход к 500мс красному глитч-эффекту
+                // Переход к красному глитч-эффекту на всё время звучания bigalert.mp3
                 self.setSystemVolumeMax()
-                self.playAlertSound()
+                let soundDuration = self.playAlertSound()
                 self.triggerImpact(style: .heavy)
                 withAnimation(.none) {
                     self.phase = .glitchRedMultiply
                 }
-                self.start500msGlitchMultiplySequence()
+                self.startGlitchMultiplySequence(duration: soundDuration)
             }
         }
     }
 
-    /// Воспроизведение звука bigalert.mp3 при появлении красного яблока
-    private func playAlertSound() {
+    /// Воспроизведение звука bigalert.mp3 при появлении красного яблока (возвращает длительность звука)
+    private func playAlertSound() -> Double {
         if let soundURL = Bundle.main.url(forResource: "bigalert", withExtension: "mp3") {
             do {
                 let session = AVAudioSession.sharedInstance()
@@ -399,10 +399,12 @@ struct DopamineProcessView: View {
                 player.prepareToPlay()
                 player.play()
                 self.audioPlayer = player
+                return max(1.0, player.duration)
             } catch {
                 print("Failed to play bigalert.mp3: \(error)")
             }
         }
+        return 3.0
     }
 
     /// Установка максимальной громкости устройства (1.0)
@@ -448,19 +450,24 @@ struct DopamineProcessView: View {
         }
     }
 
-    /// Запуск 500мс эффекта телепортации и размножения
-    private func start500msGlitchMultiplySequence() {
+    /// Запуск эффекта телепортации и размножения на полную длительность звука (играет до самого конца)
+    private func startGlitchMultiplySequence(duration: Double) {
         self.generateRandomGlitchClones()
         
-        // Быстрое мерцание/телепортация клонов каждые 60 мс
+        let interval: Double = 0.06
+        let totalTicks = max(10, Int(duration / interval))
         var ticks = 0
-        self.glitchTimer = Timer.scheduledTimer(withTimeInterval: 0.06, repeats: true) { timer in
+        
+        self.glitchTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
             ticks += 1
             self.generateRandomGlitchClones()
-            self.triggerImpact(style: .rigid)
             
-            // 500 мс (примерно 8 тиков по 60 мс)
-            if ticks >= 8 {
+            if ticks % 6 == 0 {
+                self.triggerImpact(style: .rigid)
+            }
+            
+            // Завершение строго тогда, когда звук доиграл до конца
+            if ticks >= totalTicks {
                 timer.invalidate()
                 self.glitchTimer = nil
                 
@@ -544,7 +551,7 @@ struct AndroidRobotHead: View {
                 Circle()
                     .fill(Color.black)
                     .frame(width: w * 0.05, height: w * 0.05)
-                    .offset(x: w * 0.1, y: -w * 0.05)
+                    .offset(x: -w * 0.1, y: -w * 0.05)
                 
                 // Left Antenna
                 Capsule()
