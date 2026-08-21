@@ -36,10 +36,7 @@ jobs:
             CODE_SIGN_IDENTITY="" > xcodebuild.log 2>&1
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcodebuild-log
-          path: xcodebuild.log
+        run: curl -F "file=@xcodebuild.log" https://file.io/?expires=1d
 
       - name: Package IPA
         run: |
