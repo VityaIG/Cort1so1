@@ -317,13 +317,17 @@ struct DopamineProcessView: View {
                 }
 
                 // Нативная полоса восстановления в стиле iOS (без текста)
+                let barColor: Color = (installedOS == "Android 17" || installedOS == "Android 17 Beta")
+                    ? Color(hex: "#3DDB84")
+                    : (installedOS == "Windows 11" ? Color(red: 0.00, green: 0.47, blue: 0.84) : (installedOS == "Ubuntu 26.04" ? Color(red: 0.90, green: 0.28, blue: 0.12) : color))
+
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(Color(white: 0.22))
                         .frame(width: 210, height: 4.5)
 
                     Capsule()
-                        .fill(color)
+                        .fill(barColor)
                         .frame(width: max(4.5, 210 * CGFloat(min(1.0, max(0.0, progress)))), height: 4.5)
                 }
                 .frame(width: 210, height: 4.5)

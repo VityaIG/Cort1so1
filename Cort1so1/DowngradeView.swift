@@ -708,7 +708,7 @@ enum EasterFirmware: String, CaseIterable, Identifiable {
 
     var primaryColor: Color {
         switch self {
-        case .android: return Color(red: 0.24, green: 0.86, blue: 0.36) // Android Green
+        case .android: return Color(hex: "#3DDB84") // Android 3D Green from picture (#3DDB84)
         case .windows: return Color(red: 0.00, green: 0.47, blue: 0.84) // Windows Blue
         case .ubuntu: return Color(red: 0.90, green: 0.28, blue: 0.12)  // Ubuntu Orange
         }
