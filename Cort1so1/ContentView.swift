@@ -30,14 +30,12 @@ struct ContentView: View {
                     }
                     .tag(0)
 
-                // Раздел «Твики» появляется только после выполнения джейлбрейка
-                if isJailbroken || jailbreakState == .completed {
-                    TweaksView()
-                        .tabItem {
-                            Label(strings.tabTweaks, systemImage: "hammer.fill")
-                        }
-                        .tag(1)
-                }
+                // Раздел «Твики»
+                TweaksView()
+                    .tabItem {
+                        Label(strings.tabTweaks, systemImage: "hammer.fill")
+                    }
+                    .tag(1)
 
                 DowngradeView()
                     .tabItem {
