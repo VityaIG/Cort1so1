@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Состояния процесса джейлбрейка
 enum JailbreakState: Equatable {
@@ -41,72 +42,99 @@ struct FirmwareVersion: Identifiable, Hashable {
     let id = UUID()
     let version: String
     let build: String
-    let releaseDateRu: String
-    let releaseDateEn: String
-    let isSigned: Bool
-    let isBeta: Bool
-    let sizeGB: Double
+    let features: String
+    let badgeText: String
+    let badgeColor: Color
+    let group: String
     let sha256: String
-    let sepStatusRu: String
-    let sepStatusEn: String
-
-    func releaseDate(isRu: Bool) -> String {
-        isRu ? releaseDateRu : releaseDateEn
-    }
-
-    func sepStatus(isRu: Bool) -> String {
-        isRu ? sepStatusRu : sepStatusEn
-    }
 }
 
-/// Список версий для экрана отката согласно спецификации
+/// Список версий для экрана отката
 let sampleFirmwares: [FirmwareVersion] = [
+    // LATEST & BETAS
     FirmwareVersion(
-        version: "26.6",
-        build: "30G78",
-        releaseDateRu: "Август 2025",
-        releaseDateEn: "August 2025",
-        isSigned: true,
-        isBeta: false,
-        sizeGB: 7.1,
-        sha256: "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
-        sepStatusRu: "Совместим (Cryptex1 Match)",
-        sepStatusEn: "Compatible (Cryptex1 Match)"
+        version: "iOS 27.0 Beta 4",
+        build: "31A5320d",
+        features: "SEP / BB Bypass",
+        badgeText: "BETA",
+        badgeColor: .purple,
+        group: "LATEST & BETAS",
+        sha256: "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"
     ),
     FirmwareVersion(
-        version: "26.0",
-        build: "30A195",
-        releaseDateRu: "Сентябрь 2024",
-        releaseDateEn: "September 2024",
-        isSigned: true,
-        isBeta: false,
-        sizeGB: 6.8,
-        sha256: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
-        sepStatusRu: "Совместим (Full TSS)",
-        sepStatusEn: "Compatible (Full TSS)"
+        version: "iOS 26.6.1",
+        build: "30G82",
+        features: "SEP / BB Bypass",
+        badgeText: "STABLE",
+        badgeColor: .cyan,
+        group: "LATEST & BETAS",
+        sha256: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
     ),
     FirmwareVersion(
-        version: "18.7.1",
-        build: "22H310",
-        releaseDateRu: "Октябрь 2024",
-        releaseDateEn: "October 2024",
-        isSigned: false,
-        isBeta: false,
-        sizeGB: 6.4,
-        sha256: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
-        sepStatusRu: "Нужны SHSH2 + Cryptex Fix",
-        sepStatusEn: "Requires SHSH2 + Cryptex Fix"
+        version: "iOS 26.5",
+        build: "30F66",
+        features: "SEP / BB Bypass",
+        badgeText: "STABLE",
+        badgeColor: .cyan,
+        group: "LATEST & BETAS",
+        sha256: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+    ),
+    
+    // STABLE RELEASES
+    FirmwareVersion(
+        version: "iOS 18.7.1",
+        build: "22H374",
+        features: "SEP / BB Bypass",
+        badgeText: "RECOMMENDED",
+        badgeColor: .green,
+        group: "STABLE RELEASES",
+        sha256: "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
     ),
     FirmwareVersion(
-        version: "18.5",
-        build: "22F76",
-        releaseDateRu: "Май 2024",
-        releaseDateEn: "May 2024",
-        isSigned: false,
-        isBeta: false,
-        sizeGB: 6.1,
-        sha256: "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
-        sepStatusRu: "SHSH2 Futurerestore (Gaster)",
-        sepStatusEn: "SHSH2 Futurerestore (Gaster)"
+        version: "iOS 18.6",
+        build: "22G75",
+        features: "SEP / BB Bypass",
+        badgeText: "STABLE",
+        badgeColor: .green,
+        group: "STABLE RELEASES",
+        sha256: "b6c810d29312157d62fc0bc4229ea4b4ec012826fc4933a39eaef91763b65287"
+    ),
+    FirmwareVersion(
+        version: "iOS 18.5",
+        build: "22F55",
+        features: "SEP / BB Bypass",
+        badgeText: "STABLE",
+        badgeColor: .green,
+        group: "STABLE RELEASES",
+        sha256: "a1a8c889f5bc08b981442f4c9c10f84be5e1657c913532c51000f68dc9948092"
+    ),
+    FirmwareVersion(
+        version: "iOS 18.4",
+        build: "22E210",
+        features: "SEP / BB Bypass",
+        badgeText: "STABLE",
+        badgeColor: .green,
+        group: "STABLE RELEASES",
+        sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     )
 ]
+
+struct AppTheme {
+    static let availableColors: [(name: String, color: Color)] = [
+        ("blue", .blue),
+        ("purple", .purple),
+        ("pink", .pink),
+        ("red", .red),
+        ("orange", .orange),
+        ("green", .green),
+        ("cyan", .cyan),
+        ("indigo", .indigo)
+    ]
+
+    static func resolveColor(name: String) -> Color {
+        if let match = availableColors.first(where: { $0.name == name }) {
+            return match.color
+        }
+        return .blue
+    }
+}

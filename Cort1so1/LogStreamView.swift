@@ -46,22 +46,19 @@ struct LogStreamView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: true) {
                         LazyVStack(alignment: .leading, spacing: 4) {
-                            ForEach(Array(visibleLogs.enumerated()), id: \.offset) { index, log in
+                            ForEach(Array(visibleLogs.enumerated().reversed()), id: \.offset) { index, log in
                                 Text(log)
                                     .font(.system(size: 10, design: .monospaced))
                                     .foregroundColor(logColor(for: log))
                                     .textSelection(.enabled)
                                     .id(index)
+                                    .scaleEffect(x: 1, y: -1, anchor: .center)
                             }
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                     }
-                    .onChange(of: visibleLogs.count) { _ in
-                        if let lastIndex = visibleLogs.indices.last {
-                            proxy.scrollTo(lastIndex, anchor: .bottom)
-                        }
-                    }
+                    .scaleEffect(x: 1, y: -1, anchor: .center)
                 }
             }
         }

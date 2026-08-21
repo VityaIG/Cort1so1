@@ -83,7 +83,7 @@ struct LocalizedStrings {
     var readySubtitle: String { lang == .ru ? "Система готова к запуску симуляции." : "System is ready to begin exploitation." }
 
     var completedTitle: String { lang == .ru ? "Джейлбрейк выполнен!" : "Jailbroken!" }
-    var completedSubtitle: String { lang == .ru ? "Пакетный менеджер Sileo готов к работе." : "Sileo package manager is ready." }
+    var completedSubtitle: String { lang == .ru ? "Менеджер пакетов готов к работе." : "Package manager is ready." }
 
     var buttonJailbreak: String { "Jailbreak" }
     var buttonProcessing: String { lang == .ru ? "Выполнение..." : "Jailbreaking..." }
@@ -112,7 +112,7 @@ struct LocalizedStrings {
     var step4Subtitle: String { lang == .ru ? "Установка прав суперпользователя (root)..." : "Acquiring root privileges and kernel task port..." }
 
     var step5Title: String { lang == .ru ? "Развертывание Bootstrap" : "Extracting Bootstrap" }
-    var step5Subtitle: String { lang == .ru ? "Развертывание Procursus и менеджеров пакетов..." : "Deploying Procursus bootstrap & Sileo package manager..." }
+    var step5Subtitle: String { lang == .ru ? "Развертывание Procursus и менеджеров пакетов..." : "Deploying Procursus bootstrap & package managers..." }
 
     // MARK: - Downgrade View (Reimagined)
     var downgradeTitle: String { lang == .ru ? "Откат iOS" : "iOS Downgrade" }

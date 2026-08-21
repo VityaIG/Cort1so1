@@ -21,7 +21,8 @@ struct JailbreakLogStep: Identifiable, Equatable {
 
 /// Модальное окно процесса джейлбрейка в стиле Dopamine с ультра-плавными нативными анимациями
 struct DopamineProcessView: View {
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     var onComplete: () -> Void
 
     @State private var phase: DopamineProcessPhase = .logging
@@ -280,13 +281,7 @@ struct DopamineProcessView: View {
                         .frame(height: 2.5)
 
                     Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue, Color(red: 0.35, green: 0.9, blue: 0.5), Color.white],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .fill(AppTheme.resolveColor(name: appThemeColor))
                         .frame(
                             width: max(6, geo.size.width * CGFloat(progressRatio)),
                             height: 2.5
@@ -300,7 +295,7 @@ struct DopamineProcessView: View {
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 10) {
-                        ForEach(Array(visibleLogs.enumerated()), id: \.element.id) { index, step in
+                        ForEach(Array(visibleLogs.enumerated().reversed()), id: \.element.id) { index, step in
                             let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
                             let isDone = !isCurrentRunning
 
@@ -350,8 +345,9 @@ struct DopamineProcessView: View {
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .id(step.id)
+                            .scaleEffect(x: 1, y: -1, anchor: .center)
                             .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                insertion: .opacity.combined(with: .move(edge: .top)),
                                 removal: .opacity
                             ))
                         }
@@ -360,13 +356,7 @@ struct DopamineProcessView: View {
                     .padding(.vertical, 14)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .onChange(of: visibleLogs.count) { _ in
-                    if let lastStep = visibleLogs.last {
-                        withAnimation(.easeOut(duration: 0.25)) {
-                            proxy.scrollTo(lastStep.id, anchor: .bottom)
-                        }
-                    }
-                }
+                .scaleEffect(x: 1, y: -1, anchor: .center)
             }
 
             Spacer(minLength: 0)
@@ -419,16 +409,6 @@ struct DopamineProcessView: View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
-
-            // Свечение сзади красного логотипа (эффект Dopamine)
-            RadialGradient(
-                colors: [Color(red: 0.95, green: 0.15, blue: 0.15).opacity(0.25), Color.clear],
-                center: .center,
-                startRadius: 20,
-                endRadius: 160
-            )
-            .frame(width: 320, height: 320)
-            .opacity(appleRedOpacity)
 
             Image(systemName: "applelogo")
                 .font(.system(size: 96, weight: .regular))

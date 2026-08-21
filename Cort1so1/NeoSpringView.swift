@@ -3,7 +3,7 @@ import SwiftUI
 /// Представление симуляции перезапуска SpringBoard (Respring)
 struct NeoSpringView: View {
     var onFinished: () -> Void
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
     @State private var isVisible = false
     @State private var rotationAngle: Double = 0
 

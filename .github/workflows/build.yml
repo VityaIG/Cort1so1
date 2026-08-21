@@ -53,23 +53,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.1' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.1' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.2' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.2' }}
           body: |
-            Официальная сборка приложения Cort1so1 (iOS HIG Native) v1.1.
-
-            Возможности и обновления:
-            - Новый раздел «Твики» (Substrate dylib Injection), доступный после выполнения джейлбрейка:
-              * Модули: Режим Бога, Получать одни пятерки, Существовать, 240 Герцовый экран, Бесконечная батарея, Чтение мыслей, Телепортация устройства, Удаление гравитации, Пропуск рекламы в реальной жизни, Неограниченный баланс карты.
-              * Кнопка «Применить» с подтверждением инъекции в SpringBoard.
-            * Постоянный бейдж версии реальной iOS в нижнем левом углу раздела «Основное».
-            * Стандартный нативный перезагрузочный алерт Cort1so1 после завершения «Отката iOS».
-            * Крупные системные логи джейлбрейка с нативными анимациями загрузчиков.
-            * Чистый нативный интерфейс iOS Human Interface Guidelines.
-
-            Инструкция по установке:
-            1. Скачайте файл Cort1so1.ipa из блока Assets ниже.
-            2. Установите приложение через TrollStore, AltStore, SideStore или Sideloadly.
+            Official build of Cort1so1 (iOS HIG Native) v1.2.
+            
+            Features and updates in v1.2:
+            - Fully translated the app and GitHub repository into English as the primary language!
+            - Updated Tweak names to humorous equivalents ("Download More RAM", "Tinfoil Hat Pro", "Microwave Charging", etc.)
+            - Added the ability to manage custom tweaks via a dedicated "Manage Tweaks" menu accessible from the top-left button on the Tweaks screen.
+            - Fixed custom tweak swipe-to-delete behavior.
+            - Clean and strict adherence to Apple Human Interface Guidelines.
+            
+            Installation Instructions:
+            1. Download the Cort1so1.ipa file from the Assets section below.
+            2. Install the app via TrollStore, AltStore, SideStore, or Sideloadly.
           files: Cort1so1.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

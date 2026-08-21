@@ -5,7 +5,8 @@ import UIKit
 struct SettingsView: View {
     @Binding var jailbreakState: JailbreakState
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     @AppStorage("autoRespring") private var autoRespring: Bool = true
@@ -101,7 +102,7 @@ struct SettingsView: View {
                             .fixedSize(horizontal: true, vertical: false)
                             .layoutPriority(2)
 
-                        Text("v1.1")
+                        Text("v1.2")
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(.blue)
                             .padding(.horizontal, 6)
@@ -188,7 +189,25 @@ struct SettingsView: View {
             Toggle(isOn: $isDarkMode) {
                 settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
             }
-            .tint(.blue)
+            .tint(AppTheme.resolveColor(name: appThemeColor))
+
+            Divider()
+            
+            HStack {
+                settingRowLabel(title: isRu ? "Тема приложения" : "App Theme", icon: "paintpalette.fill", color: .pink)
+                Spacer()
+                Picker("", selection: $appThemeColor) {
+                    ForEach(AppTheme.availableColors, id: \.name) { theme in
+                        HStack {
+                            Circle().fill(theme.color).frame(width: 14, height: 14)
+                            Text(isRu ? localizedThemeName(theme.name) : theme.name.capitalized)
+                        }
+                        .tag(theme.name)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(AppTheme.resolveColor(name: appThemeColor))
+            }
 
             Divider()
 
@@ -203,12 +222,26 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .tint(.blue)
+                .tint(AppTheme.resolveColor(name: appThemeColor))
             }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func localizedThemeName(_ name: String) -> String {
+        switch name {
+        case "blue": return "Синий"
+        case "purple": return "Пурпурный"
+        case "pink": return "Розовый"
+        case "red": return "Красный"
+        case "orange": return "Оранжевый"
+        case "green": return "Зеленый"
+        case "cyan": return "Голубой"
+        case "indigo": return "Индиго"
+        default: return name.capitalized
+        }
     }
 
     // MARK: - 3. Параметры джейлбрейка
@@ -220,28 +253,28 @@ struct SettingsView: View {
             Toggle(isOn: $verboseLogs) {
                 settingRowLabel(title: strings.verboseLogsToggle, icon: "terminal.fill", color: .slateColor)
             }
-            .tint(.blue)
+            .tint(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $autoRespring) {
                 settingRowLabel(title: strings.autoRespringToggle, icon: "arrow.clockwise.circle.fill", color: .green)
             }
-            .tint(.blue)
+            .tint(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $tweakInjection) {
                 settingRowLabel(title: strings.tweakInjectionToggle, icon: "puzzlepiece.extension.fill", color: .orange)
             }
-            .tint(.blue)
+            .tint(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $safeMode) {
                 settingRowLabel(title: isRu ? "Безопасный режим (Safe Mode)" : "Safe Mode Fallback", icon: "shield.lefthalf.filled", color: .cyan)
             }
-            .tint(.blue)
+            .tint(AppTheme.resolveColor(name: appThemeColor))
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -262,7 +295,7 @@ struct SettingsView: View {
             Divider()
             infoRow(title: strings.exploitLabel, value: "PhysPuppet / LandCast", icon: "bolt.fill", color: .orange)
             Divider()
-            infoRow(title: strings.packageManagerLabel, value: "Sileo v2.6 (Procursus)", icon: "shippingbox.fill", color: .cyan)
+            infoRow(title: strings.packageManagerLabel, value: "Cort1so1 Installer (Procursus)", icon: "shippingbox.fill", color: .cyan)
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -331,7 +364,7 @@ struct SettingsView: View {
                 Text(strings.versionLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("1.1 (Build 26B101)")
+                Text("1.2 (Build 26B101)")
                     .foregroundColor(.secondary)
                     .font(.system(.subheadline, design: .monospaced))
             }

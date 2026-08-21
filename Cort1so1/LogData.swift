@@ -3,7 +3,7 @@ import Foundation
 /// Набор системных логов для фазы вывода в терминал
 struct LogData {
     static let systemLogs: [String] = [
-        "[*] Cort1so1 Exploit Engine v1.1 (iOS 26.0 - arm64e)",
+        "[*] Cort1so1 Exploit Engine v1.2 (iOS 26.0 - arm64e)",
         "[*] Проверка архитектуры: Apple Silicon Neural Subsystem",
         "[*] Определение базового адреса mach_kernel: 0xfffffff007004000",
         "[*] Вычисление KASLR Slide: 0x000000001bc24000",
@@ -35,7 +35,7 @@ struct LogData {
         "[*] Извлечение /usr/bin/apt [OK]",
         "[*] Извлечение /usr/bin/sh [OK]",
         "[*] Извлечение /usr/lib/libsubstrate.dylib [OK]",
-        "[*] Извлечение /Applications/Sileo.app [OK]",
+        "[*] Извлечение /Applications/Installer.app [OK]",
         "[*] Извлечение /Applications/Zebra.app [OK]",
         "[*] Настройка прав доступа и битов setuid для системных утилит...",
         "[*] Запуск фонового демона cort1so1_daemon (jbd26)...",

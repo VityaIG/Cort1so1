@@ -3,7 +3,8 @@ import SwiftUI
 /// Главный экран утилиты «Cort1so1» в стиле Dopamine Jailbreak (iOS HIG)
 struct MainView: View {
     @Binding var jailbreakState: JailbreakState
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
 
     @State private var showingConfirmAlert: Bool = false
@@ -99,24 +100,24 @@ struct MainView: View {
                         .fontWeight(.semibold)
                 } icon: {
                     Image(systemName: "lock.open.fill")
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                 }
 
                 Spacer()
 
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(jailbreakState == .completed ? Color.green : Color.blue)
+                        .fill(jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor))
                         .frame(width: 8, height: 8)
                     Text(statusBadgeText)
-                        .foregroundColor(jailbreakState == .completed ? .green : .blue)
+                        .foregroundColor(jailbreakState == .completed ? .green : AppTheme.resolveColor(name: appThemeColor))
                         .font(.system(.subheadline, design: .default))
                         .fontWeight(.semibold)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
                 .background(
-                    (jailbreakState == .completed ? Color.green : Color.blue).opacity(0.12)
+                    (jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor)).opacity(0.12)
                 )
                 .clipShape(Capsule())
             }
@@ -185,7 +186,7 @@ struct MainView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
-                        Label("Sileo v2.6", systemImage: "shippingbox.fill")
+                        Label("Cort1so1 Installer", systemImage: "shippingbox.fill")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
@@ -199,7 +200,7 @@ struct MainView: View {
                 // Исходное состояние готовности
                 HStack(spacing: 14) {
                     Image(systemName: "lock.open.fill")
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                         .font(.system(size: 34))
 
                     VStack(alignment: .leading, spacing: 3) {
@@ -236,7 +237,7 @@ struct MainView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(Color.blue)
+                .background(AppTheme.resolveColor(name: appThemeColor))
                 .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
@@ -257,7 +258,7 @@ struct MainView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
                     .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                    .foregroundColor(.blue)
+                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }

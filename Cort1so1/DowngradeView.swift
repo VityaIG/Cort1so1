@@ -1,17 +1,146 @@
 import SwiftUI
 import UIKit
 
-/// Полностью переработанный экран «Откат iOS» (iOS Downgrade) в премиальном стиле iOS HIG
-/// Включает 60-секундный (1 минута) тайминг выполнения, пошаговые этапы, живой терминал и тактильный отклик
+/// Полностью переработанный экран «Откат iOS» (iOS Downgrade) в минималистичном стиле
+/// на основе предложенного дизайна
 struct DowngradeView: View {
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
-    @State private var selectedFirmware: FirmwareVersion = sampleFirmwares[0]
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
     
-    // Параметры восстановления
-    @State private var keepUserData: Bool = true
-    @State private var verifySepCryptex: Bool = true
+    // Состояние процесса отката
+    @State private var activeFirmware: FirmwareVersion? = nil
     
-    // Состояние 60-секундного процесса
+    private var isRu: Bool {
+        appLanguage == "ru"
+    }
+
+    private var strings: LocalizedStrings {
+        LocalizedStrings(langCode: appLanguage)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 24) {
+                    firmwareSection(title: "LATEST & BETAS", groupName: "LATEST & BETAS")
+                    firmwareSection(title: "STABLE RELEASES", groupName: "STABLE RELEASES")
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 32)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle(strings.downgradeTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            // Использование sheet для показа процесса отката
+            .sheet(item: $activeFirmware) { firmware in
+                DowngradeExecutionSheet(firmware: firmware, appLanguage: appLanguage)
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+    
+    // MARK: - Список прошивок
+    
+    @ViewBuilder
+    private func firmwareSection(title: String, groupName: String) -> some View {
+        let items = sampleFirmwares.filter { $0.group == groupName }
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Color(white: 0.4))
+                    .padding(.leading, 4)
+                
+                VStack(spacing: 0) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        firmwareRow(item)
+                        
+                        if index < items.count - 1 {
+                            Divider()
+                                .background(Color.white.opacity(0.1))
+                                .padding(.leading, 60)
+                        }
+                    }
+                }
+                .background(Color(white: 0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func firmwareRow(_ item: FirmwareVersion) -> some View {
+        HStack(spacing: 14) {
+            // Иконка
+            ZStack {
+                Circle()
+                    .strokeBorder(Color(white: 0.3), lineWidth: 1.5)
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "gearshape")
+                    .font(.system(size: 22))
+                    .foregroundColor(Color(white: 0.7))
+            }
+            
+            // Информация
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(item.version)
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text(item.badgeText)
+                        .font(.system(size: 10, weight: .heavy))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(item.badgeColor.opacity(0.2))
+                        .foregroundColor(item.badgeColor)
+                        .clipShape(Capsule())
+                }
+                
+                Text("Build \(item.build) • \(item.features)")
+                    .font(.system(size: 13, design: .monospaced))
+                    .foregroundColor(Color(white: 0.5))
+            }
+            
+            Spacer(minLength: 0)
+            
+            // Кнопка
+            Button {
+                triggerSelectionHaptic()
+                activeFirmware = item
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.counterclockwise.circle")
+                        .font(.system(size: 12, weight: .bold))
+                    Text("Downgrade")
+                        .font(.system(size: 13, weight: .bold))
+                }
+                .foregroundColor(.black)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(item.badgeColor)
+                .clipShape(Capsule())
+            }
+        }
+        .padding(16)
+    }
+    
+    private func triggerSelectionHaptic() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepare()
+        generator.selectionChanged()
+    }
+}
+
+// MARK: - Экран выполнения процесса (Sheet)
+
+struct DowngradeExecutionSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    let firmware: FirmwareVersion
+    let appLanguage: String
+    
     @State private var isRestoring: Bool = false
     @State private var elapsedSeconds: Double = 0.0
     @State private var totalSeconds: Double = 60.0
@@ -34,7 +163,7 @@ struct DowngradeView: View {
         min(1.0, elapsedSeconds / totalSeconds)
     }
 
-    // 5 этапов восстановления, точно распределенных на 60 секунд
+    // 5 этапов восстановления
     private var restoreStages: [(titleRu: String, titleEn: String, detailRu: String, detailEn: String, range: ClosedRange<Double>)] {
         [
             (
@@ -78,39 +207,54 @@ struct DowngradeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
-
+                Color.black.ignoresSafeArea()
+                
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        // 1. Верхний информационный баннер устройства и цели
-                        deviceAndTargetHeader
-
-                        // 2. Выбор прошивки IPSW (Каталог)
-                        firmwareCatalogSection
-
-                        // 3. Спецификация и совместимость выбранной прошивки
-                        firmwareDetailsCard
-
-                        // 4. Параметры прошивки
-                        restoreOptionsCard
-
-                        // 5. Движок отката (60-секундный таймер, лог, прогресс)
+                    VStack(spacing: 20) {
+                        // Цель
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(isRu ? "Целевая прошивка" : "Target Firmware")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(Color(white: 0.5))
+                                Text(firmware.version)
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            Spacer()
+                            Text(firmware.badgeText)
+                                .font(.system(size: 12, weight: .heavy))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(firmware.badgeColor.opacity(0.2))
+                                .foregroundColor(firmware.badgeColor)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.top, 20)
+                        
+                        // Процесс выполнения
                         restoreExecutionCard
-
-                        // 6. Дисклеймер безопасности
-                        disclaimerFooter
-                            .padding(.bottom, 28)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+                    .padding(.horizontal, 20)
                 }
             }
-            .navigationTitle(strings.downgradeTitle)
+            .navigationTitle(isRu ? "Откат устройства" : "Device Downgrade")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(isRu ? "Закрыть" : "Close") {
+                        if isRestoring {
+                            showCancelAlert = true
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .foregroundColor(Color(white: 0.6))
+                }
+            }
             // Алерт успешного завершения процесса отката
             .alert(strings.downgradeFinished, isPresented: $showSuccessAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) { dismiss() }
             } message: {
                 Text(strings.downgradeFinishedMsg)
             }
@@ -118,454 +262,143 @@ struct DowngradeView: View {
             .alert(isRu ? "Прервать откат?" : "Cancel Downgrade?", isPresented: $showCancelAlert) {
                 Button(isRu ? "Прервать" : "Stop", role: .destructive) {
                     cancelFlashing()
+                    dismiss()
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
                 Text(isRu ? "Процесс прошивки будет безопасно остановлен." : "The restore process will be safely terminated.")
             }
+            .onAppear {
+                // Автозапуск можно включить, или ждать нажатия кнопки
+            }
         }
     }
-
-    // MARK: - 1. Баннер устройства и целевой версии
-
-    private var deviceAndTargetHeader: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(Color.blue)
-                        .frame(width: 48, height: 48)
-
-                    Image(systemName: "iphone.gen3")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(UIDevice.current.model)
-                        .font(.system(.headline, design: .default))
+    
+    private var restoreExecutionCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Прогресс бар
+            VStack(spacing: 8) {
+                HStack {
+                    Text(isRu ? "Прогресс" : "Progress")
+                        .font(.system(.subheadline, design: .default))
                         .fontWeight(.bold)
-
-                    HStack(spacing: 6) {
-                        Text("\(isRu ? "Текущая" : "Current"): iOS \(UIDevice.current.systemVersion)")
-                            .font(.system(.caption, design: .default))
-                            .foregroundColor(.secondary)
-
-                        Text("•")
-                            .foregroundColor(.secondary)
-
-                        Text("arm64e")
-                            .font(.system(.caption, design: .monospaced))
-                            .fontWeight(.medium)
-                            .foregroundColor(.blue)
-                    }
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 3) {
-                    Text(isRu ? "Цель" : "Target")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-
-                    Text(selectedFirmware.version)
+                    Spacer()
+                    Text("\(Int(progressRatio * 100))%")
                         .font(.system(.subheadline, design: .monospaced))
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.12))
-                        .clipShape(Capsule())
+                        .foregroundColor(firmware.badgeColor)
                 }
+                
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color(white: 0.2))
+                            .frame(height: 8)
+                        Capsule()
+                            .fill(firmware.badgeColor)
+                            .frame(width: max(0, geo.size.width * progressRatio), height: 8)
+                            .animation(.linear(duration: 0.1), value: progressRatio)
+                    }
+                }
+                .frame(height: 8)
             }
-
-            Divider()
-
-            HStack(spacing: 12) {
-                HStack(spacing: 4) {
-                    Image(systemName: "shield.lefthalf.filled")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                    Text("SEP Cryptex: OK")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Image(systemName: "opticaldisc.fill")
-                        .font(.caption2)
-                        .foregroundColor(.blue)
-                    Text("APFS Snapshot: Ready")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - 2. Каталог версий IPSW
-
-    private var firmwareCatalogSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label {
-                    Text(isRu ? "Каталог прошивок IPSW" : "IPSW Firmware Catalog")
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.bold)
-                } icon: {
-                    Image(systemName: "internaldrive.fill")
-                        .foregroundColor(.blue)
-                }
-
-                Spacer()
-
-                Text("\(sampleFirmwares.count) " + (isRu ? "версий" : "versions"))
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-
-            VStack(spacing: 8) {
-                ForEach(sampleFirmwares) { fw in
-                    let isSelected = selectedFirmware.id == fw.id
-
-                    Button(action: {
-                        if !isRestoring {
-                            triggerSelectionHaptic()
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedFirmware = fw
-                            }
-                        }
-                    }) {
-                        HStack(spacing: 12) {
-                            // Индикатор радиобаттона
-                            ZStack {
+            
+            Divider().background(Color.white.opacity(0.1))
+            
+            // Этапы
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(0..<restoreStages.count, id: \.self) { i in
+                    let stage = restoreStages[i]
+                    let isActive = isRestoring && stage.range.contains(elapsedSeconds)
+                    let isCompleted = elapsedSeconds > stage.range.upperBound
+                    
+                    HStack(alignment: .top, spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor.opacity(0.2) : Color.clear))
+                                .stroke(isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor : Color(white: 0.3)), lineWidth: 1.5)
+                                .frame(width: 14, height: 14)
+                            
+                            if isCompleted {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundColor(.black)
+                            } else if isActive {
                                 Circle()
-                                    .strokeBorder(isSelected ? Color.blue : Color.secondary.opacity(0.3), lineWidth: isSelected ? 5 : 1.5)
-                                    .frame(width: 20, height: 20)
-                            }
-
-                            VStack(alignment: .leading, spacing: 3) {
-                                HStack(spacing: 6) {
-                                    Text(fw.version)
-                                        .font(.system(.body, design: .default))
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.primary)
-
-                                    if fw.isBeta {
-                                        Text("BETA")
-                                            .font(.system(size: 9, weight: .bold))
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(Color.purple.opacity(0.15))
-                                            .foregroundColor(.purple)
-                                            .clipShape(Capsule())
-                                    }
-                                }
-
-                                HStack(spacing: 6) {
-                                    Text(fw.build)
-                                        .font(.system(.caption, design: .monospaced))
-                                        .foregroundColor(.secondary)
-
-                                    Text("•")
-                                        .foregroundColor(.secondary.opacity(0.5))
-
-                                    Text(fw.releaseDate(isRu: isRu))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-
-                            Spacer()
-
-                            // Статус подписи
-                            HStack(spacing: 5) {
-                                Circle()
-                                    .fill(fw.isSigned ? Color.green : Color.orange)
+                                    .fill(firmware.badgeColor)
                                     .frame(width: 6, height: 6)
-
-                                Text(fw.isSigned ? (isRu ? "TSS Подписана" : "TSS Signed") : "SHSH2 Blobs")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(fw.isSigned ? .green : .orange)
                             }
-                            .padding(.horizontal, 9)
-                            .padding(.vertical, 5)
-                            .background((fw.isSigned ? Color.green : Color.orange).opacity(0.12))
-                            .clipShape(Capsule())
                         }
-                        .padding(12)
-                        .background(
-                            isSelected
-                                ? Color.blue.opacity(0.09)
-                                : Color(uiColor: .tertiarySystemGroupedBackground)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(isSelected ? Color.blue.opacity(0.4) : Color.clear, lineWidth: 1.5)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isRestoring)
-                }
-            }
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - 3. Спецификация выбранной прошивки
-
-    private var firmwareDetailsCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label {
-                    Text(strings.fwInfoTitle)
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.bold)
-                } icon: {
-                    Image(systemName: "doc.text.magnifyingglass")
-                        .foregroundColor(.blue)
-                }
-
-                Spacer()
-
-                Text("iOS \(selectedFirmware.version)")
-                    .font(.system(.subheadline, design: .monospaced))
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
-            }
-
-            VStack(spacing: 10) {
-                specRow(title: strings.fwBuild, value: selectedFirmware.build, isMono: true, icon: "number", color: .indigo)
-                Divider()
-                specRow(title: strings.fwReleaseDate, value: selectedFirmware.releaseDate(isRu: isRu), isMono: false, icon: "calendar", color: .blue)
-                Divider()
-                specRow(title: strings.fwSize, value: String(format: "%.1f GB", selectedFirmware.sizeGB), isMono: false, icon: "internaldrive", color: .teal)
-                Divider()
-                
-                HStack {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(selectedFirmware.isSigned ? .green : .orange)
-                        Text(strings.fwSignedStatus)
-                            .font(.system(.subheadline, design: .default))
-                    }
-                    Spacer()
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(selectedFirmware.isSigned ? Color.green : Color.orange)
-                            .frame(width: 8, height: 8)
-                        Text(selectedFirmware.isSigned ? strings.fwSigned : strings.fwUnsigned)
-                            .foregroundColor(selectedFirmware.isSigned ? .green : .orange)
-                            .font(.system(.subheadline, design: .default))
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                Divider()
-
-                HStack {
-                    HStack(spacing: 8) {
-                        Image(systemName: "cpu.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(.blue)
-                        Text(strings.fwSepCompatibility)
-                            .font(.system(.subheadline, design: .default))
-                    }
-                    Spacer()
-                    Text(selectedFirmware.sepStatus(isRu: isRu))
-                        .foregroundColor(.blue)
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.medium)
-                }
-            }
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    private func specRow(title: String, value: String, isMono: Bool, icon: String, color: Color) -> some View {
-        HStack {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundColor(color)
-                Text(title)
-                    .font(.system(.subheadline, design: .default))
-            }
-            Spacer()
-            Text(value)
-                .foregroundColor(.secondary)
-                .font(isMono ? .system(.subheadline, design: .monospaced) : .system(.subheadline, design: .default))
-        }
-    }
-
-    // MARK: - 4. Параметры восстановления
-
-    private var restoreOptionsCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Label {
-                Text(strings.restoreOptionsSection)
-                    .font(.system(.subheadline, design: .default))
-                    .fontWeight(.bold)
-            } icon: {
-                Image(systemName: "slider.horizontal.3")
-                    .foregroundColor(.blue)
-            }
-
-            Toggle(isOn: $keepUserData) {
-                Label {
-                    Text(strings.keepDataToggle)
-                        .font(.system(.subheadline, design: .default))
-                } icon: {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
-                        .foregroundColor(.blue)
-                }
-            }
-            .tint(.blue)
-            .disabled(isRestoring)
-
-            Divider()
-
-            Toggle(isOn: $verifySepCryptex) {
-                Label {
-                    Text(strings.verifySepToggle)
-                        .font(.system(.subheadline, design: .default))
-                } icon: {
-                    Image(systemName: "lock.shield.fill")
-                        .foregroundColor(.green)
-                }
-            }
-            .tint(.blue)
-            .disabled(isRestoring)
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - 5. Движок отката (60-секундный таймер)
-
-    private var restoreExecutionCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label {
-                    Text(strings.processTitle)
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.bold)
-                } icon: {
-                    Image(systemName: "timer")
-                        .foregroundColor(.blue)
-                }
-
-                Spacer()
-
-                if isRestoring {
-                    // Точный таймер обратного отсчета (1 минута = 60 секунд)
-                    let remaining = max(0, Int(ceil(totalSeconds - elapsedSeconds)))
-                    let minutes = remaining / 60
-                    let seconds = remaining % 60
-
-                    HStack(spacing: 5) {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 11))
-                            .foregroundColor(.cyan)
-
-                        Text(String(format: "%02d:%02d", minutes, seconds))
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
-                            .foregroundColor(.cyan)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.cyan.opacity(0.12))
-                    .clipShape(Capsule())
-                }
-            }
-
-            if isRestoring {
-                let stage = restoreStages[min(currentStageIndex, restoreStages.count - 1)]
-
-                VStack(spacing: 12) {
-                    // Текущий шаг и процент
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 3) {
+                        .padding(.top, 2)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(isRu ? stage.titleRu : stage.titleEn)
                                 .font(.system(.subheadline, design: .default))
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-
-                            Text(isRu ? stage.detailRu : stage.detailEn)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        Spacer()
-                        Text("\(Int(progressRatio * 100))%")
-                            .font(.system(size: 20, weight: .bold, design: .monospaced))
-                            .foregroundColor(.blue)
-                    }
-
-                    // Анимированный плавный прогресс-бар
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(Color.blue.opacity(0.12))
-                                .frame(height: 8)
-
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(Color.blue)
-                                .frame(width: max(12, geo.size.width * CGFloat(progressRatio)), height: 8)
-                                .animation(.linear(duration: 0.1), value: progressRatio)
+                                .fontWeight(.semibold)
+                                .foregroundColor(isActive || isCompleted ? .white : Color(white: 0.5))
+                            
+                            if isActive {
+                                Text(isRu ? stage.detailRu : stage.detailEn)
+                                    .font(.system(.caption2, design: .default))
+                                    .foregroundColor(firmware.badgeColor)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
-                    .frame(height: 8)
-
-                    // Статистика скорости и объема переданных данных
-                    HStack {
-                        HStack(spacing: 4) {
-                            Image(systemName: "speedometer")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text(String(format: "%.1f MB/s", restoreSpeedMBs))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
-
-                        Text(String(format: "%.2f / %.1f GB (%.0fs / 60s)", progressRatio * selectedFirmware.sizeGB, selectedFirmware.sizeGB, elapsedSeconds))
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-
-                    // Терминальный вывод логов восстановления
-                    VStack(alignment: .leading, spacing: 3) {
-                        ForEach(terminalLogs.suffix(4), id: \.self) { log in
-                            Text(log)
-                                .font(.system(size: 11, design: .monospaced))
-                                .foregroundColor(Color(red: 0.4, green: 0.9, blue: 0.95))
-                                .lineLimit(1)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(10)
-                    .background(Color.black.opacity(0.88))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
-                .padding(.vertical, 4)
             }
-
-            // Кнопка запуска / отмены
+            
+            // Терминал
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Image(systemName: "terminal")
+                    Text("Futurerestore Engine")
+                    Spacer()
+                    if isRestoring {
+                        Text("\(String(format: "%.1f", restoreSpeedMBs)) MB/s")
+                            .foregroundColor(firmware.badgeColor)
+                    }
+                }
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(Color(white: 0.5))
+                .padding(.bottom, 8)
+                
+                ScrollViewReader { proxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            if terminalLogs.isEmpty {
+                                Text("Awaiting command...")
+                                    .foregroundColor(Color(white: 0.3))
+                            } else {
+                                ForEach(terminalLogs.indices, id: \.self) { i in
+                                    Text(terminalLogs[i])
+                                        .id(i)
+                                }
+                            }
+                        }
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(Color(white: 0.8))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(height: 120)
+                    .onChange(of: terminalLogs.count) { _ in
+                        if !terminalLogs.isEmpty {
+                            withAnimation {
+                                proxy.scrollTo(terminalLogs.count - 1, anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(12)
+            .background(Color(white: 0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+            
+            // Кнопка
             if isRestoring {
                 Button(action: {
                     showCancelAlert = true
@@ -574,13 +407,13 @@ struct DowngradeView: View {
                         ProgressView()
                             .tint(.white)
                             .scaleEffect(0.9)
-                        Text(isRu ? "Откат выполняется (60 сек)... Прервать" : "Flashing (60 sec)... Cancel")
+                        Text(isRu ? "Откат выполняется... Прервать" : "Flashing... Cancel")
                     }
                     .font(.system(.body, design: .default))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.orange)
+                    .background(Color.red)
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
@@ -589,42 +422,24 @@ struct DowngradeView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
                             .font(.system(size: 18))
-                        Text("\(strings.startDowngradeBtn) \(selectedFirmware.version)")
+                        Text(isRu ? "Начать откат (60 сек)" : "Start Downgrade (60s)")
                     }
                     .font(.system(.body, design: .default))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(firmware.badgeColor)
+                    .foregroundColor(.black)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(Color(white: 0.12))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
-
-    // MARK: - 6. Дисклеймер
-
-    private var disclaimerFooter: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "info.circle.fill")
-                .foregroundColor(.secondary)
-                .font(.subheadline)
-            Text(strings.disclaimerText)
-                .font(.system(.caption, design: .default))
-                .foregroundColor(.secondary)
-            Spacer()
-        }
-        .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
+    
     // MARK: - Логика 60-секундного отката (1 минута)
-
     private func start60SecondsFlashingSequence() {
         triggerMajorHaptic()
         isRestoring = true
@@ -637,28 +452,23 @@ struct DowngradeView: View {
             "[00:01] [TSS] Handshake with gs.apple.com:443 established"
         ]
 
-        // Таймер тикает каждые 0.1 секунды (600 тиков = 60.0 секунд)
         restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             elapsedSeconds += 0.1
-
             let currentSecondsInt = Int(elapsedSeconds)
             let formattedTime = String(format: "[%02d:%02d]", currentSecondsInt / 60, currentSecondsInt % 60)
 
-            // 1. Этап 1 (0s - 10s): Проверка подписи TSS / SHSH2
             if elapsedSeconds <= 10.0 {
                 if currentStageIndex != 0 {
                     currentStageIndex = 0
                     triggerSelectionHaptic()
                 }
                 restoreSpeedMBs = Double.random(in: 44.0...54.0)
-
                 if currentSecondsInt == 3 && terminalLogs.count < 3 {
                     terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK")
                 } else if currentSecondsInt == 7 && terminalLogs.count < 4 {
-                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(selectedFirmware.sha256.prefix(10))...")
+                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(firmware.sha256.prefix(10))...")
                 }
             }
-            // 2. Этап 2 (10s - 25s): Распаковка RootFS & Cryptex1 OS
             else if elapsedSeconds <= 25.0 {
                 if currentStageIndex != 1 {
                     currentStageIndex = 1
@@ -666,12 +476,10 @@ struct DowngradeView: View {
                     terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1")
                 }
                 restoreSpeedMBs = Double.random(in: 55.0...68.0)
-
                 if currentSecondsInt == 18 && terminalLogs.count < 6 {
                     terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
                 }
             }
-            // 3. Этап 3 (25s - 40s): Прошивка SEP & Baseband
             else if elapsedSeconds <= 40.0 {
                 if currentStageIndex != 2 {
                     currentStageIndex = 2
@@ -679,25 +487,21 @@ struct DowngradeView: View {
                     terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode to SEP chip...")
                 }
                 restoreSpeedMBs = Double.random(in: 52.0...64.0)
-
                 if currentSecondsInt == 33 && terminalLogs.count < 8 {
                     terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
                 }
             }
-            // 4. Этап 4 (40s - 52s): Запись APFS Snapshot & KernelCache
             else if elapsedSeconds <= 52.0 {
                 if currentStageIndex != 3 {
                     currentStageIndex = 3
                     triggerSelectionHaptic()
-                    terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update-\(selectedFirmware.build)")
+                    terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update-\(firmware.build)")
                 }
                 restoreSpeedMBs = Double.random(in: 60.0...75.0)
-
                 if currentSecondsInt == 47 && terminalLogs.count < 10 {
                     terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
                 }
             }
-            // 5. Этап 5 (52s - 60s): Финализация, NVRAM & проверка целостности
             else if elapsedSeconds < 60.0 {
                 if currentStageIndex != 4 {
                     currentStageIndex = 4
@@ -705,12 +509,10 @@ struct DowngradeView: View {
                     terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1")
                 }
                 restoreSpeedMBs = Double.random(in: 25.0...40.0)
-
                 if currentSecondsInt == 56 && terminalLogs.count < 12 {
                     terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
                 }
             }
-            // Завершение ровно на 60 секунде
             else {
                 elapsedSeconds = 60.0
                 restoreSpeedMBs = 0.0
@@ -732,8 +534,6 @@ struct DowngradeView: View {
         restoreSpeedMBs = 0.0
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
     }
-
-    // MARK: - Тактильные эффекты
 
     private func triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()

@@ -5,14 +5,15 @@ struct CustomTweak: Identifiable, Codable, Equatable {
     var id: String = UUID().uuidString
     var title: String
     var subtitle: String
-    var icon: String
+    var icon: String = ""
     var colorName: String
     var isEnabled: Bool = true
 }
 
 /// Экран управления твиками (появляется только после выполнения джейлбрейка)
 struct TweaksView: View {
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
 
     // Состояния предустановленных твиков
     @AppStorage("tweak_godMode") private var godMode: Bool = false
@@ -32,8 +33,12 @@ struct TweaksView: View {
 
     // Состояния интерфейса
     @State private var showAddSheet: Bool = false
+    @State private var showManageSheet: Bool = false
     @State private var showAppliedAlert: Bool = false
     @State private var isApplying: Bool = false
+    
+    // Пасхалка (вместо краша)
+    @State private var showJokeAlert: Bool = false
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -45,51 +50,162 @@ struct TweaksView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(spacing: 16) {
-                        // 0. Категория «Кастомные твики» (появляется, если добавлены твики)
-                        if !customTweaks.isEmpty {
-                            customTweaksSection
+            Form {
+                if !customTweaks.isEmpty {
+                    Section(header: Text(strings.tweaksSectionCustom)) {
+                        // 100% безопасный вариант ForEach: берем по значению и ищем индекс динамически
+                        ForEach(customTweaks) { tweak in
+                            tweakToggleRow(
+                                title: tweak.title,
+                                subtitle: tweak.subtitle.isEmpty ? (isRu ? "Пользовательский модуль Substrate" : "Custom Substrate injection module") : tweak.subtitle,
+                                iconColor: AppTheme.resolveColor(name: tweak.colorName),
+                                binding: Binding(
+                                    get: {
+                                        customTweaks.first(where: { $0.id == tweak.id })?.isEnabled ?? false
+                                    },
+                                    set: { newValue in
+                                        if let idx = customTweaks.firstIndex(where: { $0.id == tweak.id }) {
+                                            customTweaks[idx].isEnabled = newValue
+                                            saveCustomTweaks()
+                                        }
+                                    }
+                                )
+                            )
                         }
-
-                        // 1. Категория «Базовые модификации ядра»
-                        coreTweaksSection
-
-                        // 2. Категория «Аппаратные оверклок-твики»
-                        hardwareTweaksSection
-
-                        // 3. Категория «Квантовые и пространственные модули»
-                        quantumTweaksSection
-
-                        // Кнопка применения
-                        applyButton
-                            .padding(.top, 8)
-                            .padding(.bottom, 36)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 14)
+                }
+
+                Section(header: Text(strings.tweaksSectionEssential)) {
+                    tweakToggleRow(
+                        title: isRu ? "Скачать оперативную память" : "Download More RAM",
+                        subtitle: isRu ? "Добавляет 128 ГБ DDR6-памяти по воздуху через 5G-вышки" : "Adds 128GB of DDR6 RAM over the air using 5G towers",
+                        iconColor: .orange,
+                        binding: $godMode
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Взлом Пентагона" : "Hack the Pentagon",
+                        subtitle: isRu ? "Получение полного доступа к серверам ЦРУ с помощью HTML и CSS" : "Gaining full root access to CIA mainframes using HTML & CSS",
+                        iconColor: .green,
+                        binding: $topGrades
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Подписка на Жизнь PRO" : "Life Premium Subscription",
+                        subtitle: isRu ? "Отключение рекламы во сне. (Внимание: отключение приведет к аннигиляции)" : "Disables ads during sleep. (Warning: toggling off causes instant annihilation)",
+                        iconColor: .purple,
+                        binding: Binding(
+                            get: { self.exist },
+                            set: { newValue in
+                                self.exist = newValue
+                                if !newValue {
+                                    // Убрали fatalError, чтобы приложение не вылетало
+                                    showJokeAlert = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        self.exist = true // автоматически включаем обратно
+                                    }
+                                }
+                            }
+                        )
+                    )
+                }
+
+                Section(header: Text(strings.tweaksSectionHardware)) {
+                    tweakToggleRow(
+                        title: isRu ? "Охлаждение жидким азотом" : "Liquid Nitrogen Cooling",
+                        subtitle: isRu ? "Превращает заднюю крышку iPhone в морозильник для пельменей" : "Turns the back of your iPhone into a freezer for your dumplings",
+                        iconColor: .blue,
+                        binding: $display240Hz
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Микроволновая зарядка" : "Microwave Charging",
+                        subtitle: isRu ? "Заряжает телефон от соседских микроволновок. Может поджарить мозги." : "Charges phone from neighbors' microwaves. May fry your brain.",
+                        iconColor: .green,
+                        binding: $infiniteBattery
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Бесконечные деньги (Glitch)" : "Infinite Money Glitch",
+                        subtitle: isRu ? "Легальная печать 100-долларовых купюр прямо из порта USB-C" : "Legally prints physical $100 bills directly from the USB-C port",
+                        iconColor: .mint,
+                        binding: $infiniteCard
+                    )
+                }
+
+                Section(header: Text(strings.tweaksSectionReality)) {
+                    tweakToggleRow(
+                        title: isRu ? "Шапочка из фольги 2.0" : "Tinfoil Hat Pro",
+                        subtitle: isRu ? "Защищает мозг от сканирования рептилоидами и вышками 5G" : "Protects your brain from reptilian scans and 5G microchips",
+                        iconColor: .pink,
+                        binding: $mindReader
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Экстренная телепортация домой" : "Emergency Couch Teleport",
+                        subtitle: isRu ? "Квантовое перемещение на любимый диван в обход всех пробок" : "Quantum spatial relocation directly to your couch, skipping traffic",
+                        iconColor: .teal,
+                        binding: $teleportation
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Отключение гравитации" : "Anti-Gravity Engine",
+                        subtitle: isRu ? "Не включайте на улице, телефон может улететь в открытый космос" : "Do not enable outdoors. The phone will literally float into orbit.",
+                        iconColor: .indigo,
+                        binding: $antiGravity
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "AdBlock на людей" : "AdBlock for Humans",
+                        subtitle: isRu ? "Замазывает лица раздражающих вас людей в реальном времени" : "Automatically blurs faces of annoying people in real-time",
+                        iconColor: .red,
+                        binding: $adblockIRL
+                    )
+                }
+
+                Section {
+                    Button(action: {
+                        isApplying = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            isApplying = false
+                            showAppliedAlert = true
+                        }
+                    }) {
+                        HStack {
+                            Spacer()
+                            if isApplying {
+                                ProgressView().tint(AppTheme.resolveColor(name: appThemeColor))
+                            } else {
+                                Text(strings.tweaksApplyBtn)
+                                    .font(.system(size: 17, weight: .medium))
+                                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isApplying)
                 }
             }
             .navigationTitle(strings.tweaksTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if !customTweaks.isEmpty {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            showManageSheet = true
+                        } label: {
+                            Image(systemName: "list.bullet.rectangle")
+                        }
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showAddSheet = true
                     } label: {
                         Image(systemName: "plus")
-                            .font(.system(size: 16, weight: .bold))
                     }
-                    .accessibilityLabel("Добавить твик")
                 }
             }
+            .sheet(isPresented: $showManageSheet) {
+                ManageCustomTweaksSheet(customTweaks: $customTweaks, onSave: saveCustomTweaks)
+            }
             .sheet(isPresented: $showAddSheet) {
-                AddCustomTweakSheet { newTweak in
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                CustomTweakEditorSheet { newTweak in
+                    withAnimation {
                         customTweaks.append(newTweak)
                         saveCustomTweaks()
                     }
@@ -100,6 +216,11 @@ struct TweaksView: View {
             } message: {
                 Text(strings.tweaksAppliedMsg)
             }
+            .alert(isRu ? "Ошибка вселенной" : "Universe Error", isPresented: $showJokeAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(isRu ? "Вы не можете отменить существование. Перезагрузка..." : "You cannot cancel existence. Rebooting spacetime...")
+            }
             .onAppear {
                 exist = true
                 loadCustomTweaks()
@@ -107,270 +228,27 @@ struct TweaksView: View {
         }
     }
 
-    // MARK: - Секция: Кастомные твики (Custom Tweaks)
-
-    private var customTweaksSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Text(strings.tweaksSectionCustom)
-                    .font(.system(.subheadline, design: .default))
-                    .fontWeight(.bold)
+    private func tweakToggleRow(
+        title: String,
+        subtitle: String,
+        iconColor: Color,
+        binding: Binding<Bool>
+    ) -> some View {
+        Toggle(isOn: binding) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(.body, design: .default))
                     .foregroundColor(.primary)
 
-                Spacer()
-
-                Text("\(customTweaks.count)")
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundColor(.purple)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 2)
-                    .background(Color.purple.opacity(0.12))
-                    .clipShape(Capsule())
+                Text(subtitle)
+                    .font(.system(.caption, design: .default))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
             }
-
-            ForEach(Array(customTweaks.enumerated()), id: \.element.id) { index, tweak in
-                if index > 0 {
-                    Divider()
-                }
-
-                HStack(alignment: .center, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(tweak.title)
-                            .font(.system(.body, design: .default))
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
-
-                        Text(tweak.subtitle.isEmpty ? (isRu ? "Пользовательский модуль Substrate" : "Custom Substrate injection module") : tweak.subtitle)
-                            .font(.system(.caption, design: .default))
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer(minLength: 8)
-
-                    HStack(spacing: 12) {
-                        Toggle("", isOn: Binding(
-                            get: { tweak.isEnabled },
-                            set: { newValue in
-                                customTweaks[index].isEnabled = newValue
-                                saveCustomTweaks()
-                            }
-                        ))
-                        .labelsHidden()
-                        .tint(resolveColor(tweak.colorName))
-
-                        // Кнопка удаления кастомного твика
-                        Button(role: .destructive) {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                customTweaks.remove(at: index)
-                                saveCustomTweaks()
-                            }
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.red.opacity(0.8))
-                        }
-                    }
-                }
-            }
+            .padding(.vertical, 2)
         }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .tint(iconColor)
     }
-
-    // MARK: - Секция 1: Базовые модификации ядра
-
-    private var coreTweaksSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(
-                title: strings.tweaksSectionEssential,
-                icon: "bolt.shield.fill",
-                color: .orange
-            )
-
-            // Режим Бога
-            tweakToggleRow(
-                title: isRu ? "Режим Бога" : "God Mode",
-                subtitle: isRu ? "Снятие аппаратных лимитов SoC и прямой доступ к системным потокам ядра" : "Bypass SoC hardware limits & direct kernel execution",
-                icon: "bolt.fill",
-                iconColor: .orange,
-                binding: $godMode
-            )
-
-            Divider()
-
-            // Получать одни пятерки
-            tweakToggleRow(
-                title: isRu ? "Получать одни пятерки" : "Straight A's Generator",
-                subtitle: isRu ? "Синхронизация с электронными дневниками и авто-коррекция оценок" : "Automatic academic sync & highest grade injection",
-                icon: "graduationcap.fill",
-                iconColor: .green,
-                binding: $topGrades
-            )
-
-            Divider()
-
-            // Существовать (Краш при отключении)
-            tweakToggleRow(
-                title: isRu ? "Существовать" : "Exist",
-                subtitle: isRu ? "Поддержание стабильности материи и физического присутствия в реальности" : "Maintain spacetime continuity and consciousness in local reality",
-                icon: "sparkles",
-                iconColor: .purple,
-                binding: Binding(
-                    get: { self.exist },
-                    set: { newValue in
-                        self.exist = newValue
-                        if !newValue {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                fatalError("Cort1so1: Thread 1: EXC_BAD_ACCESS (code=1, address=0x0) - Spacetime continuity terminated.")
-                            }
-                        }
-                    }
-                )
-            )
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - Секция 2: Аппаратные оверклок-твики
-
-    private var hardwareTweaksSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(
-                title: strings.tweaksSectionHardware,
-                icon: "cpu.fill",
-                color: .blue
-            )
-
-            // 240 Герцовый экран
-            tweakToggleRow(
-                title: isRu ? "240 Герцовый экран" : "240Hz ProMotion Ultra",
-                subtitle: isRu ? "Оверклокинг частоты обновления панели Super Retina XDR до 240 FPS" : "Overclock Super Retina XDR display panel to 240 FPS",
-                icon: "display",
-                iconColor: .blue,
-                binding: $display240Hz
-            )
-
-            Divider()
-
-            // Бесконечная батарея
-            tweakToggleRow(
-                title: isRu ? "Бесконечная батарея" : "Infinite Battery",
-                subtitle: isRu ? "Забор энергии из электромагнитного поля (1000% постоянный заряд)" : "Ambient electromagnetic harvesting for perpetual 1000% charge",
-                icon: "battery.100.bolt",
-                iconColor: .green,
-                binding: $infiniteBattery
-            )
-
-            Divider()
-
-            // Неограниченный баланс карты
-            tweakToggleRow(
-                title: isRu ? "Неограниченный баланс Apple Card" : "Apple Card Infinite Limit",
-                subtitle: isRu ? "Патчинг криптографического чипа Secure Enclave для бесконечного лимита" : "Secure Enclave bypass for infinite transaction authorization",
-                icon: "creditcard.fill",
-                iconColor: .mint,
-                binding: $infiniteCard
-            )
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - Секция 3: Квантовые и пространственные модули
-
-    private var quantumTweaksSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(
-                title: strings.tweaksSectionReality,
-                icon: "wand.and.stars",
-                color: .indigo
-            )
-
-            // Чтение мыслей собеседника
-            tweakToggleRow(
-                title: isRu ? "Чтение мыслей собеседника" : "Neural Mind Reader",
-                subtitle: isRu ? "Декодирование нейроволн через TrueDepth сенсор и Apple Neural Engine" : "Direct neural wave decoding via TrueDepth sensor and Apple Neural Engine",
-                icon: "brain.head.profile",
-                iconColor: .pink,
-                binding: $mindReader
-            )
-
-            Divider()
-
-            // Телепортация устройства
-            tweakToggleRow(
-                title: isRu ? "Телепортация устройства" : "Quantum GPS Teleportation",
-                subtitle: isRu ? "Мгновенное физическое перемещение смартфона в заданные координаты" : "Instant subatomic spatial relocation of iPhone to target coordinates",
-                icon: "location.circle.fill",
-                iconColor: .teal,
-                binding: $teleportation
-            )
-
-            Divider()
-
-            // Удаление гравитации
-            tweakToggleRow(
-                title: isRu ? "Удаление гравитации" : "Anti-Gravity Gyroscope",
-                subtitle: isRu ? "Инверсия гравитационного поля вокруг корпуса iPhone" : "Local gravitational field inversion for zero-gravity handling",
-                icon: "airplane",
-                iconColor: .indigo,
-                binding: $antiGravity
-            )
-
-            Divider()
-
-            // Пропуск рекламы в реальной жизни
-            tweakToggleRow(
-                title: isRu ? "Пропуск рекламы в реальной жизни" : "Real-Life AdBlocker",
-                subtitle: isRu ? "Автоматическая цензура баннеров и навязчивых предложений вокруг вас" : "Real-time visual filtering and audio muting of physical advertisements",
-                icon: "eye.slash.fill",
-                iconColor: .red,
-                binding: $adblockIRL
-            )
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    // MARK: - Кнопка применить
-
-    private var applyButton: some View {
-        Button(action: {
-            isApplying = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                isApplying = false
-                showAppliedAlert = true
-            }
-        }) {
-            HStack(spacing: 8) {
-                if isApplying {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 16, weight: .bold))
-                }
-
-                Text(strings.tweaksApplyBtn)
-                    .font(.system(size: 17, weight: .bold, design: .default))
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(Color.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .disabled(isApplying)
-    }
-
-    // MARK: - Вспомогательные функции сохранения
 
     private func loadCustomTweaks() {
         guard let data = customTweaksJSON.data(using: .utf8),
@@ -386,74 +264,101 @@ struct TweaksView: View {
             self.customTweaksJSON = jsonString
         }
     }
+}
 
-    private func resolveColor(_ name: String) -> Color {
-        switch name {
-        case "blue": return .blue
-        case "purple": return .purple
-        case "orange": return .orange
-        case "green": return .green
-        case "pink": return .pink
-        case "teal": return .teal
-        case "indigo": return .indigo
-        case "red": return .red
-        case "mint": return .mint
-        default: return .blue
-        }
+// MARK: - Экран управления (удаление/редактирование) кастомными твиками
+struct ManageCustomTweaksSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    
+    @Binding var customTweaks: [CustomTweak]
+    var onSave: () -> Void
+    
+    @State private var tweakToEdit: CustomTweak?
+    
+    private var isRu: Bool {
+        appLanguage == "ru"
     }
 
-    private func sectionHeader(title: String, icon: String, color: Color) -> some View {
-        HStack(spacing: 8) {
-            Text(title)
-                .font(.system(.subheadline, design: .default))
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-
-            Spacer()
-        }
-    }
-
-    private func tweakToggleRow(
-        title: String,
-        subtitle: String,
-        icon: String,
-        iconColor: Color,
-        binding: Binding<Bool>
-    ) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(.body, design: .default))
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-
-                Text(subtitle)
-                    .font(.system(.caption, design: .default))
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(customTweaks) { tweak in
+                    Button {
+                        tweakToEdit = tweak
+                    } label: {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(AppTheme.resolveColor(name: tweak.colorName))
+                                .frame(width: 14, height: 14)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(tweak.title)
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                Text(tweak.subtitle)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                .onDelete { indexSet in
+                    customTweaks.remove(atOffsets: indexSet)
+                    onSave()
+                    
+                    // Если удалили все, закрываем окно
+                    if customTweaks.isEmpty {
+                        dismiss()
+                    }
+                }
             }
-
-            Spacer(minLength: 8)
-
-            Toggle("", isOn: binding)
-                .labelsHidden()
-                .tint(iconColor)
+            .navigationTitle(isRu ? "Управление твиками" : "Manage Tweaks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(isRu ? "Закрыть" : "Close") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
+            }
+            .sheet(item: $tweakToEdit) { tweak in
+                CustomTweakEditorSheet(initialTweak: tweak) { updatedTweak in
+                    if let index = customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
+                        customTweaks[index] = updatedTweak
+                        onSave()
+                    }
+                }
+            }
         }
     }
 }
 
-// MARK: - Модальное окно добавления кастомного твика
-
-struct AddCustomTweakSheet: View {
+// MARK: - Универсальное модальное окно добавления/редактирования кастомного твика
+struct CustomTweakEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("appLanguage") private var appLanguage: String = "ru"
+    @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
 
-    var onAdd: (CustomTweak) -> Void
+    var initialTweak: CustomTweak?
+    var onSave: (CustomTweak) -> Void
 
-    @State private var title: String = ""
-    @State private var subtitle: String = ""
-    @State private var selectedColor: String = "purple"
+    @State private var title: String
+    @State private var subtitle: String
+    @State private var selectedColor: String
+    
+    init(initialTweak: CustomTweak? = nil, onSave: @escaping (CustomTweak) -> Void) {
+        self.initialTweak = initialTweak
+        self.onSave = onSave
+        _title = State(initialValue: initialTweak?.title ?? "")
+        _subtitle = State(initialValue: initialTweak?.subtitle ?? "")
+        _selectedColor = State(initialValue: initialTweak?.colorName ?? "purple")
+    }
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -462,18 +367,6 @@ struct AddCustomTweakSheet: View {
     private var isRu: Bool {
         appLanguage == "ru"
     }
-
-    private let availableColors: [(name: String, color: Color)] = [
-        ("blue", .blue),
-        ("purple", .purple),
-        ("orange", .orange),
-        ("green", .green),
-        ("pink", .pink),
-        ("teal", .teal),
-        ("indigo", .indigo),
-        ("red", .red),
-        ("mint", .mint)
-    ]
 
     var body: some View {
         NavigationStack {
@@ -489,36 +382,39 @@ struct AddCustomTweakSheet: View {
 
                 // Выбор цвета
                 Section(header: Text(strings.tweaksAddColorLabel)) {
-                    HStack(spacing: 12) {
-                        ForEach(availableColors, id: \.name) { item in
-                            Button {
-                                selectedColor = item.name
-                            } label: {
-                                ZStack {
-                                    Circle()
-                                        .fill(item.color)
-                                        .frame(width: 28, height: 28)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            ForEach(AppTheme.availableColors, id: \.name) { item in
+                                Button {
+                                    selectedColor = item.name
+                                } label: {
+                                    ZStack {
+                                        Circle()
+                                            .fill(item.color)
+                                            .frame(width: 32, height: 32)
+                                            .shadow(color: item.color.opacity(0.3), radius: 3, x: 0, y: 2)
 
-                                    if selectedColor == item.name {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(.white)
+                                        if selectedColor == item.name {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 14, weight: .bold))
+                                                .foregroundColor(.white)
+                                        }
                                     }
                                 }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
                     }
-                    .padding(.vertical, 6)
                 }
 
                 // Предпросмотр
                 Section(header: Text(isRu ? "Предпросмотр" : "Live Preview")) {
-                    HStack(alignment: .center, spacing: 12) {
+                    Toggle(isOn: .constant(true)) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (isRu ? "Название твика" : "Tweak Name") : title)
                                 .font(.system(.body, design: .default))
-                                .fontWeight(.medium)
                                 .foregroundColor(.primary)
 
                             Text(subtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (isRu ? "Описание действия твика" : "Tweak description") : subtitle)
@@ -526,17 +422,12 @@ struct AddCustomTweakSheet: View {
                                 .foregroundColor(.secondary)
                                 .lineLimit(2)
                         }
-
-                        Spacer()
-
-                        Toggle("", isOn: .constant(true))
-                            .labelsHidden()
-                            .tint(resolveColor(selectedColor))
+                        .padding(.vertical, 2)
                     }
-                    .padding(.vertical, 4)
+                    .tint(AppTheme.resolveColor(name: selectedColor))
                 }
             }
-            .navigationTitle(strings.tweaksAddTitle)
+            .navigationTitle(isRu ? (initialTweak == nil ? "Новый твик" : "Редактирование") : (initialTweak == nil ? "New Tweak" : "Edit Tweak"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -552,13 +443,14 @@ struct AddCustomTweakSheet: View {
                         guard !trimmedTitle.isEmpty else { return }
 
                         let newTweak = CustomTweak(
+                            id: initialTweak?.id ?? UUID().uuidString,
                             title: trimmedTitle,
                             subtitle: trimmedDesc,
                             icon: "",
                             colorName: selectedColor,
-                            isEnabled: true
+                            isEnabled: initialTweak?.isEnabled ?? true
                         )
-                        onAdd(newTweak)
+                        onSave(newTweak)
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -567,23 +459,4 @@ struct AddCustomTweakSheet: View {
             }
         }
     }
-
-    private func resolveColor(_ name: String) -> Color {
-        switch name {
-        case "blue": return .blue
-        case "purple": return .purple
-        case "orange": return .orange
-        case "green": return .green
-        case "pink": return .pink
-        case "teal": return .teal
-        case "indigo": return .indigo
-        case "red": return .red
-        case "mint": return .mint
-        default: return .blue
-        }
-    }
-}
-
-#Preview {
-    TweaksView()
 }
