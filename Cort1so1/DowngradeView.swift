@@ -192,7 +192,6 @@ struct DowngradeView: View {
                 
                 Section {
                     Button(action: {
-                        triggerSelectionHaptic()
                         if let fw = sampleFirmwares.first(where: { $0.id == selectedFirmwareId }) {
                             self.activeFirmware = fw
                         }
@@ -222,7 +221,6 @@ struct DowngradeView: View {
                 Section {
                     VStack(alignment: .center, spacing: 20) {
                         Button(action: {
-                            triggerSelectionHaptic()
                             let androidFirmware = FirmwareVersion(
                                 version: "Android 17 Beta",
                                 build: "SWEET_CAT",
@@ -234,18 +232,18 @@ struct DowngradeView: View {
                             )
                             activeFirmware = androidFirmware
                         }) {
-                            Text("Android 17 Beta")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 12)
-                                .background(Color.green)
-                                .clipShape(Capsule())
+                            VStack(spacing: 8) {
+                                Image(systemName: "ladybug.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.green)
+                                Text("android_build_override")
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 }
@@ -255,12 +253,6 @@ struct DowngradeView: View {
                 DowngradeExecutionSheet(firmware: firmware, appLanguage: appLanguage, verbose: verboseRestore)
             }
         }
-    }
-    
-    private func triggerSelectionHaptic() {
-        let generator = UISelectionFeedbackGenerator()
-        generator.prepare()
-        generator.selectionChanged()
     }
 }
 
@@ -499,7 +491,6 @@ struct DowngradeExecutionSheet: View {
     
     private func start60SecondsFlashingSequence() {
         let isVerbose = verbose || verboseLogs
-        triggerMajorHaptic()
         isRestoring = true
         elapsedSeconds = 0.0
         currentStageIndex = 0
@@ -525,19 +516,19 @@ struct DowngradeExecutionSheet: View {
             
             // Stages & Speeds
             if elapsedSeconds <= 10.0 {
-                if currentStageIndex != 0 { currentStageIndex = 0; triggerSelectionHaptic() }
+                if currentStageIndex != 0 { currentStageIndex = 0 }
                 restoreSpeedMBs = Double.random(in: 44.0...54.0)
             } else if elapsedSeconds <= 25.0 {
-                if currentStageIndex != 1 { currentStageIndex = 1; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1") }
+                if currentStageIndex != 1 { currentStageIndex = 1; terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1") }
                 restoreSpeedMBs = Double.random(in: 55.0...68.0)
             } else if elapsedSeconds <= 40.0 {
-                if currentStageIndex != 2 { currentStageIndex = 2; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode...") }
+                if currentStageIndex != 2 { currentStageIndex = 2; terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode...") }
                 restoreSpeedMBs = Double.random(in: 52.0...64.0)
             } else if elapsedSeconds <= 52.0 {
-                if currentStageIndex != 3 { currentStageIndex = 3; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update") }
+                if currentStageIndex != 3 { currentStageIndex = 3; terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update") }
                 restoreSpeedMBs = Double.random(in: 60.0...75.0)
             } else if elapsedSeconds < 60.0 {
-                if currentStageIndex != 4 { currentStageIndex = 4; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1") }
+                if currentStageIndex != 4 { currentStageIndex = 4; terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1") }
                 restoreSpeedMBs = Double.random(in: 25.0...40.0)
             } else {
                 elapsedSeconds = 60.0
@@ -547,7 +538,6 @@ struct DowngradeExecutionSheet: View {
                 timer.invalidate()
                 restoreTimer = nil
                 isRestoring = false
-                triggerNotificationSuccess()
                 installedOS = firmware.version
                 UserDefaults.standard.set(firmware.version, forKey: "installedOS")
                 if autoRespring {
@@ -617,23 +607,5 @@ struct DowngradeExecutionSheet: View {
         restoreTimer = nil
         isRestoring = false
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
-    }
-    
-    private func triggerSelectionHaptic() {
-        let generator = UISelectionFeedbackGenerator()
-        generator.prepare()
-        generator.selectionChanged()
-    }
-    
-    private func triggerMajorHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.prepare()
-        generator.impactOccurred()
-    }
-    
-    private func triggerNotificationSuccess() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.prepare()
-        generator.notificationOccurred(.success)
     }
 }

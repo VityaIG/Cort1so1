@@ -382,7 +382,6 @@ struct DopamineProcessView: View {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 self.visibleLogs.append(step)
             }
-            self.triggerHaptic(isMajor: step.isMajorPhase)
             
             let baseDelay = method.stepDelay(verbose: verboseLogs)
             let delay: Double = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
@@ -473,12 +472,10 @@ struct DopamineProcessView: View {
                 newX = self.maxDvdOffsetX
                 vx = -abs(vx)
                 self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? 1 : -1)
-                self.triggerImpact(style: .light)
             } else if newX <= -self.maxDvdOffsetX {
                 newX = -self.maxDvdOffsetX
                 vx = abs(vx)
                 self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? -1 : 1)
-                self.triggerImpact(style: .light)
             }
             
             // Отскок по оси Y с передачей крутящего момента
@@ -486,12 +483,10 @@ struct DopamineProcessView: View {
                 newY = self.maxDvdOffsetY
                 vy = -abs(vy)
                 self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? -1 : 1)
-                self.triggerImpact(style: .light)
             } else if newY <= -self.maxDvdOffsetY {
                 newY = -self.maxDvdOffsetY
                 vy = abs(vy)
                 self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? 1 : -1)
-                self.triggerImpact(style: .light)
             }
             
             self.dvdPosition = CGPoint(x: newX, y: newY)
@@ -605,10 +600,6 @@ struct DopamineProcessView: View {
         self.glitchTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
             ticks += 1
             self.generateRandomGlitchClones()
-            
-            if ticks % 5 == 0 {
-                self.triggerImpact(style: .rigid)
-            }
             
             // Если Auto-Respring выключен, ждем окончания всего звука
             if ticks >= totalTicks {

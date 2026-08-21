@@ -93,9 +93,9 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { newTab in
-            // Фиксированный шанс 5% при открытии Настроек (только 1 раз за сессию приложения)
+            // Фиксированный шанс 1% при открытии Настроек (только 1 раз за сессию приложения)
             if newTab == 3 && !ContentView.hasPlayedSecretEasterEggInSession && !showSecretEasterEgg {
-                if Int.random(in: 1...100) <= 5 {
+                if Int.random(in: 1...100) == 1 {
                     ContentView.hasPlayedSecretEasterEggInSession = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {

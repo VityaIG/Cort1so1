@@ -10,6 +10,19 @@ struct CustomTweak: Identifiable, Codable, Equatable {
     var isEnabled: Bool = true
 }
 
+/// Типы алертов на экране твиков
+enum TweaksAlertItem: Identifiable {
+    case applied
+    case joke
+
+    var id: String {
+        switch self {
+        case .applied: return "applied"
+        case .joke: return "joke"
+        }
+    }
+}
+
 /// Экран управления твиками (появляется только после выполнения джейлбрейка)
 struct TweaksView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
@@ -45,11 +58,8 @@ struct TweaksView: View {
     // Состояния интерфейса
     @State private var showAddSheet: Bool = false
     @State private var showManageSheet: Bool = false
-    @State private var showAppliedAlert: Bool = false
     @State private var isApplying: Bool = false
-    
-    // Пасхалка (вместо краша)
-    @State private var showJokeAlert: Bool = false
+    @State private var activeAlert: TweaksAlertItem? = nil
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
@@ -108,8 +118,7 @@ struct TweaksView: View {
                             set: { newValue in
                                 self.exist = newValue
                                 if !newValue {
-                                    // Убрали fatalError, чтобы приложение не вылетало
-                                    self.showJokeAlert = true
+                                    self.activeAlert = .joke
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                         self.exist = true // автоматически включаем обратно
                                     }
@@ -224,9 +233,9 @@ struct TweaksView: View {
                 Section {
                     Button(action: {
                         self.isApplying = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             self.isApplying = false
-                            self.showAppliedAlert = true
+                            self.activeAlert = .applied
                         }
                     }) {
                         HStack {
@@ -275,18 +284,20 @@ struct TweaksView: View {
                     }
                 }
             }
-            .alert(isPresented: $showAppliedAlert) {
-                Alert(
-                    title: Text(strings.tweaksAppliedTitle),
-                    dismissButton: .default(Text(strings.tweaksAppliedButton))
-                )
-            }
-            .alert(isPresented: $showJokeAlert) {
-                Alert(
-                    title: Text(isRu ? "Ошибка вселенной" : "Universe Error"),
-                    message: Text(isRu ? "Вы не можете отменить существование. Перезагрузка..." : "You cannot cancel existence. Rebooting spacetime..."),
-                    dismissButton: .default(Text("OK"))
-                )
+            .alert(item: $activeAlert) { alertItem in
+                switch alertItem {
+                case .applied:
+                    return Alert(
+                        title: Text(strings.tweaksAppliedTitle),
+                        dismissButton: .default(Text(strings.tweaksAppliedButton))
+                    )
+                case .joke:
+                    return Alert(
+                        title: Text(isRu ? "Ошибка вселенной" : "Universe Error"),
+                        message: Text(isRu ? "Вы не можете отменить существование. Перезагрузка..." : "You cannot cancel existence. Rebooting spacetime..."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
             }
             .onAppear {
                 exist = true
