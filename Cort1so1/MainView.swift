@@ -79,11 +79,11 @@ struct MainView: View {
                 isPresented: $showingMethodDialog,
                 titleVisibility: .visible
             ) {
-                Button("Dopamine") {
+                Button("Dopamine (Old)") {
                     self.selectedMethod = .dopamine
                     self.showingProcessModal = true
                 }
-                Button("Cortisol") {
+                Button("Cortisol (New)") {
                     self.selectedMethod = .cortisol
                     self.showingProcessModal = true
                 }

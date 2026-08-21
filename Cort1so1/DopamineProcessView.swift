@@ -156,7 +156,7 @@ struct DopamineProcessView: View {
                     Image(systemName: method == .dopamine ? "drop.fill" : "bolt.shield.fill")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(method.primaryColor)
-                    Text(method.title)
+                    Text(method.shortTitle)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
                 }

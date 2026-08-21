@@ -116,7 +116,7 @@ struct ContentView: View {
             case .welcome:
                 return Alert(
                     title: Text(isRu ? "Привет!" : "Hello!"),
-                    message: Text(isRu ? "Добро пожаловать в Cort1so1!\n\nЭто приложение открывает возможности интерактивной среды iOS:\n\n• Выполнение джейлбрейка на движках Dopamine и Cortisol\n• Настройка и применение твиков подсистемы Substrate\n• Симуляция отката и восстановления прошивок iOS" : "Welcome to Cort1so1!\n\nThis app allows you to explore an interactive iOS environment:\n\n• Jailbreak with Dopamine and Cortisol engines\n• Customize and apply Substrate runtime tweaks\n• Simulate iOS firmware downgrades and restores"),
+                    message: Text(isRu ? "Добро пожаловать в Cort1so1!\n\nЭто приложение открывает возможности интерактивной среды iOS:\n\n• Выполнение джейлбрейка на движках Dopamine (Old) и Cortisol (New)\n• Настройка и применение твиков подсистемы Substrate\n• Симуляция отката и восстановления прошивок iOS" : "Welcome to Cort1so1!\n\nThis app allows you to explore an interactive iOS environment:\n\n• Jailbreak with Dopamine (Old) and Cortisol (New) engines\n• Customize and apply Substrate runtime tweaks\n• Simulate iOS firmware downgrades and restores"),
                     dismissButton: .default(Text(isRu ? "Продолжить" : "Continue")) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             self.activeFirstLaunchAlert = .volumeWarning

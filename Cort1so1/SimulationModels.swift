@@ -10,6 +10,13 @@ enum JailbreakMethod: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
+        case .dopamine: return "Dopamine (Old)"
+        case .cortisol: return "Cortisol (New)"
+        }
+    }
+    
+    var shortTitle: String {
+        switch self {
         case .dopamine: return "Dopamine"
         case .cortisol: return "Cortisol"
         }
