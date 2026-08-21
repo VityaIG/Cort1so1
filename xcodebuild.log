@@ -1,0 +1,288 @@
+Command line invocation:
+    /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/xcodebuild build -project Cort1so1.xcodeproj -scheme Cort1so1 -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=
+
+User defaults from command line:
+    IDEDerivedDataPathOverride = /Users/runner/work/Cort1so1/Cort1so1/build
+    IDEPackageSupportUseBuiltinSCM = YES
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = 
+    CODE_SIGNING_ALLOWED = NO
+    CODE_SIGNING_REQUIRED = NO
+    SDKROOT = iphoneos17.5
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:0000FE00-4E3C58738E9617E1, name:My Mac }
+{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:visionOS Simulator, variant:Designed for [iPad,iPhone], id:D5C2DEE7-1FE1-4AC3-8CB3-56763FEDB102, OS:1.2, name:Apple Vision Pro }
+{ platform:visionOS Simulator, variant:Designed for [iPad,iPhone], id:6528EA2C-E1FC-4A54-A8F2-68A8CD94B0F1, OS:2.1, name:Apple Vision Pro }
+{ platform:visionOS Simulator, variant:Designed for [iPad,iPhone], id:2FE0497B-85F4-4AE2-92C8-89E7B8A4839C, OS:2.2, name:Apple Vision Pro }
+{ platform:iOS Simulator, id:094E8ACF-D708-41DF-BBA7-21144CC2836C, OS:17.0.1, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:094E8ACF-D708-41DF-BBA7-21144CC2836C, OS:17.0.1, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:B637D080-5C40-4C89-8460-EAE597724690, OS:17.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:B637D080-5C40-4C89-8460-EAE597724690, OS:17.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:116CBF1F-F16D-46E2-85D7-07D9D1689431, OS:17.4, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:116CBF1F-F16D-46E2-85D7-07D9D1689431, OS:17.4, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:979E9CD8-2208-458B-B0BA-401C6E8129ED, OS:17.5, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:979E9CD8-2208-458B-B0BA-401C6E8129ED, OS:17.5, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:88CEBB3E-DCBC-4945-AD2F-EE45AC0A5554, OS:18.1, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:88CEBB3E-DCBC-4945-AD2F-EE45AC0A5554, OS:18.1, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:94EBF519-C9E5-4A0C-8B0B-5E636A8181C2, OS:18.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:94EBF519-C9E5-4A0C-8B0B-5E636A8181C2, OS:18.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:A81D46DE-8B6E-4CAD-9547-2729CF4508B9, OS:17.0.1, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:A81D46DE-8B6E-4CAD-9547-2729CF4508B9, OS:17.0.1, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:3AE3FCD8-BC39-478B-9418-77BF9C130BFD, OS:17.2, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:3AE3FCD8-BC39-478B-9418-77BF9C130BFD, OS:17.2, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:BED4A38A-10C3-4904-AA62-AA72A6E27B80, OS:17.4, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:BED4A38A-10C3-4904-AA62-AA72A6E27B80, OS:17.4, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:D89B48FF-69A7-4B88-B688-86463527D099, OS:17.4, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:D89B48FF-69A7-4B88-B688-86463527D099, OS:17.4, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:3880C9EC-7AE9-4EB0-B13C-FD3C915930A7, OS:17.5, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:3880C9EC-7AE9-4EB0-B13C-FD3C915930A7, OS:17.5, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:599B3881-8C88-482F-9DEE-33F80B422292, OS:18.1, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:599B3881-8C88-482F-9DEE-33F80B422292, OS:18.1, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:4CFD839E-198F-4833-BC58-7023512A4130, OS:18.2, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:4CFD839E-198F-4833-BC58-7023512A4130, OS:18.2, name:iPad Air 11-inch (M2) }
+{ platform:iOS Simulator, id:0BC420C8-7121-47B4-A33C-A18276B97867, OS:17.4, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:0BC420C8-7121-47B4-A33C-A18276B97867, OS:17.4, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:496B7861-CF07-4124-BD8F-C7A64CE9E398, OS:17.5, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:496B7861-CF07-4124-BD8F-C7A64CE9E398, OS:17.5, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:8DD674A3-6FDF-4103-B4DB-8789CD826507, OS:18.1, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:8DD674A3-6FDF-4103-B4DB-8789CD826507, OS:18.1, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:83783939-C64D-465D-93FE-8846C81479EB, OS:18.2, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:83783939-C64D-465D-93FE-8846C81479EB, OS:18.2, name:iPad Air 13-inch (M2) }
+{ platform:iOS Simulator, id:5DC05905-F879-41EF-81E6-8828379E0CB1, OS:17.0.1, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:5DC05905-F879-41EF-81E6-8828379E0CB1, OS:17.0.1, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:DA660936-7C0A-471B-A495-4A7F9AB8EE54, OS:17.2, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:DA660936-7C0A-471B-A495-4A7F9AB8EE54, OS:17.2, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:A5E25447-ACEE-4F87-A46F-ED6CA669EA69, OS:17.4, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:A5E25447-ACEE-4F87-A46F-ED6CA669EA69, OS:17.4, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:ADF3209B-E1D0-48EC-9C0D-AA82F5368970, OS:17.0.1, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:ADF3209B-E1D0-48EC-9C0D-AA82F5368970, OS:17.0.1, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:DC7E7698-FE6C-419D-B4AA-589FB68E79E2, OS:17.2, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:DC7E7698-FE6C-419D-B4AA-589FB68E79E2, OS:17.2, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:2AA3FD9C-24C4-404B-9289-27036E305031, OS:17.4, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:2AA3FD9C-24C4-404B-9289-27036E305031, OS:17.4, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:F88D7811-4EDC-45AD-B83D-2B22EFDE0ABC, OS:17.4, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:F88D7811-4EDC-45AD-B83D-2B22EFDE0ABC, OS:17.4, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:F85ADD35-038C-452A-B38E-8E2B94E74BE1, OS:17.5, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:F85ADD35-038C-452A-B38E-8E2B94E74BE1, OS:17.5, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:7FF663D0-59E5-420A-A854-85CBEDFED59B, OS:18.1, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:7FF663D0-59E5-420A-A854-85CBEDFED59B, OS:18.1, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:433BA3AA-BE2F-4C6B-B6AA-CC218636C26E, OS:18.2, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:433BA3AA-BE2F-4C6B-B6AA-CC218636C26E, OS:18.2, name:iPad Pro 11-inch (M4) }
+{ platform:iOS Simulator, id:16978ACE-AEDE-40AA-82F3-F17E15D9952F, OS:17.4, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:16978ACE-AEDE-40AA-82F3-F17E15D9952F, OS:17.4, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:5C07EF61-B143-46D9-9DBB-7D3F1AE4EDE5, OS:17.5, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:5C07EF61-B143-46D9-9DBB-7D3F1AE4EDE5, OS:17.5, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:3AB2E92A-907F-4FE4-885E-643671DA8A98, OS:18.1, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:3AB2E92A-907F-4FE4-885E-643671DA8A98, OS:18.1, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:714B5BA1-1993-4875-9A46-1F7553B54EAA, OS:18.2, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:714B5BA1-1993-4875-9A46-1F7553B54EAA, OS:18.2, name:iPad Pro 13-inch (M4) }
+{ platform:iOS Simulator, id:7EA7755B-B81B-4356-ABE7-3E9232F7B67C, OS:17.0.1, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:7EA7755B-B81B-4356-ABE7-3E9232F7B67C, OS:17.0.1, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:357B7607-F928-4A5B-BD24-38A4ADF4DD25, OS:17.2, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:357B7607-F928-4A5B-BD24-38A4ADF4DD25, OS:17.2, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:23642F47-678C-4D30-B9DD-ABFF0E574983, OS:17.4, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:23642F47-678C-4D30-B9DD-ABFF0E574983, OS:17.4, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:CB5569E5-D12C-4F44-9A39-C8F0274576F6, OS:17.5, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:CB5569E5-D12C-4F44-9A39-C8F0274576F6, OS:17.5, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:8C417B9E-5AC0-499B-B339-8C9B858ACE14, OS:18.1, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, id:8C417B9E-5AC0-499B-B339-8C9B858ACE14, OS:18.1, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, id:1AE3E85B-8328-4C82-B8C6-EEECB4968991, OS:18.2, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, id:1AE3E85B-8328-4C82-B8C6-EEECB4968991, OS:18.2, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, id:0021405E-8418-41AC-BC7C-1DCE3BF68FCD, OS:17.0.1, name:iPhone 15 }
+{ platform:iOS Simulator, id:0021405E-8418-41AC-BC7C-1DCE3BF68FCD, OS:17.0.1, name:iPhone 15 }
+{ platform:iOS Simulator, id:13FD2836-BA4F-4AA5-B54E-50D124BBAE99, OS:17.2, name:iPhone 15 }
+{ platform:iOS Simulator, id:13FD2836-BA4F-4AA5-B54E-50D124BBAE99, OS:17.2, name:iPhone 15 }
+{ platform:iOS Simulator, id:63CB9FA1-623A-45D1-B9AA-89B2B10B97F3, OS:17.4, name:iPhone 15 }
+{ platform:iOS Simulator, id:63CB9FA1-623A-45D1-B9AA-89B2B10B97F3, OS:17.4, name:iPhone 15 }
+{ platform:iOS Simulator, id:287A7916-2BD1-4674-8A22-38756D5658F4, OS:17.5, name:iPhone 15 }
+{ platform:iOS Simulator, id:287A7916-2BD1-4674-8A22-38756D5658F4, OS:17.5, name:iPhone 15 }
+{ platform:iOS Simulator, id:5E28D651-2D26-44D9-80A8-1704B6171DC6, OS:18.1, name:iPhone 15 }
+{ platform:iOS Simulator, id:5E28D651-2D26-44D9-80A8-1704B6171DC6, OS:18.1, name:iPhone 15 }
+{ platform:iOS Simulator, id:E8DE5083-20B6-44B7-89B6-2CECE2E5633F, OS:17.0.1, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:E8DE5083-20B6-44B7-89B6-2CECE2E5633F, OS:17.0.1, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:71C38D13-F059-47C7-BCCD-BF6571A6F7F1, OS:17.2, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:71C38D13-F059-47C7-BCCD-BF6571A6F7F1, OS:17.2, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:B952C60F-6A6D-4B96-9764-ACABDAA37051, OS:17.4, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:B952C60F-6A6D-4B96-9764-ACABDAA37051, OS:17.4, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:8888EA89-AFF6-45E8-86DB-D93CEDDA2262, OS:17.5, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:8888EA89-AFF6-45E8-86DB-D93CEDDA2262, OS:17.5, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:40D19B98-20FF-4991-993A-2EC9B1965009, OS:18.1, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:40D19B98-20FF-4991-993A-2EC9B1965009, OS:18.1, name:iPhone 15 Plus }
+{ platform:iOS Simulator, id:F057F93D-2562-418F-AB4C-35C3B965CD8D, OS:17.0.1, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:F057F93D-2562-418F-AB4C-35C3B965CD8D, OS:17.0.1, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:65471791-75F2-4CF5-98DC-DD66F809D095, OS:17.2, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:65471791-75F2-4CF5-98DC-DD66F809D095, OS:17.2, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:B24657D9-26B4-48F5-9D1A-62A84461E1F0, OS:17.4, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:B24657D9-26B4-48F5-9D1A-62A84461E1F0, OS:17.4, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:42725BA4-8A0A-4D90-B272-DB970F21BEA0, OS:17.5, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:42725BA4-8A0A-4D90-B272-DB970F21BEA0, OS:17.5, name:iPhone 15 Pro }
+{ platform:iOS Simulator, id:087AF5AE-046A-47BC-9A3A-3939EE1FE321, OS:17.0.1, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:087AF5AE-046A-47BC-9A3A-3939EE1FE321, OS:17.0.1, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:8C971C09-7334-495D-8245-ADA43AA5E637, OS:17.2, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:8C971C09-7334-495D-8245-ADA43AA5E637, OS:17.2, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:70B3ADD7-C975-4ED5-9094-A5C3BBAC1D9F, OS:17.4, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:70B3ADD7-C975-4ED5-9094-A5C3BBAC1D9F, OS:17.4, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:52D2F37C-CA9F-4293-A015-E5DFC3B360A7, OS:17.5, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:52D2F37C-CA9F-4293-A015-E5DFC3B360A7, OS:17.5, name:iPhone 15 Pro Max }
+{ platform:iOS Simulator, id:E5D65BC2-373C-4724-B290-2F7ED26DE14F, OS:18.1, name:iPhone 16 }
+{ platform:iOS Simulator, id:E5D65BC2-373C-4724-B290-2F7ED26DE14F, OS:18.1, name:iPhone 16 }
+{ platform:iOS Simulator, id:C5890B99-B633-4FCF-902C-52BB8E932E8D, OS:18.2, name:iPhone 16 }
+{ platform:iOS Simulator, id:C5890B99-B633-4FCF-902C-52BB8E932E8D, OS:18.2, name:iPhone 16 }
+{ platform:iOS Simulator, id:025E2B05-71A0-40AF-A021-1D9253724244, OS:18.1, name:iPhone 16 Plus }
+{ platform:iOS Simulator, id:025E2B05-71A0-40AF-A021-1D9253724244, OS:18.1, name:iPhone 16 Plus }
+{ platform:iOS Simulator, id:620D90EA-A00C-454B-B0C4-7D757D85B0DE, OS:18.2, name:iPhone 16 Plus }
+{ platform:iOS Simulator, id:620D90EA-A00C-454B-B0C4-7D757D85B0DE, OS:18.2, name:iPhone 16 Plus }
+{ platform:iOS Simulator, id:87898CFC-9881-4D80-B2F2-807B97909EDE, OS:18.1, name:iPhone 16 Pro }
+{ platform:iOS Simulator, id:87898CFC-9881-4D80-B2F2-807B97909EDE, OS:18.1, name:iPhone 16 Pro }
+{ platform:iOS Simulator, id:710F2619-BD89-49F5-859F-33B9C48B36CE, OS:18.2, name:iPhone 16 Pro }
+{ platform:iOS Simulator, id:710F2619-BD89-49F5-859F-33B9C48B36CE, OS:18.2, name:iPhone 16 Pro }
+{ platform:iOS Simulator, id:FB549212-E828-4FA4-82BE-8CD7185C099B, OS:18.1, name:iPhone 16 Pro Max }
+{ platform:iOS Simulator, id:FB549212-E828-4FA4-82BE-8CD7185C099B, OS:18.1, name:iPhone 16 Pro Max }
+{ platform:iOS Simulator, id:78A8FD46-29F2-4131-B9D2-EE5B7C4507DF, OS:18.2, name:iPhone 16 Pro Max }
+{ platform:iOS Simulator, id:78A8FD46-29F2-4131-B9D2-EE5B7C4507DF, OS:18.2, name:iPhone 16 Pro Max }
+{ platform:iOS Simulator, id:207BD571-13EA-4F89-8290-50BA2AD03E2D, OS:17.0.1, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:207BD571-13EA-4F89-8290-50BA2AD03E2D, OS:17.0.1, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:9AE82185-1FB8-49F1-8643-40D1FEFA513A, OS:17.2, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:9AE82185-1FB8-49F1-8643-40D1FEFA513A, OS:17.2, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:AB6BB91B-AAE3-49E4-94CF-D2D6F861E33F, OS:17.4, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:AB6BB91B-AAE3-49E4-94CF-D2D6F861E33F, OS:17.4, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:7217C8FE-3657-4347-BA57-30B1ECAC3B6E, OS:17.5, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:7217C8FE-3657-4347-BA57-30B1ECAC3B6E, OS:17.5, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:CE505324-B3F4-4B42-8BC5-419D92D4505A, OS:18.1, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:CE505324-B3F4-4B42-8BC5-419D92D4505A, OS:18.1, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:4836E8B8-5A29-4F7A-8ED1-5F4C7128F1DA, OS:18.2, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:4836E8B8-5A29-4F7A-8ED1-5F4C7128F1DA, OS:18.2, name:iPhone SE (3rd generation) }
+Prepare packages
+
+note: Using codesigning identity override: 
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'Cort1so1' in project 'Cort1so1' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -v
+
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 41acdb3fcdf1e9b7b9c8a96c08c8f132
+Build description path: /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/XCBuildData/41acdb3fcdf1e9b7b9c8a96c08c8f132.xcbuilddata
+ClangStatCache /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk /Users/runner/work/Cort1so1/Cort1so1/build/SDKStatCaches.noindex/iphoneos17.5-21F77-f0fa7969d082b13145125136a829df3a.sdkstatcache
+    cd /Users/runner/work/Cort1so1/Cort1so1/Cort1so1.xcodeproj
+    /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -o /Users/runner/work/Cort1so1/Cort1so1/build/SDKStatCaches.noindex/iphoneos17.5-21F77-f0fa7969d082b13145125136a829df3a.sdkstatcache
+
+CreateBuildDirectory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products
+    cd /Users/runner/work/Cort1so1/Cort1so1/Cort1so1.xcodeproj
+    builtin-create-build-directory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products
+
+CreateBuildDirectory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex
+    cd /Users/runner/work/Cort1so1/Cort1so1/Cort1so1.xcodeproj
+    builtin-create-build-directory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos
+    cd /Users/runner/work/Cort1so1/Cort1so1/Cort1so1.xcodeproj
+    builtin-create-build-directory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos
+
+CreateBuildDirectory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos
+    cd /Users/runner/work/Cort1so1/Cort1so1/Cort1so1.xcodeproj
+    builtin-create-build-directory /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos
+
+MkDir /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    /bin/mkdir -p /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/all-product-headers.yaml (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/all-product-headers.yaml
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-project-headers.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-own-target-headers.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-generated-files.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-all-target-headers.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-all-non-framework-target-headers.hmap (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Cort1so1-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1_const_extract_protocols.json (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1.LinkFileList (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1.SwiftFileList (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1-OutputFileMap.json (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    write-file /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/Objects-normal/arm64/Cort1so1-OutputFileMap.json
+
+GenerateAssetSymbols /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region ru --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos --compile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets --bundle-identifier com.cort1so1.app --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+CoreGraphics PDF has logged an error. Set environment variable "CG_PDF_VERBOSE" to learn more.
+Entity: line 1: parser error : Start tag expected, '<' not found
+�PNG
+^
+/* com.apple.actool.compilation-results */
+/Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CpResource /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app/easter_egg.mp4 /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/easter_egg.mp4 (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/easter_egg.mp4 /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app
+
+CompileAssetCatalog /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets (in target 'Cort1so1' from project 'Cort1so1')
+    cd /Users/runner/work/Cort1so1/Cort1so1
+    /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region ru --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos --compile /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets
+CoreGraphics PDF has logged an error. Set environment variable "CG_PDF_VERBOSE" to learn more.
+Entity: line 1: parser error : Start tag expected, '<' not found
+�PNG
+^
+/* com.apple.actool.errors */
+/Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets: error: The stickers icon set or app icon set named "AppIcon" did not have any applicable content.
+/* com.apple.actool.notices */
+/Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets: warning: Accent color ‘AccentColor’ is not present in any asset catalogs.
+/* com.apple.actool.compilation-results */
+/Users/runner/work/Cort1so1/Cort1so1/build/Build/Intermediates.noindex/Cort1so1.build/Release-iphoneos/Cort1so1.build/assetcatalog_generated_info.plist
+
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CompileAssetCatalog /Users/runner/work/Cort1so1/Cort1so1/build/Build/Products/Release-iphoneos/Cort1so1.app /Users/runner/work/Cort1so1/Cort1so1/Cort1so1/Assets.xcassets (in target 'Cort1so1' from project 'Cort1so1')
+(1 failure)
