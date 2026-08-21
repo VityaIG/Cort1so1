@@ -480,7 +480,7 @@ struct DopamineProcessView: View {
                                 self.phase = .respring
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                self.onFinished()
+                                self.onComplete()
                             }
                         }
                     }
