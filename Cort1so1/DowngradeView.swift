@@ -225,17 +225,7 @@ struct DowngradeView: View {
                 // Easter Egg
                 Section {
                     VStack(alignment: .center, spacing: 16) {
-                        if let image = UIImage(named: "easter2") ?? UIImage(contentsOfFile: Bundle.main.path(forResource: "easter2", ofType: "png") ?? "") {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity)
-                        } else {
-                            Image("easter2")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity)
-                        }
+                        easter2ImageView
 
                         Button(action: {
                             let androidFirmware = FirmwareVersion(
@@ -275,6 +265,27 @@ struct DowngradeView: View {
                 UITableView.appearance().backgroundColor = .clear
                 UICollectionView.appearance().backgroundColor = .clear
             }
+        }
+    }
+
+    @ViewBuilder
+    private var easter2ImageView: some View {
+        if let image = UIImage(named: "easter2") {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+        } else if let path = Bundle.main.path(forResource: "easter2", ofType: "png"),
+                  let image = UIImage(contentsOfFile: path) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+        } else {
+            Image("easter2")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
         }
     }
 }

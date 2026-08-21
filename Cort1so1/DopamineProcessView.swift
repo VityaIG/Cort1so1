@@ -131,6 +131,70 @@ struct DopamineProcessView: View {
 
     // MARK: - Главный интерфейс логов
 
+    private func logTextColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
+        if step.isMajorPhase {
+            return method == .cortisol ? Color(red: 0.30, green: 0.95, blue: 1.00) : method.primaryColor
+        }
+        if isCurrentRunning {
+            return Color.white
+        }
+        return Color.white.opacity(0.82)
+    }
+
+    private func logFontWeight(step: JailbreakLogStep, isCurrentRunning: Bool) -> Font.Weight {
+        if step.isMajorPhase {
+            return .bold
+        }
+        if isCurrentRunning {
+            return .semibold
+        }
+        return .regular
+    }
+
+    private func logBackgroundColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
+        if isCurrentRunning {
+            return method == .cortisol ? Color.cyan.opacity(0.14) : method.primaryColor.opacity(0.12)
+        }
+        if step.isMajorPhase {
+            return method == .cortisol ? Color.cyan.opacity(0.09) : method.primaryColor.opacity(0.08)
+        }
+        return Color.clear
+    }
+
+    private func logStrokeColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
+        if step.isMajorPhase {
+            return method == .cortisol ? Color.cyan.opacity(0.35) : method.primaryColor.opacity(0.25)
+        }
+        if isCurrentRunning {
+            return method.primaryColor.opacity(0.2)
+        }
+        return Color.clear
+    }
+
+    private var progressBarGradient: LinearGradient {
+        if method == .cortisol {
+            return LinearGradient(
+                colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        } else {
+            return LinearGradient(
+                colors: [Color(red: 0.08, green: 0.70, blue: 0.40), Color(red: 0.12, green: 0.92, blue: 0.52)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        }
+    }
+
+    private var verifiedBadgeGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
     private var loggingInterface: some View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
@@ -200,15 +264,7 @@ struct DopamineProcessView: View {
                         .frame(height: 2.5)
 
                     Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: method == .cortisol
-                                    ? [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)]
-                                    : [Color(red: 0.08, green: 0.70, blue: 0.40), Color(red: 0.12, green: 0.92, blue: 0.52)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .fill(progressBarGradient)
                         .frame(
                             width: max(8, geo.size.width * CGFloat(progressRatio)),
                             height: 2.5
@@ -249,14 +305,10 @@ struct DopamineProcessView: View {
                                 Text(isRu ? step.titleRu : step.titleEn)
                                     .font(.system(
                                         size: step.isMajorPhase ? 13.5 : 12.5,
-                                        weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular),
+                                        weight: logFontWeight(step: step, isCurrentRunning: isCurrentRunning),
                                         design: .monospaced
                                     ))
-                                    .foregroundColor(
-                                        step.isMajorPhase
-                                            ? (method == .cortisol ? Color(red: 0.30, green: 0.95, blue: 1.00) : method.primaryColor)
-                                            : (isCurrentRunning ? Color.white : Color.white.opacity(0.82))
-                                    )
+                                    .foregroundColor(logTextColor(step: step, isCurrentRunning: isCurrentRunning))
                                     .lineLimit(2)
 
                                 Spacer(minLength: 0)
@@ -268,13 +320,7 @@ struct DopamineProcessView: View {
                                             .foregroundColor(.black)
                                             .padding(.horizontal, 7)
                                             .padding(.vertical, 2.5)
-                                            .background(
-                                                LinearGradient(
-                                                    colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
-                                                    startPoint: .leading,
-                                                    endPoint: .trailing
-                                                )
-                                            )
+                                            .background(verifiedBadgeGradient)
                                             .clipShape(Capsule())
                                     } else {
                                         Text(isRu ? "OK" : "DONE")
@@ -289,19 +335,11 @@ struct DopamineProcessView: View {
                             }
                             .padding(.horizontal, 11)
                             .padding(.vertical, 6.5)
-                            .background(
-                                isCurrentRunning
-                                    ? (method == .cortisol ? Color.cyan.opacity(0.14) : method.primaryColor.opacity(0.12))
-                                    : (step.isMajorPhase
-                                        ? (method == .cortisol ? Color.cyan.opacity(0.09) : method.primaryColor.opacity(0.08))
-                                        : Color.clear)
-                            )
+                            .background(logBackgroundColor(step: step, isCurrentRunning: isCurrentRunning))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                                     .stroke(
-                                        step.isMajorPhase
-                                            ? (method == .cortisol ? Color.cyan.opacity(0.35) : method.primaryColor.opacity(0.25))
-                                            : (isCurrentRunning ? method.primaryColor.opacity(0.2) : Color.clear),
+                                        logStrokeColor(step: step, isCurrentRunning: isCurrentRunning),
                                         lineWidth: step.isMajorPhase ? 0.8 : 0.5
                                     )
                             )
