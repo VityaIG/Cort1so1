@@ -237,38 +237,14 @@ struct DopamineProcessView: View {
     private var loggingInterface: some View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
-            HStack(spacing: 12) {
-                HStack(spacing: 6) {
-                    Circle().fill(Color(red: 0.95, green: 0.35, blue: 0.35)).frame(width: 9, height: 9)
-                    Circle().fill(Color(red: 0.95, green: 0.75, blue: 0.25)).frame(width: 9, height: 9)
-                    Circle().fill(Color(red: 0.35, green: 0.85, blue: 0.45)).frame(width: 9, height: 9)
-                }
-
+            HStack {
                 Spacer()
 
-                HStack(spacing: 6) {
-                    Image(systemName: "shield.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white)
-                    Text("Cort1so1")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                }
+                Text("Cort1so1")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
 
                 Spacer()
-
-                HStack(spacing: 4) {
-                    Text("[\(currentStepIndex)/\(logSteps.count)]")
-                        .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    Text("\(Int(progressRatio * 100))%")
-                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
-                }
-                .foregroundColor(.white.opacity(0.9))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(Color.white.opacity(0.12))
-                .clipShape(Capsule())
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
