@@ -28,7 +28,7 @@ struct SettingsView: View {
     private let telegramColor = Color(red: 0.165, green: 0.67, blue: 0.94)
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
@@ -61,13 +61,15 @@ struct SettingsView: View {
             .navigationTitle(strings.settingsTitle)
             .navigationBarTitleDisplayMode(.inline)
             // Подтверждение удаления джейлбрейка
-            .alert(strings.removeJailbreakAlertTitle, isPresented: $showRemoveJailbreakAlert) {
-                Button(strings.cancelBtn, role: .cancel) { }
-                Button(strings.removeConfirmBtn, role: .destructive) {
-                    self.removeJailbreak()
-                }
-            } message: {
-                Text(strings.removeJailbreakAlertMsg)
+            .alert(isPresented: $showRemoveJailbreakAlert) {
+                Alert(
+                    title: Text(strings.removeJailbreakAlertTitle),
+                    message: Text(strings.removeJailbreakAlertMsg),
+                    primaryButton: .destructive(Text(strings.removeConfirmBtn)) {
+                        self.removeJailbreak()
+                    },
+                    secondaryButton: .cancel(Text(strings.cancelBtn))
+                )
             }
         }
     }
@@ -189,7 +191,7 @@ struct SettingsView: View {
             Toggle(isOn: $isDarkMode) {
                 settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
             }
-            .tint(AppTheme.resolveColor(name: appThemeColor))
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
             
@@ -206,7 +208,7 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .tint(AppTheme.resolveColor(name: appThemeColor))
+                .accentColor(AppTheme.resolveColor(name: appThemeColor))
             }
 
             Divider()
@@ -222,7 +224,7 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .tint(AppTheme.resolveColor(name: appThemeColor))
+                .accentColor(AppTheme.resolveColor(name: appThemeColor))
             }
         }
         .padding(16)
@@ -253,28 +255,28 @@ struct SettingsView: View {
             Toggle(isOn: $verboseLogs) {
                 settingRowLabel(title: strings.verboseLogsToggle, icon: "terminal.fill", color: .slateColor)
             }
-            .tint(AppTheme.resolveColor(name: appThemeColor))
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $autoRespring) {
                 settingRowLabel(title: strings.autoRespringToggle, icon: "arrow.clockwise.circle.fill", color: .green)
             }
-            .tint(AppTheme.resolveColor(name: appThemeColor))
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $tweakInjection) {
                 settingRowLabel(title: strings.tweakInjectionToggle, icon: "puzzlepiece.extension.fill", color: .orange)
             }
-            .tint(AppTheme.resolveColor(name: appThemeColor))
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
 
             Divider()
 
             Toggle(isOn: $safeMode) {
                 settingRowLabel(title: isRu ? "Безопасный режим (Safe Mode)" : "Safe Mode Fallback", icon: "shield.lefthalf.filled", color: .cyan)
             }
-            .tint(AppTheme.resolveColor(name: appThemeColor))
+            .accentColor(AppTheme.resolveColor(name: appThemeColor))
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -308,7 +310,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader(title: strings.jbManagementSection, icon: "exclamationmark.shield.fill", color: .red)
 
-            Button(role: .destructive, action: {
+            Button(action: {
                 let generator = UIImpactFeedbackGenerator(style: .medium)
                 generator.prepare()
                 generator.impactOccurred()

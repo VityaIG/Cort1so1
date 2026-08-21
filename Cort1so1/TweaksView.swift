@@ -49,7 +49,7 @@ struct TweaksView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 if !customTweaks.isEmpty {
                     Section(header: Text(strings.tweaksSectionCustom)) {
@@ -167,7 +167,7 @@ struct TweaksView: View {
                         HStack {
                             Spacer()
                             if isApplying {
-                                ProgressView().tint(AppTheme.resolveColor(name: appThemeColor))
+                                ProgressView().accentColor(AppTheme.resolveColor(name: appThemeColor))
                             } else {
                                 Text(strings.tweaksApplyBtn)
                                     .font(.system(size: 17, weight: .medium))
@@ -211,15 +211,19 @@ struct TweaksView: View {
                     }
                 }
             }
-            .alert(strings.tweaksAppliedTitle, isPresented: $showAppliedAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(strings.tweaksAppliedMsg)
+            .alert(isPresented: $showAppliedAlert) {
+                Alert(
+                    title: Text(strings.tweaksAppliedTitle),
+                    message: Text(strings.tweaksAppliedMsg),
+                    dismissButton: .default(Text("OK"))
+                )
             }
-            .alert(isRu ? "Ошибка вселенной" : "Universe Error", isPresented: $showJokeAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(isRu ? "Вы не можете отменить существование. Перезагрузка..." : "You cannot cancel existence. Rebooting spacetime...")
+            .alert(isPresented: $showJokeAlert) {
+                Alert(
+                    title: Text(isRu ? "Ошибка вселенной" : "Universe Error"),
+                    message: Text(isRu ? "Вы не можете отменить существование. Перезагрузка..." : "You cannot cancel existence. Rebooting spacetime..."),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             .onAppear {
                 exist = true
@@ -247,7 +251,7 @@ struct TweaksView: View {
             }
             .padding(.vertical, 2)
         }
-        .tint(iconColor)
+        .toggleStyle(SwitchToggleStyle(tint: iconColor))
     }
 
     private func loadCustomTweaks() {
@@ -268,7 +272,7 @@ struct TweaksView: View {
 
 // MARK: - Экран управления (удаление/редактирование) кастомными твиками
 struct ManageCustomTweaksSheet: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     
     @Binding var customTweaks: [CustomTweak]
@@ -281,7 +285,7 @@ struct ManageCustomTweaksSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 ForEach(customTweaks) { tweak in
                     Button {
@@ -311,7 +315,7 @@ struct ManageCustomTweaksSheet: View {
                     
                     // Если удалили все, закрываем окно
                     if customTweaks.isEmpty {
-                        self.dismiss()
+                        self.presentationMode.wrappedValue.dismiss()
                     }
                 }
             }
@@ -320,7 +324,7 @@ struct ManageCustomTweaksSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(isRu ? "Закрыть" : "Close") {
-                        self.dismiss()
+                        self.presentationMode.wrappedValue.dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -341,7 +345,7 @@ struct ManageCustomTweaksSheet: View {
 
 // MARK: - Универсальное модальное окно добавления/редактирования кастомного твика
 struct CustomTweakEditorSheet: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
 
@@ -369,7 +373,7 @@ struct CustomTweakEditorSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 // Основная информация
                 Section(header: Text(isRu ? "Параметры модуля" : "Module Info")) {
@@ -424,7 +428,7 @@ struct CustomTweakEditorSheet: View {
                         }
                         .padding(.vertical, 2)
                     }
-                    .tint(AppTheme.resolveColor(name: selectedColor))
+                    .accentColor(AppTheme.resolveColor(name: selectedColor))
                 }
             }
             .navigationTitle(isRu ? (initialTweak == nil ? "Новый твик" : "Редактирование") : (initialTweak == nil ? "New Tweak" : "Edit Tweak"))
@@ -432,7 +436,7 @@ struct CustomTweakEditorSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(strings.tweaksAddCancelBtn) {
-                        self.dismiss()
+                        self.presentationMode.wrappedValue.dismiss()
                     }
                 }
 
@@ -451,7 +455,7 @@ struct CustomTweakEditorSheet: View {
                             isEnabled: initialTweak?.isEnabled ?? true
                         )
                         self.onSave(newTweak)
-                        self.dismiss()
+                        self.presentationMode.wrappedValue.dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .fontWeight(.bold)

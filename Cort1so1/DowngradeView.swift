@@ -18,7 +18,7 @@ struct DowngradeView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 24) {
                     firmwareSection(title: "LATEST & BETAS", groupName: "LATEST & BETAS")
@@ -172,7 +172,7 @@ struct DowngradeView: View {
 // MARK: - Экран выполнения процесса (Sheet)
 
 struct DowngradeExecutionSheet: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     
     let firmware: FirmwareVersion
     let appLanguage: String
@@ -241,7 +241,7 @@ struct DowngradeExecutionSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 Color.black.ignoresSafeArea()
                 
@@ -282,27 +282,33 @@ struct DowngradeExecutionSheet: View {
                         if self.isRestoring {
                             self.showCancelAlert = true
                         } else {
-                            self.dismiss()
+                            self.presentationMode.wrappedValue.dismiss()
                         }
                     }
                     .foregroundColor(Color(white: 0.6))
                 }
             }
             // Алерт успешного завершения процесса отката
-            .alert(strings.downgradeFinished, isPresented: $showSuccessAlert) {
-                Button("OK", role: .cancel) { self.dismiss() }
-            } message: {
-                Text(strings.downgradeFinishedMsg)
+            .alert(isPresented: $showSuccessAlert) {
+                Alert(
+                    title: Text(strings.downgradeFinished),
+                    message: Text(strings.downgradeFinishedMsg),
+                    dismissButton: .default(Text("OK")) {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                )
             }
             // Алерт прерывания
-            .alert(isRu ? "Прервать откат?" : "Cancel Downgrade?", isPresented: $showCancelAlert) {
-                Button(isRu ? "Прервать" : "Stop", role: .destructive) {
-                    self.cancelFlashing()
-                    self.dismiss()
-                }
-                Button(strings.cancelBtn, role: .cancel) { }
-            } message: {
-                Text(isRu ? "Процесс прошивки будет безопасно остановлен." : "The restore process will be safely terminated.")
+            .alert(isPresented: $showCancelAlert) {
+                Alert(
+                    title: Text(isRu ? "Прервать откат?" : "Cancel Downgrade?"),
+                    message: Text(isRu ? "Процесс прошивки будет безопасно остановлен." : "The restore process will be safely terminated."),
+                    primaryButton: .destructive(Text(isRu ? "Прервать" : "Stop")) {
+                        self.cancelFlashing()
+                        self.presentationMode.wrappedValue.dismiss()
+                    },
+                    secondaryButton: .cancel(Text(strings.cancelBtn))
+                )
             }
             .onAppear {
                 // Автозапуск можно включить, или ждать нажатия кнопки
@@ -441,7 +447,6 @@ struct DowngradeExecutionSheet: View {
                 }) {
                     HStack(spacing: 8) {
                         ProgressView()
-                            .tint(.white)
                             .scaleEffect(0.9)
                         Text(isRu ? "Откат выполняется... Прервать" : "Flashing... Cancel")
                     }
@@ -454,7 +459,7 @@ struct DowngradeExecutionSheet: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             } else {
-                Button(action: start60SecondsFlashingSequence) {
+                Button(action: { self.start60SecondsFlashingSequence() }) {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
                             .font(.system(size: 18))

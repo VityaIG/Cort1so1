@@ -15,7 +15,7 @@ struct MainView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
@@ -67,13 +67,15 @@ struct MainView: View {
             .navigationTitle(strings.mainTitle)
             .navigationBarTitleDisplayMode(.inline)
             // 1. Стандартный алерт подтверждения перед джейлбрейком
-            .alert(strings.confirmAlertTitle, isPresented: $showingConfirmAlert) {
-                Button(strings.confirmYesBtn) {
-                    self.showingProcessModal = true
-                }
-                Button(strings.cancelBtn, role: .cancel) { }
-            } message: {
-                Text(strings.confirmAlertMessage)
+            .alert(isPresented: $showingConfirmAlert) {
+                Alert(
+                    title: Text(strings.confirmAlertTitle),
+                    message: Text(strings.confirmAlertMessage),
+                    primaryButton: .default(Text(strings.confirmYesBtn)) {
+                        self.showingProcessModal = true
+                    },
+                    secondaryButton: .cancel(Text(strings.cancelBtn))
+                )
             }
             // 2. Модальное окно процесса (Dopamine style, non-dismissible)
             .fullScreenCover(isPresented: $showingProcessModal) {

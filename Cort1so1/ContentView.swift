@@ -65,7 +65,7 @@ struct ContentView: View {
         }
         // Поддержка двух режимов оформления
         .preferredColorScheme(isDarkMode ? .dark : .light)
-        .tint(AppTheme.resolveColor(name: appThemeColor))
+        .accentColor(AppTheme.resolveColor(name: appThemeColor))
     }
 }
 

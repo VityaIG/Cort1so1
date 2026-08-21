@@ -224,10 +224,10 @@ struct DopamineProcessView: View {
                     .transition(.opacity)
             }
         }
-        .interactiveDismissDisabled(true)
+        
         .preferredColorScheme(.dark)
-        .task {
-            await runExecutionPipeline()
+        .onAppear {
+            runExecutionPipeline(stepIndex: 0)
         }
     }
 
@@ -364,7 +364,7 @@ struct DopamineProcessView: View {
             // Нижняя компактная статусная строка
             HStack(spacing: 10) {
                 ProgressView()
-                    .tint(.white)
+                    
                     .scaleEffect(0.8)
 
                 Text(isRu ? "Выполняется джейлбрейк..." : "Jailbreak in progress...")
@@ -440,85 +440,44 @@ struct DopamineProcessView: View {
 
     // MARK: - Замедленный асинхронный пайплайн выполнения
 
-    private func runExecutionPipeline() async {
-        // Вывод логов с плавными задержками (1.1s - 1.6s на шаг)
-        for (idx, step) in logSteps.enumerated() {
-            await MainActor.run {
-                currentStepIndex = idx + 1
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    visibleLogs.append(step)
+    private func runExecutionPipeline(stepIndex: Int) {
+        if stepIndex < logSteps.count {
+            let step = logSteps[stepIndex]
+            self.currentStepIndex = stepIndex + 1
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                self.visibleLogs.append(step)
+            }
+            self.triggerHaptic(isMajor: step.isMajorPhase)
+            
+            let delay: Double = step.isMajorPhase ? 1.5 : 1.1
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.runExecutionPipeline(stepIndex: stepIndex + 1)
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    self.showAppleLogo = true
                 }
-                triggerHaptic(isMajor: step.isMajorPhase)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    withAnimation(.easeInOut(duration: 0.8)) {
+                        self.appleWhiteOpacity = 1.0
+                        self.appleWhiteScale = 1.0
+                    }
+                    self.triggerHaptic(isMajor: true)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                        withAnimation(.easeIn(duration: 1.5)) {
+                            self.appleRedOpacity = 1.0
+                            self.appleRedScale = 1.2
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                            self.onFinished()
+                        }
+                    }
+                }
             }
-
-            let delayNanos: UInt64 = step.isMajorPhase ? 1_500_000_000 : 1_100_000_000
-            try? await Task.sleep(nanoseconds: delayNanos)
-        }
-
-        // Пауза перед переходом к экранам Apple
-        try? await Task.sleep(nanoseconds: 1_200_000_000)
-
-        // 1. Появление белого логотипа Apple с анимацией увеличения и затухания
-        await MainActor.run {
-            triggerImpact(style: .medium)
-            phase = .appleWhite
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
-                appleWhiteOpacity = 1.0
-                appleWhiteScale = 1.0
-            }
-        }
-
-        try? await Task.sleep(nanoseconds: 1_600_000_000)
-
-        // Затухание белого логотипа
-        await MainActor.run {
-            withAnimation(.easeOut(duration: 0.45)) {
-                appleWhiteOpacity = 0.0
-                appleWhiteScale = 0.95
-            }
-        }
-        try? await Task.sleep(nanoseconds: 450_000_000)
-
-        // 2. Чистый черный экран
-        await MainActor.run {
-            phase = .blackScreen
-        }
-        try? await Task.sleep(nanoseconds: 900_000_000)
-
-        // 3. Появление красного логотипа Apple (фирменный знак Dopamine)
-        await MainActor.run {
-            triggerImpact(style: .heavy)
-            phase = .appleRed
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
-                appleRedOpacity = 1.0
-                appleRedScale = 1.0
-            }
-        }
-
-        try? await Task.sleep(nanoseconds: 1_700_000_000)
-
-        // Затухание красного логотипа
-        await MainActor.run {
-            withAnimation(.easeOut(duration: 0.45)) {
-                appleRedOpacity = 0.0
-                appleRedScale = 0.95
-            }
-        }
-        try? await Task.sleep(nanoseconds: 400_000_000)
-
-        // 4. Респринг SpringBoard
-        await MainActor.run {
-            withAnimation(.easeInOut(duration: 0.35)) {
-                phase = .respring
-            }
-        }
-
-        try? await Task.sleep(nanoseconds: 2_400_000_000)
-
-        // 5. Завершение
-        await MainActor.run {
-            triggerNotificationSuccess()
-            onComplete()
         }
     }
 

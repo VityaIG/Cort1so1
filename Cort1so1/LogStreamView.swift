@@ -75,7 +75,7 @@ struct LogStreamView: View {
         currentLogIndex = 0
         let allLogs = LogData.systemLogs
         
-        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
+        self.timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
             if self.currentLogIndex < allLogs.count {
                 self.visibleLogs.append(allLogs[self.currentLogIndex])
                 self.currentLogIndex += 1
