@@ -62,21 +62,21 @@ struct MainView: View {
             }
             // 2. Вторичный диалог выбора метода установки (Action Sheet / Pop-up)
             .confirmationDialog(
-                "Какой метод установки вы хотите выбрать?",
+                isRu ? "Выберите метод джейлбрейка" : "Select Jailbreak Method",
                 isPresented: $showingMethodDialog,
                 titleVisibility: .visible
             ) {
-                Button("Dopamine (Old)") {
+                Button("Dopamine (Old) — Emerald & PPL") {
                     self.selectedMethod = .dopamine
                     self.showingProcessModal = true
                 }
-                Button("Cortisol (New)") {
+                Button("Cortisol (New) — Neon Cyan & PAC/PPL") {
                     self.selectedMethod = .cortisol
                     self.showingProcessModal = true
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
-                Text(isRu ? "Выберите желаемый алгоритм и конфигурацию инсталляции" : "Select desired installation method")
+                Text(isRu ? "Выберите желаемый алгоритм и конфигурацию инсталляции" : "Select desired installation engine and environment setup")
             }
             // 3. Модальное окно процесса (Dopamine style, non-dismissible)
             .fullScreenCover(isPresented: $showingProcessModal) {
