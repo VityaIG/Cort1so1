@@ -23,7 +23,7 @@
 		B10010172C74000100000001 /* AdminDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010172C74000100000001 /* AdminDashboardView.swift */; };
 		B10010982C74000100000001 /* bigalert.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F10010982C74000100000001 /* bigalert.mp3 */; };
 		B10010992C74000100000001 /* easter_egg.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F10010992C74000100000001 /* easter_egg.mp4 */; };
-		B100109A2C74000100000001 /* secreteaster.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F100109A2C74000100000001 /* secreteaster.mp4 */; };
+		B100109B2C74000100000001 /* easter2.png in Resources */ = {isa = PBXBuildFile; fileRef = F100109B2C74000100000001 /* easter2.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,7 +45,7 @@
 		F10010172C74000100000001 /* AdminDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminDashboardView.swift; sourceTree = "<group>"; };
 		F10010982C74000100000001 /* bigalert.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bigalert.mp3; sourceTree = "<group>"; };
 		F10010992C74000100000001 /* easter_egg.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = easter_egg.mp4; sourceTree = "<group>"; };
-		F100109A2C74000100000001 /* secreteaster.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = secreteaster.mp4; sourceTree = "<group>"; };
+		F100109B2C74000100000001 /* easter2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = easter2.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,7 +87,7 @@
 				F10010112C74000100000001 /* Info.plist */,
 				F10010982C74000100000001 /* bigalert.mp3 */,
 				F10010992C74000100000001 /* easter_egg.mp4 */,
-				F100109A2C74000100000001 /* secreteaster.mp4 */,
+				F100109B2C74000100000001 /* easter2.png */,
 			);
 			path = Cort1so1;
 			sourceTree = "<group>";
@@ -161,7 +161,7 @@
 				B10010102C74000100000001 /* Assets.xcassets in Resources */,
 				B10010982C74000100000001 /* bigalert.mp3 in Resources */,
 				B10010992C74000100000001 /* easter_egg.mp4 in Resources */,
-				B100109A2C74000100000001 /* secreteaster.mp4 in Resources */,
+				B100109B2C74000100000001 /* easter2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

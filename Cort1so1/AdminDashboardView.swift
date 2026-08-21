@@ -37,7 +37,6 @@ struct AdminDashboardView: View {
     // Локальные состояния для модальных окон
     @State private var showResetConfirmationAlert: Bool = false
     @State private var showSecretVideoModal: Bool = false
-    @State private var showSecretBootloopModal: Bool = false
     @State private var showRespringModal: Bool = false
     @State private var dummyBool: Bool = false
 
@@ -246,13 +245,6 @@ struct AdminDashboardView: View {
                     }
 
                     Button(action: {
-                        showSecretBootloopModal = true
-                    }) {
-                        Label(isRu ? "Тест бутлупа и краша" : "Test Bootloop & Panic Crash", systemImage: "exclamationmark.triangle")
-                            .foregroundColor(.red)
-                    }
-
-                    Button(action: {
                         showRespringModal = true
                     }) {
                         Label(isRu ? "Тест респринга SpringBoard" : "Trigger SpringBoard Respring", systemImage: "arrow.clockwise")
@@ -320,9 +312,6 @@ struct AdminDashboardView: View {
             }
             .fullScreenCover(isPresented: $showSecretVideoModal) {
                 EasterEggVideoPlayerView(isPresented: $showSecretVideoModal, hasPlayedEasterEgg: $dummyBool)
-            }
-            .fullScreenCover(isPresented: $showSecretBootloopModal) {
-                SecretEasterEggFloatingView(isPresented: $showSecretBootloopModal)
             }
             .fullScreenCover(isPresented: $showRespringModal) {
                 NeoSpringView(onFinished: {

@@ -45,7 +45,7 @@ struct DopamineProcessView: View {
     @State private var visibleLogs: [JailbreakLogStep] = []
     @State private var currentStepIndex: Int = 0
     
-    // Параметры экрана восстановления (10 секунд)
+    // Параметры экрана восстановления (40 секунд)
     @State private var restoreProgress: Double = 0.0
     @State private var restoreTimer: Timer? = nil
     
@@ -134,48 +134,77 @@ struct DopamineProcessView: View {
     private var loggingInterface: some View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
-            HStack(alignment: .center) {
+            HStack(alignment: .center, spacing: 10) {
                 // Левая сторона: Индикаторы статуса
-                HStack(spacing: 6) {
-                    Circle().fill(Color.red.opacity(0.85)).frame(width: 8, height: 8)
-                    Circle().fill(Color.yellow.opacity(0.85)).frame(width: 8, height: 8)
-                    Circle().fill(Color.green.opacity(0.85)).frame(width: 8, height: 8)
+                if method == .dopamine {
+                    HStack(spacing: 6) {
+                        Circle().fill(Color.red.opacity(0.85)).frame(width: 8, height: 8)
+                        Circle().fill(Color.yellow.opacity(0.85)).frame(width: 8, height: 8)
+                        Circle().fill(Color.green.opacity(0.85)).frame(width: 8, height: 8)
+                    }
+                } else {
+                    HStack(spacing: 5) {
+                        Circle().fill(Color(red: 0.00, green: 0.88, blue: 1.00)).frame(width: 8, height: 8)
+                            .shadow(color: Color.cyan.opacity(0.8), radius: 4)
+                        Circle().fill(Color(red: 0.72, green: 0.22, blue: 0.98)).frame(width: 8, height: 8)
+                            .shadow(color: Color.purple.opacity(0.8), radius: 4)
+                    }
                 }
 
                 Spacer()
 
                 // Центральный счетчик шагов и процент
-                Text(String(format: "%d%% • %d/%d", Int(progressRatio * 100), currentStepIndex, logSteps.count))
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.7))
+                HStack(spacing: 4) {
+                    if method == .cortisol {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 10, weight: .black))
+                            .foregroundColor(Color.cyan)
+                    }
+                    Text(String(format: "%d%% • %d/%d", Int(progressRatio * 100), currentStepIndex, logSteps.count))
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .foregroundColor(method == .cortisol ? Color.cyan.opacity(0.9) : Color.white.opacity(0.75))
+                }
 
                 Spacer()
 
-                // Правая сторона: Название метода
+                // Правая сторона: Название метода и бейдж
                 HStack(spacing: 6) {
-                    Image(systemName: method == .dopamine ? "drop.fill" : "bolt.shield.fill")
-                        .font(.system(size: 12, weight: .semibold))
+                    Image(systemName: method.systemIcon)
+                        .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(method.primaryColor)
                     Text(method.title)
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
+                    Text(method.badgeText)
+                        .font(.system(size: 8.5, weight: .heavy, design: .monospaced))
+                        .foregroundColor(method == .cortisol ? .black : .white)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(method == .cortisol ? Color.cyan : Color.white.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.06))
+                .clipShape(Capsule())
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(Color(white: 0.05))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color(white: 0.04))
 
             // Прогресс-бар с плавным spring-эффектом
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.white.opacity(0.12))
+                        .fill(Color.white.opacity(0.10))
                         .frame(height: 2.5)
 
                     Rectangle()
                         .fill(
                             LinearGradient(
-                                colors: [method.primaryColor.opacity(0.8), method.primaryColor],
+                                colors: method == .cortisol
+                                    ? [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)]
+                                    : [Color(red: 0.08, green: 0.70, blue: 0.40), Color(red: 0.12, green: 0.92, blue: 0.52)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -184,61 +213,97 @@ struct DopamineProcessView: View {
                             width: max(8, geo.size.width * CGFloat(progressRatio)),
                             height: 2.5
                         )
+                        .shadow(color: (method == .cortisol ? Color.cyan : method.primaryColor).opacity(0.5), radius: 3)
                         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentStepIndex)
                 }
             }
             .frame(height: 2.5)
 
-            // Список логов: плавный поток и подсветка
+            // Список логов: плавный поток и подсветка (снизу вверх)
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 9) {
+                    VStack(alignment: .leading, spacing: 8) {
                         ForEach(Array(visibleLogs.enumerated().reversed()), id: \.element.id) { index, step in
                             let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
 
-                            HStack(alignment: .center, spacing: 12) {
+                            HStack(alignment: .center, spacing: 10) {
                                 // Иконка состояния
                                 if isCurrentRunning {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle(tint: method.primaryColor))
-                                        .scaleEffect(0.85)
-                                        .frame(width: 22, height: 22)
+                                        .scaleEffect(0.8)
+                                        .frame(width: 20, height: 20)
                                 } else if step.isMajorPhase {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 17, weight: .bold))
+                                    Image(systemName: method == .cortisol ? "bolt.shield.fill" : "checkmark.circle.fill")
+                                        .font(.system(size: 16, weight: .bold))
                                         .foregroundColor(method.primaryColor)
-                                        .frame(width: 22, height: 22)
+                                        .frame(width: 20, height: 20)
                                 } else {
                                     Image(systemName: "checkmark")
-                                        .font(.system(size: 13, weight: .bold))
+                                        .font(.system(size: 12, weight: .bold))
                                         .foregroundColor(method.primaryColor.opacity(0.9))
-                                        .frame(width: 22, height: 22)
+                                        .frame(width: 20, height: 20)
                                 }
 
                                 // Текст лога
                                 Text(isRu ? step.titleRu : step.titleEn)
-                                    .font(.system(size: step.isMajorPhase ? 14 : 13, weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular), design: .monospaced))
-                                    .foregroundColor(step.isMajorPhase ? method.primaryColor : (isCurrentRunning ? Color.white : Color.white.opacity(0.8)))
+                                    .font(.system(
+                                        size: step.isMajorPhase ? 13.5 : 12.5,
+                                        weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular),
+                                        design: .monospaced
+                                    ))
+                                    .foregroundColor(
+                                        step.isMajorPhase
+                                            ? (method == .cortisol ? Color(red: 0.30, green: 0.95, blue: 1.00) : method.primaryColor)
+                                            : (isCurrentRunning ? Color.white : Color.white.opacity(0.82))
+                                    )
                                     .lineLimit(2)
 
                                 Spacer(minLength: 0)
 
                                 if step.isMajorPhase {
-                                    Text(isRu ? "OK" : "DONE")
-                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                        .foregroundColor(.black)
-                                        .padding(.horizontal, 7)
-                                        .padding(.vertical, 2.5)
-                                        .background(method.primaryColor)
-                                        .clipShape(Capsule())
+                                    if method == .cortisol {
+                                        Text("VERIFIED")
+                                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 7)
+                                            .padding(.vertical, 2.5)
+                                            .background(
+                                                LinearGradient(
+                                                    colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
+                                                    startPoint: .leading,
+                                                    endPoint: .trailing
+                                                )
+                                            )
+                                            .clipShape(Capsule())
+                                    } else {
+                                        Text(isRu ? "OK" : "DONE")
+                                            .font(.system(size: 9.5, weight: .heavy, design: .rounded))
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 7)
+                                            .padding(.vertical, 2.5)
+                                            .background(method.primaryColor)
+                                            .clipShape(Capsule())
+                                    }
                                 }
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 7)
+                            .padding(.horizontal, 11)
+                            .padding(.vertical, 6.5)
                             .background(
                                 isCurrentRunning
-                                    ? method.primaryColor.opacity(0.12)
-                                    : (step.isMajorPhase ? method.primaryColor.opacity(0.08) : Color.clear)
+                                    ? (method == .cortisol ? Color.cyan.opacity(0.14) : method.primaryColor.opacity(0.12))
+                                    : (step.isMajorPhase
+                                        ? (method == .cortisol ? Color.cyan.opacity(0.09) : method.primaryColor.opacity(0.08))
+                                        : Color.clear)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .stroke(
+                                        step.isMajorPhase
+                                            ? (method == .cortisol ? Color.cyan.opacity(0.35) : method.primaryColor.opacity(0.25))
+                                            : (isCurrentRunning ? method.primaryColor.opacity(0.2) : Color.clear),
+                                        lineWidth: step.isMajorPhase ? 0.8 : 0.5
+                                    )
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .id(step.id)
@@ -260,9 +325,19 @@ struct DopamineProcessView: View {
 
             // Нижняя статусная строка
             HStack(spacing: 10) {
+                if method == .cortisol {
+                    Text("SPTM")
+                        .font(.system(size: 9, weight: .heavy, design: .monospaced))
+                        .foregroundColor(.cyan)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Color.cyan.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                }
+
                 Text(currentPhaseDescription)
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.white.opacity(0.88))
                     .lineLimit(1)
 
                 Spacer()
@@ -272,11 +347,11 @@ struct DopamineProcessView: View {
                     .scaleEffect(0.75)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 13)
-            .background(Color(white: 0.05))
+            .padding(.vertical, 12)
+            .background(Color(white: 0.04))
             .overlay(
                 Rectangle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.white.opacity(0.08))
                     .frame(height: 0.5),
                 alignment: .top
             )
@@ -284,7 +359,7 @@ struct DopamineProcessView: View {
         .background(Color.black)
     }
 
-    // MARK: - Экран восстановления Apple (Яблоко + полоска снизу без текста на 10 сек)
+    // MARK: - Экран восстановления Apple (Яблоко + полоска снизу без текста на 40 сек)
 
     private func restoreAppleView(color: Color, progress: Double) -> some View {
         ZStack {
@@ -381,12 +456,27 @@ struct DopamineProcessView: View {
         if stepIndex < logSteps.count {
             let step = logSteps[stepIndex]
             self.currentStepIndex = stepIndex + 1
+            
+            // Тактильный отклик под каждый метод
+            triggerHaptic(isMajor: step.isMajorPhase)
+            
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 self.visibleLogs.append(step)
             }
             
             let baseDelay = method.stepDelay(verbose: verboseLogs) / speed
-            let delay: Double = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
+            let delay: Double
+            if method == .cortisol {
+                if step.isMajorPhase {
+                    delay = baseDelay * 1.8
+                } else {
+                    let variance = Double.random(in: 0.85...1.15)
+                    delay = baseDelay * variance
+                }
+            } else {
+                delay = step.isMajorPhase ? (baseDelay * 1.5) : baseDelay
+            }
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
             }
@@ -397,23 +487,71 @@ struct DopamineProcessView: View {
                     self.phase = .restoreWhite
                 }
                 
-                self.start10SecondsRestoreSequence()
+                self.start40SecondsRestoreSequence()
             }
         }
     }
 
-    /// Запуск 10-секундной полосы восстановления (без вибрации во время заполнения)
-    private func start10SecondsRestoreSequence() {
+    // MARK: - Расчет прогресса восстановления (40 сек с правдоподобными паузами каждые 4-6 сек)
+
+    private struct RestoreKeyframe {
+        let time: Double
+        let progress: Double
+    }
+
+    private var restoreKeyframes: [RestoreKeyframe] {
+        [
+            RestoreKeyframe(time: 0.0, progress: 0.0),
+            RestoreKeyframe(time: 4.5, progress: 0.12),
+            RestoreKeyframe(time: 6.0, progress: 0.12),
+            RestoreKeyframe(time: 10.5, progress: 0.28),
+            RestoreKeyframe(time: 12.5, progress: 0.28),
+            RestoreKeyframe(time: 17.5, progress: 0.46),
+            RestoreKeyframe(time: 19.0, progress: 0.46),
+            RestoreKeyframe(time: 24.5, progress: 0.65),
+            RestoreKeyframe(time: 26.5, progress: 0.65),
+            RestoreKeyframe(time: 31.0, progress: 0.80),
+            RestoreKeyframe(time: 32.5, progress: 0.80),
+            RestoreKeyframe(time: 37.0, progress: 0.93),
+            RestoreKeyframe(time: 38.5, progress: 0.93),
+            RestoreKeyframe(time: 40.0, progress: 1.00)
+        ]
+    }
+
+    private func calculateRestoreProgress(at elapsedNormalizedTime: Double) -> Double {
+        let t = max(0.0, min(40.0, elapsedNormalizedTime))
+        if t >= 40.0 { return 1.0 }
+
+        let keyframes = restoreKeyframes
+        for i in 0..<(keyframes.count - 1) {
+            let k1 = keyframes[i]
+            let k2 = keyframes[i + 1]
+
+            if t >= k1.time && t <= k2.time {
+                let duration = k2.time - k1.time
+                if duration <= 0 { return k2.progress }
+                let fraction = (t - k1.time) / duration
+                return k1.progress + (k2.progress - k1.progress) * fraction
+            }
+        }
+        return 1.0
+    }
+
+    /// Запуск 40-секундной полосы восстановления с правдоподобными остановками каждые 4-6 секунд
+    private func start40SecondsRestoreSequence() {
         let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
         self.restoreProgress = 0.0
-        let totalDuration: Double = 10.0 / speed
-        let interval: Double = 0.05
-        let increment: Double = interval / totalDuration
+        let totalRealDuration: Double = 40.0 / speed
+        let interval: Double = 0.04
+        let startTime = Date()
         
         self.restoreTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
-            self.restoreProgress += increment
+            let actualElapsed = Date().timeIntervalSince(startTime)
+            let normalizedElapsed = actualElapsed * speed
             
-            if self.restoreProgress >= 1.0 {
+            self.restoreProgress = self.calculateRestoreProgress(at: normalizedElapsed)
+            
+            if normalizedElapsed >= 40.0 || actualElapsed >= totalRealDuration {
                 self.restoreProgress = 1.0
                 timer.invalidate()
                 self.restoreTimer = nil
@@ -638,13 +776,19 @@ struct DopamineProcessView: View {
 
     private func triggerHaptic(isMajor: Bool) {
         if isMajor {
-            let generator = UIImpactFeedbackGenerator(style: .medium)
+            let generator = UIImpactFeedbackGenerator(style: method == .cortisol ? .heavy : .medium)
             generator.prepare()
             generator.impactOccurred()
         } else {
-            let generator = UISelectionFeedbackGenerator()
-            generator.prepare()
-            generator.selectionChanged()
+            if method == .cortisol {
+                let generator = UIImpactFeedbackGenerator(style: .light)
+                generator.prepare()
+                generator.impactOccurred()
+            } else {
+                let generator = UISelectionFeedbackGenerator()
+                generator.prepare()
+                generator.selectionChanged()
+            }
         }
     }
 

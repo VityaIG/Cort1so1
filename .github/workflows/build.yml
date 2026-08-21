@@ -87,9 +87,6 @@ jobs:
               - Added editable post-apply title and button text directly within the "New Tweak" & "Edit Tweak" sheets.
               - Added interactive "Test Apply Pop-up" and one-tap "Save & Apply" actions.
               - Streamlined Tweaks page with a single, clean top "Apply" action button.
-            - **Secret Easter Egg & Full-Screen Bootloop Panic**:
-              - Added 1% chance secret video trigger when opening Settings (once per session).
-              - Smooth full-screen bootloop sequence: White Apple logo -> Green Apple logo -> Hard kernel panic app termination (`exit(0)`).
             - **First-Launch Onboarding & Headphone Safety Warning**:
               - Sequential native modal dialogs on first launch introducing app capabilities and warning about loud audio playback.
             - **Humorous & Overclock Tweaks**:

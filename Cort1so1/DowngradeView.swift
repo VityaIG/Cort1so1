@@ -224,7 +224,19 @@ struct DowngradeView: View {
                 
                 // Easter Egg
                 Section {
-                    VStack(alignment: .center, spacing: 20) {
+                    VStack(alignment: .center, spacing: 16) {
+                        if let image = UIImage(named: "easter2") ?? UIImage(contentsOfFile: Bundle.main.path(forResource: "easter2", ofType: "png") ?? "") {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                        } else {
+                            Image("easter2")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                        }
+
                         Button(action: {
                             let androidFirmware = FirmwareVersion(
                                 version: "Android 17 Beta",

@@ -29,9 +29,6 @@ The interface is designed strictly according to **Apple Human Interface Guidelin
   - Configurable alert titles and buttons (`"son"` / `"Запустил"` and `"bruh"` / `"Семя в арбуууз"`).
   - Ability to customize apply button and title text in the "New Tweak" & "Edit Tweak" dialogs with interactive testing.
   - Cleaned up redundant action buttons into a single, top-level Apply action.
-- **Secret Easter Egg & Bootloop Panic**:
-  - 1% chance secret video trigger on Settings tab switch.
-  - Seamless full-screen White Apple -> Green Apple -> Kernel Panic app crash sequence.
 - **First-Launch Onboarding Flow**:
   - Sequential native modal dialogs introducing app capabilities followed by headphone & audio safety warnings.
 - **New Humorous Tweaks**: 3 new creative modules added across all categories.

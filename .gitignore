@@ -14,3 +14,4 @@ Payload/
 node_modules/
 dist/
 .vite/
+bun.lock

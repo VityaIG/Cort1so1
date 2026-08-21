@@ -8,11 +8,9 @@ struct SettingsView: View {
     static var hasPlayedInSession: Bool = false
 
     @Binding var jailbreakState: JailbreakState
-    @Binding var showSecretEasterEgg: Bool
 
-    init(jailbreakState: Binding<JailbreakState>, showSecretEasterEgg: Binding<Bool> = .constant(false)) {
+    init(jailbreakState: Binding<JailbreakState>) {
         self._jailbreakState = jailbreakState
-        self._showSecretEasterEgg = showSecretEasterEgg
     }
     @AppStorage("isDarkMode") private var isDarkMode: Bool = true
     @AppStorage("hideStatusBar") private var hideStatusBar: Bool = false

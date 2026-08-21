@@ -79,17 +79,17 @@ struct MainView: View {
                 isPresented: $showingMethodDialog,
                 titleVisibility: .visible
             ) {
-                Button("Dopamine") {
+                Button("Dopamine (Old)") {
                     self.selectedMethod = .dopamine
                     self.showingProcessModal = true
                 }
-                Button("Cortisol") {
+                Button("Cortisol (New)") {
                     self.selectedMethod = .cortisol
                     self.showingProcessModal = true
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
-                Text(isRu ? "Выберите желаемый метод джейлбрейка" : "Select desired jailbreak method")
+                Text(isRu ? "Выберите желаемый метод и архитектуру джейлбрейка" : "Select desired jailbreak method & architecture")
             }
             // 3. Модальное окно процесса (Dopamine style, non-dismissible)
             .fullScreenCover(isPresented: $showingProcessModal) {
