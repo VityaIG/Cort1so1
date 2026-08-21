@@ -1,0 +1,42 @@
+--- Cort1so1/SettingsView.swift
++++ Cort1so1/SettingsView.swift
+@@ -348,6 +348,34 @@
+         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+     }
+ 
++    // MARK: - 7. Создатель & Разработчик
++    private var creatorCard: some View {
++        Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
++            HStack(spacing: 12) {
++                ZStack {
++                    Circle()
++                        .fill(telegramColor.opacity(0.15))
++                        .frame(width: 40, height: 40)
++                    Image(systemName: "paperplane.fill")
++                        .font(.system(size: 18))
++                        .foregroundColor(telegramColor)
++                }
++                VStack(alignment: .leading, spacing: 4) {
++                    Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
++                        .font(.system(size: 12, weight: .medium))
++                        .foregroundColor(.secondary)
++                        .lineLimit(1)
++                    Text("@VityaV 🇷🇺")
++                        .font(.system(size: 16, weight: .bold))
++                        .foregroundColor(telegramColor)
++                        .lineLimit(1)
++                }
++                Spacer()
++                Image(systemName: "arrow.up.right")
++                    .font(.system(size: 14, weight: .bold))
++                    .foregroundColor(telegramColor)
++            }
++            .padding(16)
++            .background(Color(uiColor: .secondarySystemGroupedBackground))
++            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
++        }
++    }
++
+     // MARK: - Вспомогательные компоненты разметки
+ 
+     private func sectionHeader(title: String, icon: String, color: Color) -> some View {

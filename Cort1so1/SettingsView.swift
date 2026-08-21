@@ -52,6 +52,9 @@ struct SettingsView: View {
 
                         // 6. О программе и сообщество
                         aboutProjectCard
+                        
+                        // 7. Создатель & Разработчик
+                        creatorCard
                             .padding(.bottom, 28)
                     }
                     .padding(.horizontal, 16)
@@ -139,42 +142,6 @@ struct SettingsView: View {
                 .fixedSize(horizontal: true, vertical: false)
             }
 
-            Divider()
-
-            // Карточка создателя с переходом в Telegram
-            Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(telegramColor.opacity(0.15))
-                            .frame(width: 34, height: 34)
-                        Image(systemName: "paperplane.fill")
-                            .font(.system(size: 15))
-                            .foregroundColor(telegramColor)
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-
-                        Text("@VityaV 🇷🇺")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(telegramColor)
-                            .lineLimit(1)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(telegramColor)
-                }
-                .padding(10)
-                .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -380,6 +347,39 @@ struct SettingsView: View {
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    // MARK: - 7. Создатель & Разработчик
+    private var creatorCard: some View {
+        Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(telegramColor.opacity(0.15))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "paperplane.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(telegramColor)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                    Text("@VityaV 🇷🇺")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(telegramColor)
+                        .lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(telegramColor)
+            }
+            .padding(16)
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
     }
 
     // MARK: - Вспомогательные компоненты разметки
