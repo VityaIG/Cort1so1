@@ -36,7 +36,13 @@ jobs:
             CODE_SIGN_IDENTITY="" > xcodebuild.log 2>&1
       - name: Upload logs on failure
         if: failure()
-        run: curl -F "file=@xcodebuild.log" https://file.io/?expires=1d
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git checkout -b build-logs
+          git add xcodebuild.log
+          git commit -m "Add xcodebuild.log"
+          git push -f origin build-logs
 
       - name: Package IPA
         run: |
