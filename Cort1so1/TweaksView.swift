@@ -19,13 +19,24 @@ struct TweaksView: View {
     @AppStorage("tweak_godMode") private var godMode: Bool = false
     @AppStorage("tweak_topGrades") private var topGrades: Bool = true
     @AppStorage("tweak_exist") private var exist: Bool = true
+    @AppStorage("tweak_wifiAnywhere") private var wifiAnywhere: Bool = false
+    @AppStorage("tweak_autoHomework") private var autoHomework: Bool = false
+    @AppStorage("tweak_infiniteLuck") private var infiniteLuck: Bool = true
+
     @AppStorage("tweak_display240Hz") private var display240Hz: Bool = false
     @AppStorage("tweak_infiniteBattery") private var infiniteBattery: Bool = false
     @AppStorage("tweak_infiniteCard") private var infiniteCard: Bool = false
+    @AppStorage("tweak_coffeeMachine") private var coffeeMachine: Bool = false
+    @AppStorage("tweak_laserPointer") private var laserPointer: Bool = false
+    @AppStorage("tweak_waterproofForceField") private var waterproofForceField: Bool = true
+
     @AppStorage("tweak_mindReader") private var mindReader: Bool = false
     @AppStorage("tweak_teleportation") private var teleportation: Bool = false
     @AppStorage("tweak_antiGravity") private var antiGravity: Bool = false
     @AppStorage("tweak_adblockIRL") private var adblockIRL: Bool = true
+    @AppStorage("tweak_timeRewind") private var timeRewind: Bool = false
+    @AppStorage("tweak_animalSpeech") private var animalSpeech: Bool = true
+    @AppStorage("tweak_invisibilityCloak") private var invisibilityCloak: Bool = false
 
     // Хранилище кастомных твиков в JSON
     @AppStorage("custom_tweaks_store") private var customTweaksJSON: String = "[]"
@@ -106,6 +117,24 @@ struct TweaksView: View {
                             }
                         )
                     )
+                    tweakToggleRow(
+                        title: isRu ? "Бесплатный Wi-Fi везде" : "Free Wi-Fi Anywhere",
+                        subtitle: isRu ? "Прямое подключение к спутникам Starlink на скорости 10 Гбит/с" : "Direct uplink to Starlink satellites at uncapped 10 Gbps speed",
+                        iconColor: .blue,
+                        binding: $wifiAnywhere
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Авто-диплом и домашка" : "Auto Homework & Degree",
+                        subtitle: isRu ? "Нейросеть пишет диплом за 3 секунды и защищает его перед комиссией" : "Neural engine writes your thesis in 3s and defends it before committee",
+                        iconColor: .indigo,
+                        binding: $autoHomework
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Увеличение удачи +999%" : "Universal Luck Boost +999%",
+                        subtitle: isRu ? "Патчит квантовую вероятность во всей вашей жизни на победу" : "Patches RNG in quantum probability fields for guaranteed wins",
+                        iconColor: .yellow,
+                        binding: $infiniteLuck
+                    )
                 }
 
                 Section(header: Text(strings.tweaksSectionHardware)) {
@@ -126,6 +155,24 @@ struct TweaksView: View {
                         subtitle: isRu ? "Легальная печать 100-долларовых купюр прямо из порта USB-C" : "Legally prints physical $100 bills directly from the USB-C port",
                         iconColor: .mint,
                         binding: $infiniteCard
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Кофемашина из динамика" : "Speaker Espresso Maker",
+                        subtitle: isRu ? "Ультразвуковые волны динамика варят горячий эспрессо прямо в чашку" : "High-frequency acoustic vibrations brew fresh hot espresso on demand",
+                        iconColor: .orange,
+                        binding: $coffeeMachine
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Лазерная резка вспышкой" : "Flashlight Laser Cutter",
+                        subtitle: isRu ? "Разгоняет LED-вспышку до 5000 Вт, превращая её в световой меч" : "Overclocks True Tone LED flash to 5000W lightsaber mode",
+                        iconColor: .red,
+                        binding: $laserPointer
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Силовое поле от падений" : "Kinetic Drop Forcefield",
+                        subtitle: isRu ? "Генерирует нано-купол вокруг экрана, выдерживает падение с 9 этажа" : "Generates a kinetic nano-shield capable of surviving 9-story drops",
+                        iconColor: .teal,
+                        binding: $waterproofForceField
                     )
                 }
 
@@ -153,6 +200,24 @@ struct TweaksView: View {
                         subtitle: isRu ? "Замазывает лица раздражающих вас людей в реальном времени" : "Automatically blurs faces of annoying people in real-time",
                         iconColor: .red,
                         binding: $adblockIRL
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Перемотка времени назад на 5 минут" : "5-Minute Time Rewind",
+                        subtitle: isRu ? "Позволяет мгновенно отменить неловкие фразы и глупые сообщения" : "Instantly undo awkward conversations and embarrassing texts",
+                        iconColor: .cyan,
+                        binding: $timeRewind
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Переводчик с языка котов" : "Cat Speech Translator",
+                        subtitle: isRu ? "Синхронный перевод «Мяу» на человеческий язык без цензуры" : "Real-time subtitle translation of meows into unfiltered human speech",
+                        iconColor: .yellow,
+                        binding: $animalSpeech
+                    )
+                    tweakToggleRow(
+                        title: isRu ? "Режим полной невидимости" : "Full Invisibility Cloak",
+                        subtitle: isRu ? "Искривляет фотоны вокруг вас, делая невидимым для камер и людей" : "Bends visible light photons around your body for total stealth",
+                        iconColor: .purple,
+                        binding: $invisibilityCloak
                     )
                 }
 
@@ -213,8 +278,7 @@ struct TweaksView: View {
             .alert(isPresented: $showAppliedAlert) {
                 Alert(
                     title: Text(strings.tweaksAppliedTitle),
-                    message: Text(strings.tweaksAppliedMsg),
-                    dismissButton: .default(Text("OK"))
+                    dismissButton: .default(Text(strings.tweaksAppliedButton))
                 )
             }
             .alert(isPresented: $showJokeAlert) {

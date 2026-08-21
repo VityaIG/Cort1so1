@@ -38,7 +38,8 @@ struct LocalizedStrings {
     var tweaksSectionHardware: String { lang == .ru ? "Аппаратные оверклок-твики" : "Hardware Overclock Tweaks" }
     var tweaksSectionReality: String { lang == .ru ? "Квантовые и квантово-физические модули" : "Quantum & Spatial Modules" }
     var tweaksApplyBtn: String { lang == .ru ? "Применить" : "Apply" }
-    var tweaksAppliedTitle: String { "Cort1so1" }
+    var tweaksAppliedTitle: String { lang == .ru ? "Запустил" : "son" }
+    var tweaksAppliedButton: String { lang == .ru ? "Семя в арбуууз" : "bruh" }
     var tweaksAppliedMsg: String { lang == .ru ? "Твики успешно применены! Изменения вступили в силу в подсистеме SpringBoard." : "Tweaks applied successfully! Changes are now active in SpringBoard." }
     var tweaksActiveBadge: String { lang == .ru ? "Substrate активен" : "Substrate Active" }
     
