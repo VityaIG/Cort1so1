@@ -480,17 +480,18 @@ struct DowngradeExecutionSheet: View {
             .onDisappear {
                 restoreTimer?.invalidate()
             }
+        }
             
-            if isRespringing {
-                NeoSpringView(onFinished: {
-                    self.isRespringing = false
-                    presentationMode.wrappedValue.dismiss()
-                })
-                .ignoresSafeArea()
-                .zIndex(100)
-            }
+        if isRespringing {
+            NeoSpringView(onFinished: {
+                self.isRespringing = false
+                presentationMode.wrappedValue.dismiss()
+            })
+            .ignoresSafeArea()
+            .zIndex(100)
         }
     }
+}
     
     // MARK: - Logic
     

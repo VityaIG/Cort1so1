@@ -147,7 +147,6 @@ struct DopamineProcessView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(visibleLogs.enumerated().reversed()), id: \.element.id) { index, step in
                             let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
-                            let isDone = !isCurrentRunning
 
                             HStack(alignment: .center, spacing: 12) {
                                 // Иконка состояния: если выполняется — индикатор прогресса, если завершен — зеленая галочка / значок

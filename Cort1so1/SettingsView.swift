@@ -554,7 +554,6 @@ struct Cort1so1IconShape: Shape {
         let outerTop = CGPoint(x: center.x + outerXOffset, y: topCutY)
         let innerTop = CGPoint(x: center.x + innerXOffset, y: topCutY)
         let outerBottom = CGPoint(x: center.x + outerXOffset, y: bottomCutY)
-        let innerBottom = CGPoint(x: center.x + innerXOffset, y: bottomCutY)
         
         let startAngleOuter = atan2(-cutOffsetY, outerXOffset)
         let endAngleOuter = atan2(cutOffsetY, outerXOffset)
