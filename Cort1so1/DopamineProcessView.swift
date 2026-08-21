@@ -238,16 +238,34 @@ struct DopamineProcessView: View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
             HStack {
+                // Левая сторона: Инфо о системном эксплойте
+                HStack(spacing: 6) {
+                    Image(systemName: "cpu.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                    Text("PhysPuppet • SPTM")
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.85))
+                }
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.1))
+                .clipShape(Capsule())
+
                 Spacer()
 
-                Text("Cort1so1")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-
-                Spacer()
+                // Правая сторона: Название Cort1so1
+                HStack(spacing: 6) {
+                    Image(systemName: "shippingbox.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                    Text("Cort1so1")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             .background(Color.black)
 
             // Прогресс-бар с динамической подсветкой
