@@ -64,10 +64,11 @@ struct SettingsView: View {
                         creatorCard
                             .padding(.bottom, SettingsView.hasPlayedInSession ? 24 : 8)
 
-                        // 8. Секретный триггер Пасхалки (прокрутка слишком далеко вниз)
+                        // 8. Секретный триггер Пасхалки (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
                         if !SettingsView.hasPlayedInSession {
                             easterEggBottomTrigger
-                                .padding(.bottom, 24)
+                                .padding(.top, 40)
+                                .padding(.bottom, 60)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -431,15 +432,16 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 8. Триггер Пасхалки (автоматически при прокрутке в самый низ)
+    // MARK: - 8. Триггер Пасхалки (только при прокрутке ОЧЕНЬ ДАЛЕКО вниз / overscroll)
     private var easterEggBottomTrigger: some View {
         Color.clear
-            .frame(height: 4)
+            .frame(height: 10)
             .background(
                 GeometryReader { geo -> Color in
                     let minY = geo.frame(in: .global).minY
                     let screenHeight = UIScreen.main.bounds.height
-                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 10 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
+                    // Требуется глубокий оверскролл (прокрутка ОЧЕНЬ ДАЛЕКО вниз: минимум на 160pt выше нижней границы экрана)
+                    if !SettingsView.hasPlayedInSession && minY > 0 && minY < screenHeight - 160 && Date().timeIntervalSince(self.lastTriggerTime) > 3.0 {
                         DispatchQueue.main.async {
                             self.lastTriggerTime = Date()
                             SettingsView.hasPlayedInSession = true
