@@ -308,12 +308,13 @@ struct DowngradeExecutionSheet: View {
                 Section {
                     if isRestoring {
                         Button(action: {
-                            showCancelAlert = true
+                            cancelFlashing()
                         }) {
                             HStack {
                                 Spacer()
+                                Image(systemName: "stop.fill")
                                 Text(isRu ? "Прервать Откат" : "Stop Flashing")
-                                    .fontWeight(.semibold)
+                                    .fontWeight(.bold)
                                 Spacer()
                             }
                             .foregroundColor(.red)

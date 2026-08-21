@@ -129,26 +129,6 @@ struct MainView: View {
                     .font(.system(.subheadline, design: .monospaced))
                     .fontWeight(.medium)
             }
-
-            HStack {
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(Color.purple.opacity(0.15))
-                            .frame(width: 26, height: 26)
-                        Image(systemName: "memorychip")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.purple)
-                    }
-                    Text(strings.archTitle)
-                        .font(.system(.subheadline, design: .default))
-                }
-                Spacer()
-                Text(strings.archValue)
-                    .foregroundColor(.secondary)
-                    .font(.system(.subheadline, design: .monospaced))
-                    .fontWeight(.medium)
-            }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
