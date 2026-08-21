@@ -89,8 +89,8 @@ struct TweaksView: View {
                         binding: $topGrades
                     )
                     tweakToggleRow(
-                        title: isRu ? "Подписка на Жизнь PRO" : "Life Premium Subscription",
-                        subtitle: isRu ? "Отключение рекламы во сне. (Внимание: отключение приведет к аннигиляции)" : "Disables ads during sleep. (Warning: toggling off causes instant annihilation)",
+                        title: isRu ? "Существование" : "Existence",
+                        subtitle: isRu ? "Поддержание вашего базового присутствия в текущей реальности. (Отключение приведет к аннигиляции)" : "Maintains your basic presence in the current reality. (Disabling causes instant annihilation)",
                         iconColor: .purple,
                         binding: Binding(
                             get: { self.exist },
@@ -238,44 +238,20 @@ struct TweaksView: View {
         binding: Binding<Bool>
     ) -> some View {
         Toggle(isOn: binding) {
-            HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(iconColor.opacity(0.15))
-                        .frame(width: 32, height: 32)
-                    Image(systemName: tweakIconName(for: title))
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(iconColor)
-                }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(.body, design: .default))
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.system(.body, design: .default))
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-
-                    Text(subtitle)
-                        .font(.system(.caption, design: .default))
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
+                Text(subtitle)
+                    .font(.system(.caption, design: .default))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
             }
-            .padding(.vertical, 3)
+            .padding(.vertical, 2)
         }
         .toggleStyle(SwitchToggleStyle(tint: iconColor))
-    }
-
-    private func tweakIconName(for title: String) -> String {
-        if title.contains("RAM") || title.contains("память") { return "memorychip.fill" }
-        if title.contains("Pentagon") || title.contains("Пентагон") { return "terminal.fill" }
-        if title.contains("Life") || title.contains("Жизнь") { return "sparkles" }
-        if title.contains("Nitrogen") || title.contains("азотом") { return "snowflake" }
-        if title.contains("Microwave") || title.contains("Микроволновая") { return "bolt.batteryblock.fill" }
-        if title.contains("Money") || title.contains("деньги") { return "banknote.fill" }
-        if title.contains("Tinfoil") || title.contains("фольги") { return "shield.checkered" }
-        if title.contains("Couch") || title.contains("телепортация") { return "paperplane.circle.fill" }
-        if title.contains("Gravity") || title.contains("гравитации") { return "globe.americas.fill" }
-        return "puzzlepiece.extension.fill"
     }
 
     private func loadCustomTweaks() {
