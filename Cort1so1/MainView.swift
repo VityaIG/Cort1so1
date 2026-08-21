@@ -183,11 +183,12 @@ struct MainView: View {
                     HStack(spacing: 14) {
                         ZStack {
                             Circle()
-                                .fill(Color.green.opacity(0.15))
+                                .fill(Color(red: 0.05, green: 0.20, blue: 0.09))
                                 .frame(width: 52, height: 52)
+
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
-                                .font(.system(size: 32, weight: .semibold))
+                                .font(.system(size: 30, weight: .semibold))
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
