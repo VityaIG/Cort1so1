@@ -29,13 +29,14 @@ struct GlitchClone: Identifiable {
     var opacity: Double
 }
 
-/// Модальное окно процесса джейлбрейка с 10-секундным экраном восстановления Apple и глитчем на всю длину аудио
+/// Модальное окно процесса джейлбрейка
 struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("installedOS") private var installedOS: String = "iOS"
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     @AppStorage("autoRespring") private var autoRespring: Bool = true
+    @AppStorage("safeMode") private var safeMode: Bool = false
     var method: JailbreakMethod = .dopamine
     var onComplete: () -> Void
 
@@ -47,10 +48,16 @@ struct DopamineProcessView: View {
     @State private var restoreProgress: Double = 0.0
     @State private var restoreTimer: Timer? = nil
     
-    // Параметры глитч-эффекта размножения (на всё время звучания bigalert.mp3)
+    // Параметры стандартного глитч-эффекта
     @State private var glitchClones: [GlitchClone] = []
     @State private var glitchTimer: Timer? = nil
     @State private var audioPlayer: AVAudioPlayer? = nil
+
+    // Параметры Safe Mode (DVD Bouncing)
+    @State private var dvdPosition: CGPoint = .zero
+    @State private var maxDvdOffsetX: CGFloat = 80
+    @State private var maxDvdOffsetY: CGFloat = 200
+    @State private var dvdTimer: Timer? = nil
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -114,6 +121,8 @@ struct DopamineProcessView: View {
         .onDisappear {
             restoreTimer?.invalidate()
             glitchTimer?.invalidate()
+            dvdTimer?.invalidate()
+            audioPlayer?.stop()
         }
     }
 
@@ -305,27 +314,42 @@ struct DopamineProcessView: View {
         }
     }
 
-    // MARK: - Экран глитча (Красное яблоко + полоса телепортируются и размножаются во время звука)
+    // MARK: - Экран красного яблока (Обычный глитч ИЛИ Safe Mode DVD Bounce)
 
     private var glitchMultiplyView: some View {
         let redColor = Color(red: 0.98, green: 0.22, blue: 0.26)
 
-        return ZStack {
-            Color.black
-                .ignoresSafeArea()
+        return GeometryReader { geo in
+            ZStack {
+                Color.black
+                    .ignoresSafeArea()
 
-            // Основной красный центральный объект
-            restoreAppleView(color: redColor, progress: 1.0)
-                .shadow(color: redColor.opacity(0.8), radius: 24)
+                if safeMode {
+                    // Safe Mode: Красное яблоко и полоса летают как логотип DVD (без тряски, клонов и звука)
+                    restoreAppleView(color: redColor, progress: 1.0)
+                        .position(
+                            x: geo.size.width / 2 + dvdPosition.x,
+                            y: geo.size.height / 2 + dvdPosition.y
+                        )
+                } else {
+                    // Обычный режим: Центральный объект + размноженные телепортирующиеся копии
+                    restoreAppleView(color: redColor, progress: 1.0)
+                        .shadow(color: redColor.opacity(0.8), radius: 24)
 
-            // Размноженные телепортирующиеся красные копии
-            ForEach(glitchClones) { clone in
-                restoreAppleView(color: redColor, progress: 1.0)
-                    .scaleEffect(clone.scale)
-                    .rotationEffect(.degrees(clone.rotation))
-                    .offset(clone.offset)
-                    .opacity(clone.opacity)
-                    .shadow(color: redColor.opacity(0.6), radius: 16)
+                    ForEach(glitchClones) { clone in
+                        restoreAppleView(color: redColor, progress: 1.0)
+                            .scaleEffect(clone.scale)
+                            .rotationEffect(.degrees(clone.rotation))
+                            .offset(clone.offset)
+                            .opacity(clone.opacity)
+                            .shadow(color: redColor.opacity(0.6), radius: 16)
+                    }
+                }
+            }
+            .onAppear {
+                if safeMode {
+                    initDVDBoundaries(screenSize: geo.size)
+                }
             }
         }
     }
@@ -373,17 +397,93 @@ struct DopamineProcessView: View {
                 timer.invalidate()
                 self.restoreTimer = nil
                 
-                // Переход к красному глитч-эффекту на всё время звучания bigalert.mp3
-                self.setSystemVolumeMax()
-                let soundDuration = self.playAlertSound()
-                self.triggerImpact(style: .heavy)
-                withAnimation(.none) {
-                    self.phase = .glitchRedMultiply
+                if self.safeMode {
+                    // Safe Mode: НЕТ звука, НЕТ регулировки громкости, только DVD-движение ровно 10 сек
+                    withAnimation(.none) {
+                        self.phase = .glitchRedMultiply
+                    }
+                    self.startSafeModeDVDSequence()
+                } else {
+                    // Обычный режим: Максимальная громкость + bigalert.mp3 + глитч
+                    self.setSystemVolumeMax()
+                    let soundDuration = self.playAlertSound()
+                    self.triggerImpact(style: .heavy)
+                    withAnimation(.none) {
+                        self.phase = .glitchRedMultiply
+                    }
+                    self.startGlitchMultiplySequence(duration: soundDuration)
                 }
-                self.startGlitchMultiplySequence(duration: soundDuration)
             }
         }
     }
+
+    // MARK: - Safe Mode DVD Animation (10 секунд движения как DVD)
+
+    private func initDVDBoundaries(screenSize: CGSize) {
+        let itemWidth: CGFloat = 220
+        let itemHeight: CGFloat = 170
+        self.maxDvdOffsetX = max(30, (screenSize.width - itemWidth) / 2)
+        self.maxDvdOffsetY = max(50, (screenSize.height - itemHeight) / 2)
+        self.dvdPosition = CGPoint(
+            x: CGFloat.random(in: -maxDvdOffsetX...maxDvdOffsetX),
+            y: CGFloat.random(in: -maxDvdOffsetY...maxDvdOffsetY)
+        )
+    }
+
+    private func startSafeModeDVDSequence() {
+        let fps: Double = 60.0
+        let dt: Double = 1.0 / fps
+        let totalDuration: Double = 10.0
+        var elapsed: Double = 0.0
+        
+        var vx: CGFloat = 185.0
+        var vy: CGFloat = 165.0
+        
+        self.dvdTimer = Timer.scheduledTimer(withTimeInterval: dt, repeats: true) { timer in
+            elapsed += dt
+            
+            var newX = self.dvdPosition.x + vx * CGFloat(dt)
+            var newY = self.dvdPosition.y + vy * CGFloat(dt)
+            
+            // Отскок по оси X
+            if newX >= self.maxDvdOffsetX {
+                newX = self.maxDvdOffsetX
+                vx = -abs(vx)
+            } else if newX <= -self.maxDvdOffsetX {
+                newX = -self.maxDvdOffsetX
+                vx = abs(vx)
+            }
+            
+            // Отскок по оси Y
+            if newY >= self.maxDvdOffsetY {
+                newY = self.maxDvdOffsetY
+                vy = -abs(vy)
+            } else if newY <= -self.maxDvdOffsetY {
+                newY = -self.maxDvdOffsetY
+                vy = abs(vy)
+            }
+            
+            self.dvdPosition = CGPoint(x: newX, y: newY)
+            
+            // Завершение строго через 10 секунд
+            if elapsed >= totalDuration {
+                timer.invalidate()
+                self.dvdTimer = nil
+                
+                UserDefaults.standard.set(true, forKey: "isJailbroken")
+                
+                if self.autoRespring {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        self.phase = .respring
+                    }
+                } else {
+                    self.onComplete()
+                }
+            }
+        }
+    }
+
+    // MARK: - Стандартный режим (Звук + Глитч)
 
     /// Воспроизведение звука bigalert.mp3 при появлении красного яблока (возвращает длительность звука)
     private func playAlertSound() -> Double {
@@ -558,7 +658,7 @@ struct AndroidRobotHead: View {
                 Circle()
                     .fill(Color.black)
                     .frame(width: w * 0.05, height: w * 0.05)
-                    .offset(x: -w * 0.1, y: -w * 0.05)
+                    .offset(x: w * 0.1, y: -w * 0.05)
                 
                 // Left Antenna
                 Capsule()
