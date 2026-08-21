@@ -729,16 +729,16 @@ enum EasterFirmware: String, CaseIterable, Identifiable {
                 JailbreakLogStep(id: 3, titleRu: "[VBMeta] Патчинг vbmeta.img (--disable-verity)...", titleEn: "[VBMeta] Patching vbmeta.img (--disable-verity)...", isMajorPhase: false, iconName: "shield.slash.fill"),
                 JailbreakLogStep(id: 4, titleRu: "[Partition] Разметка динамического Super раздела (system/vendor)...", titleEn: "[Partition] Repartitioning dynamic Super partition...", isMajorPhase: false, iconName: "square.grid.2x2.fill"),
                 JailbreakLogStep(id: 5, titleRu: "[Kernel] Прошивка GKI ядра (Linux 6.6-android)...", titleEn: "[Kernel] Flashing GKI (Generic Kernel Image 6.6-android)...", isMajorPhase: false, iconName: "cpu"),
-                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "⭐️ Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Разделы Super и Bootloader успешно прошиты", titleEn: "Phase 1: Super Partition & Bootloader Flashed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 7, titleRu: "[System] Распаковка system_ext.img (Android 17 SWEET_CAT)...", titleEn: "[System] Extracting system_ext.img (Android 17 SWEET_CAT)...", isMajorPhase: false, iconName: "archivebox.fill"),
                 JailbreakLogStep(id: 8, titleRu: "[Vendor] Инъекция Apple Bionic HAL и драйверов дисплея...", titleEn: "[Vendor] Injecting Apple Bionic HAL & display drivers...", isMajorPhase: false, iconName: "memorychip"),
                 JailbreakLogStep(id: 9, titleRu: "[Magisk] Установка Magisk v27.0 root демона в init.rc...", titleEn: "[Magisk] Injecting Magisk v27.0 root daemon into init.rc...", isMajorPhase: false, iconName: "crown.fill"),
                 JailbreakLogStep(id: 10, titleRu: "[Zygote] Инициализация среды ART runtime и Dalvik VM...", titleEn: "[Zygote] Initializing ART runtime & Dalvik VM...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "⭐️ Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Системные образы и Magisk Root развернуты", titleEn: "Phase 2: System Images & Magisk Root Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 12, titleRu: "[GMS] Установка сервисов Google Play и MicroG framework...", titleEn: "[GMS] Installing Google Play Services & MicroG framework...", isMajorPhase: false, iconName: "shippingbox.fill"),
                 JailbreakLogStep(id: 13, titleRu: "[SELinux] Перевод политик безопасности в Permissive mode...", titleEn: "[SELinux] Setting SELinux state: Permissive mode...", isMajorPhase: false, iconName: "checkmark.shield.fill"),
                 JailbreakLogStep(id: 14, titleRu: "[Sync] Очистка кэш-разделов и сборка dalvik-cache...", titleEn: "[Sync] Wiping cache partition & rebuilding dalvik-cache...", isMajorPhase: false, iconName: "arrow.clockwise"),
-                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "⭐️ Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Android 17 подготовлен к перезагрузке", titleEn: "Phase 3: Android 17 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
             ]
         case .windows:
             return [
@@ -747,16 +747,16 @@ enum EasterFirmware: String, CaseIterable, Identifiable {
                 JailbreakLogStep(id: 3, titleRu: "[DISM] Развертывание install.wim (Windows 11 ARM64 Build 26100)...", titleEn: "[DISM] Applying install.wim (Windows 11 ARM64 Build 26100)...", isMajorPhase: false, iconName: "archivebox.fill"),
                 JailbreakLogStep(id: 4, titleRu: "[BCDBoot] Инициализация EFI системного раздела (ESP)...", titleEn: "[BCDBoot] Initializing EFI System Partition (ESP)...", isMajorPhase: false, iconName: "folder.badge.gearshape"),
                 JailbreakLogStep(id: 5, titleRu: "[Drivers] Интеграция драйверов ARM64 SoC и дисплея...", titleEn: "[Drivers] Injecting ARM64 SoC & display drivers...", isMajorPhase: false, iconName: "memorychip"),
-                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "⭐️ Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Образ Windows 11 ARM64 успешно развернут", titleEn: "Phase 1: Windows 11 ARM64 Image Deployed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 7, titleRu: "[Registry] Инъекция кустов реестра SYSTEM и SOFTWARE...", titleEn: "[Registry] Injecting SYSTEM & SOFTWARE registry hives...", isMajorPhase: false, iconName: "doc.badge.gearshape"),
                 JailbreakLogStep(id: 8, titleRu: "[Bypass] Обход требований TPM 2.0 и SecureBoot checks...", titleEn: "[Bypass] Bypassing TPM 2.0 & SecureBoot verification checks...", isMajorPhase: false, iconName: "lock.open.fill"),
                 JailbreakLogStep(id: 9, titleRu: "[Winlogon] Создание профиля Администратора (OOBE Bypass)...", titleEn: "[Winlogon] Creating Administrator profile (OOBE Bypass)...", isMajorPhase: false, iconName: "person.crop.circle.badge.checkmark"),
                 JailbreakLogStep(id: 10, titleRu: "[DirectX] Инициализация графического конвейера DX12 / WDDM...", titleEn: "[DirectX] Initializing DX12 & WDDM graphics pipeline...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "⭐️ Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Реестр и подсистема драйверов настроены", titleEn: "Phase 2: Registry & Driver Subsystems Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 12, titleRu: "[Services] Запуск служб Windows Explorer и DWM...", titleEn: "[Services] Enabling Windows Explorer & DWM shell services...", isMajorPhase: false, iconName: "server.rack"),
                 JailbreakLogStep(id: 13, titleRu: "[BSOD] Подавление системных вотчдогов CRITICAL_PROCESS_DIED...", titleEn: "[BSOD] Suppressing CRITICAL_PROCESS_DIED watchdogs...", isMajorPhase: false, iconName: "shield.fill"),
                 JailbreakLogStep(id: 14, titleRu: "[Bootmgr] Обновление BCD: режим без проверки подписи...", titleEn: "[Bootmgr] Updating BCD: /nointegritychecks enabled...", isMajorPhase: false, iconName: "arrow.clockwise"),
-                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Windows 11 готова к первому запуску", titleEn: "⭐️ Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
+                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Windows 11 готова к первому запуску", titleEn: "Phase 3: Windows 11 Ready for First Boot", isMajorPhase: true, iconName: "sparkles")
             ]
         case .ubuntu:
             return [
@@ -765,16 +765,16 @@ enum EasterFirmware: String, CaseIterable, Identifiable {
                 JailbreakLogStep(id: 3, titleRu: "[debootstrap] Распаковка базовой rootfs Ubuntu 26.04 LTS...", titleEn: "[debootstrap] Unpacking Ubuntu 26.04 Noble LTS rootfs...", isMajorPhase: false, iconName: "archivebox.fill"),
                 JailbreakLogStep(id: 4, titleRu: "[Kernel] Установка ядра Linux 6.10-noble-arm64...", titleEn: "[Kernel] Installing Linux Kernel 6.10-noble-arm64...", isMajorPhase: false, iconName: "memorychip"),
                 JailbreakLogStep(id: 5, titleRu: "[initramfs] Генерация initramfs образа (zstd сжатие)...", titleEn: "[initramfs] Generating initramfs image with zstd compression...", isMajorPhase: false, iconName: "bolt.horizontal.fill"),
-                JailbreakLogStep(id: 6, titleRu: "⭐️ Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "⭐️ Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 6, titleRu: "Фаза 1: Корневая файловая система и Linux ядро установлены", titleEn: "Phase 1: Linux Kernel & RootFS Installed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 7, titleRu: "[systemd] Настройка systemd таргетов и служб multi-user...", titleEn: "[systemd] Configuring systemd targets and multi-user services...", isMajorPhase: false, iconName: "server.rack"),
                 JailbreakLogStep(id: 8, titleRu: "[Sudo] Настройка прав sudo для пользователя 'cort1so1'...", titleEn: "[Sudo] Granting root sudoers privileges to user 'cort1so1'...", isMajorPhase: false, iconName: "crown.fill"),
                 JailbreakLogStep(id: 9, titleRu: "[APT] Обновление репозиториев и установка базовых утилит...", titleEn: "[APT] Updating repository sources and installing essential packages...", isMajorPhase: false, iconName: "shippingbox.fill"),
                 JailbreakLogStep(id: 10, titleRu: "[Mesa] Инициализация Gallium GPU и Wayland композитора...", titleEn: "[Mesa] Initializing Asahi GPU Gallium driver & Wayland compositor...", isMajorPhase: false, iconName: "bolt.fill"),
-                JailbreakLogStep(id: 11, titleRu: "⭐️ Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "⭐️ Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 11, titleRu: "Фаза 2: Графический стек Mesa и Wayland настроены", titleEn: "Phase 2: Mesa Graphics Stack & Wayland Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
                 JailbreakLogStep(id: 12, titleRu: "[GNOME] Развертывание окружения рабочего стола GNOME 47...", titleEn: "[GNOME] Deploying GNOME 47 Desktop Environment & Shell...", isMajorPhase: false, iconName: "macwindow"),
                 JailbreakLogStep(id: 13, titleRu: "[Network] Запуск NetworkManager и демона wpa_supplicant...", titleEn: "[Network] Starting NetworkManager & wpa_supplicant daemon...", isMajorPhase: false, iconName: "wifi"),
                 JailbreakLogStep(id: 14, titleRu: "[GRUB] Установка загрузчика GRUB-EFI в /boot/efi...", titleEn: "[GRUB] Installing GRUB-EFI bootloader into /boot/efi...", isMajorPhase: false, iconName: "arrow.triangle.merge"),
-                JailbreakLogStep(id: 15, titleRu: "⭐️ Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "⭐️ Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
+                JailbreakLogStep(id: 15, titleRu: "Фаза 3: Ubuntu 26.04 готова к перезагрузке", titleEn: "Phase 3: Ubuntu 26.04 Ready for Reboot", isMajorPhase: true, iconName: "sparkles")
             ]
         }
     }
