@@ -20,6 +20,7 @@
 		B10010142C74000100000001 /* DopamineProcessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010142C74000100000001 /* DopamineProcessView.swift */; };
 		B10010102C74000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10010102C74000100000001 /* Assets.xcassets */; };
 		B10010162C74000100000001 /* TweaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10010162C74000100000001 /* TweaksView.swift */; };
+		B10010982C74000100000001 /* bigalert.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F10010982C74000100000001 /* bigalert.mp3 */; };
 		B10010992C74000100000001 /* easter_egg.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F10010992C74000100000001 /* easter_egg.mp4 */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +40,7 @@
 		F10010112C74000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F10010122C74000100000001 /* Cort1so1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cort1so1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10010162C74000100000001 /* TweaksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweaksView.swift; sourceTree = "<group>"; };
+		F10010982C74000100000001 /* bigalert.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bigalert.mp3; sourceTree = "<group>"; };
 		F10010992C74000100000001 /* easter_egg.mp4 */ = {isa = PBXFileReference; lastKnownFileType = video.mp4; path = easter_egg.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,6 +80,7 @@
 				F10010142C74000100000001 /* DopamineProcessView.swift */,
 				F10010102C74000100000001 /* Assets.xcassets */,
 				F10010112C74000100000001 /* Info.plist */,
+				F10010982C74000100000001 /* bigalert.mp3 */,
 				F10010992C74000100000001 /* easter_egg.mp4 */,
 			);
 			path = Cort1so1;
@@ -150,6 +153,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B10010102C74000100000001 /* Assets.xcassets in Resources */,
+				B10010982C74000100000001 /* bigalert.mp3 in Resources */,
 				B10010992C74000100000001 /* easter_egg.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

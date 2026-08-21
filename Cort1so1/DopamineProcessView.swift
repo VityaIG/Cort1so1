@@ -50,6 +50,7 @@ struct DopamineProcessView: View {
     // Параметры глитч-эффекта размножения (500 мс)
     @State private var glitchClones: [GlitchClone] = []
     @State private var glitchTimer: Timer? = nil
+    @State private var audioPlayer: AVAudioPlayer? = nil
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -374,11 +375,32 @@ struct DopamineProcessView: View {
                 
                 // Переход к 500мс красному глитч-эффекту
                 self.setSystemVolumeMax()
+                self.playAlertSound()
                 self.triggerImpact(style: .heavy)
                 withAnimation(.none) {
                     self.phase = .glitchRedMultiply
                 }
                 self.start500msGlitchMultiplySequence()
+            }
+        }
+    }
+
+    /// Воспроизведение звука bigalert.mp3 при появлении красного яблока
+    private func playAlertSound() {
+        if let soundURL = Bundle.main.url(forResource: "bigalert", withExtension: "mp3") {
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .default, options: [.duckOthers, .mixWithOthers])
+                try session.setActive(true)
+                
+                let player = try AVAudioPlayer(contentsOf: soundURL)
+                player.volume = 1.0
+                player.numberOfLoops = 0
+                player.prepareToPlay()
+                player.play()
+                self.audioPlayer = player
+            } catch {
+                print("Failed to play bigalert.mp3: \(error)")
             }
         }
     }
