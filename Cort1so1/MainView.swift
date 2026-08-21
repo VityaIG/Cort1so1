@@ -182,17 +182,15 @@ struct MainView: View {
                 VStack(spacing: 14) {
                     HStack(spacing: 14) {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .fill(Color.green)
-                                .frame(width: 48, height: 48)
-                                .shadow(color: Color.green.opacity(0.4), radius: 6, x: 0, y: 3)
-
-                            Image(systemName: "checkmark.shield.fill")
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.white)
+                            Circle()
+                                .fill(Color.green.opacity(0.15))
+                                .frame(width: 52, height: 52)
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 32, weight: .semibold))
                         }
 
-                        VStack(alignment: .leading, spacing: 3) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(strings.completedTitle)
                                 .font(.system(.headline, design: .default))
                                 .fontWeight(.bold)
@@ -202,29 +200,37 @@ struct MainView: View {
                         }
                         Spacer()
                     }
-                    .padding(.vertical, 4)
+
+                    Divider()
+
+                    HStack(spacing: 10) {
+                        Label(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Procursus" : customArch, systemImage: "cube.fill")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Label(customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customPackageManager, systemImage: "shippingbox.fill")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Label(customExploitName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "tfp0: OK" : customExploitName, systemImage: "terminal.fill")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                    }
                 }
+                .padding(.vertical, 4)
             } else {
-                // Состояние готовности к джейлбрейку
+                // Исходное состояние готовности
                 HStack(spacing: 14) {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 13, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        AppTheme.resolveColor(name: appThemeColor),
-                                        AppTheme.resolveColor(name: appThemeColor).opacity(0.8)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 48, height: 48)
-                            .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.35), radius: 6, x: 0, y: 3)
-
+                        Circle()
+                            .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                            .frame(width: 50, height: 50)
                         Image(systemName: "lock.open.fill")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            .font(.system(size: 26, weight: .bold))
                     }
 
                     VStack(alignment: .leading, spacing: 3) {
