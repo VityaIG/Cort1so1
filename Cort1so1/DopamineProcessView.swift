@@ -53,8 +53,10 @@ struct DopamineProcessView: View {
     @State private var glitchTimer: Timer? = nil
     @State private var audioPlayer: AVAudioPlayer? = nil
 
-    // Параметры Safe Mode (DVD Bouncing)
+    // Параметры Safe Mode (DVD Bouncing с физикой вращения)
     @State private var dvdPosition: CGPoint = .zero
+    @State private var dvdRotation: Double = 0.0
+    @State private var dvdAngularVelocity: Double = 220.0
     @State private var maxDvdOffsetX: CGFloat = 80
     @State private var maxDvdOffsetY: CGFloat = 200
     @State private var dvdTimer: Timer? = nil
@@ -314,6 +316,23 @@ struct DopamineProcessView: View {
         }
     }
 
+    // MARK: - Safe Mode Вращающийся логотип Apple
+
+    private func safeModeAppleLogo(color: Color) -> some View {
+        Group {
+            if installedOS == "Android 17 Beta" {
+                AndroidRobotHead(color: color)
+                    .frame(width: 100, height: 100)
+            } else {
+                Image(systemName: "applelogo")
+                    .font(.system(size: 100, weight: .regular))
+                    .foregroundColor(color)
+            }
+        }
+        .rotationEffect(.degrees(dvdRotation))
+        .shadow(color: color.opacity(0.85), radius: 22)
+    }
+
     // MARK: - Экран красного яблока (Обычный глитч ИЛИ Safe Mode DVD Bounce)
 
     private var glitchMultiplyView: some View {
@@ -325,8 +344,8 @@ struct DopamineProcessView: View {
                     .ignoresSafeArea()
 
                 if safeMode {
-                    // Safe Mode: Красное яблоко и полоса летают как логотип DVD (без тряски, клонов и звука)
-                    restoreAppleView(color: redColor, progress: 1.0)
+                    // Safe Mode: Только красное яблоко БЕЗ полоски, летает и крутится от столкновений как DVD!
+                    safeModeAppleLogo(color: redColor)
                         .position(
                             x: geo.size.width / 2 + dvdPosition.x,
                             y: geo.size.height / 2 + dvdPosition.y
@@ -398,7 +417,7 @@ struct DopamineProcessView: View {
                 self.restoreTimer = nil
                 
                 if self.safeMode {
-                    // Safe Mode: НЕТ звука, НЕТ регулировки громкости, только DVD-движение ровно 10 сек
+                    // Safe Mode: НЕТ звука, НЕТ регулировки громкости, только крутящееся DVD-яблоко ровно 10 сек
                     withAnimation(.none) {
                         self.phase = .glitchRedMultiply
                     }
@@ -417,17 +436,18 @@ struct DopamineProcessView: View {
         }
     }
 
-    // MARK: - Safe Mode DVD Animation (10 секунд движения как DVD)
+    // MARK: - Safe Mode DVD Animation (10 секунд полета с физикой вращения)
 
     private func initDVDBoundaries(screenSize: CGSize) {
-        let itemWidth: CGFloat = 220
-        let itemHeight: CGFloat = 170
-        self.maxDvdOffsetX = max(30, (screenSize.width - itemWidth) / 2)
-        self.maxDvdOffsetY = max(50, (screenSize.height - itemHeight) / 2)
+        let itemSize: CGFloat = 110
+        self.maxDvdOffsetX = max(30, (screenSize.width - itemSize) / 2)
+        self.maxDvdOffsetY = max(50, (screenSize.height - itemSize) / 2)
         self.dvdPosition = CGPoint(
             x: CGFloat.random(in: -maxDvdOffsetX...maxDvdOffsetX),
             y: CGFloat.random(in: -maxDvdOffsetY...maxDvdOffsetY)
         )
+        self.dvdRotation = 0.0
+        self.dvdAngularVelocity = Double.random(in: 180...300) * (Bool.random() ? 1 : -1)
     }
 
     private func startSafeModeDVDSequence() {
@@ -436,31 +456,42 @@ struct DopamineProcessView: View {
         let totalDuration: Double = 10.0
         var elapsed: Double = 0.0
         
-        var vx: CGFloat = 185.0
-        var vy: CGFloat = 165.0
+        var vx: CGFloat = 205.0 * (Bool.random() ? 1 : -1)
+        var vy: CGFloat = 185.0 * (Bool.random() ? 1 : -1)
         
         self.dvdTimer = Timer.scheduledTimer(withTimeInterval: dt, repeats: true) { timer in
             elapsed += dt
             
+            // Непрерывное физическое вращение
+            self.dvdRotation += self.dvdAngularVelocity * dt
+            
             var newX = self.dvdPosition.x + vx * CGFloat(dt)
             var newY = self.dvdPosition.y + vy * CGFloat(dt)
             
-            // Отскок по оси X
+            // Отскок по оси X с передачей крутящего момента
             if newX >= self.maxDvdOffsetX {
                 newX = self.maxDvdOffsetX
                 vx = -abs(vx)
+                self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? 1 : -1)
+                self.triggerImpact(style: .light)
             } else if newX <= -self.maxDvdOffsetX {
                 newX = -self.maxDvdOffsetX
                 vx = abs(vx)
+                self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? -1 : 1)
+                self.triggerImpact(style: .light)
             }
             
-            // Отскок по оси Y
+            // Отскок по оси Y с передачей крутящего момента
             if newY >= self.maxDvdOffsetY {
                 newY = self.maxDvdOffsetY
                 vy = -abs(vy)
+                self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? -1 : 1)
+                self.triggerImpact(style: .light)
             } else if newY <= -self.maxDvdOffsetY {
                 newY = -self.maxDvdOffsetY
                 vy = abs(vy)
+                self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? 1 : -1)
+                self.triggerImpact(style: .light)
             }
             
             self.dvdPosition = CGPoint(x: newX, y: newY)
