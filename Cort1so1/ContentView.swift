@@ -143,7 +143,7 @@ struct ContentView: View {
             case .volumeWarning:
                 return Alert(
                     title: Text(isRu ? "ВНИМАНИЕ!" : "WARNING!"),
-                    message: Text(isRu ? "Некоторые процессы симуляции и пасхалки в приложении сопровождаются внезапными громкими звуковыми эффектами.\n\nЕсли вы используете наушники, пожалуйста, снимите их или убавьте громкость устройства перед продолжением." : "Some simulation sequences and Easter eggs in this app include sudden high-volume sound effects.\n\nIf you are using headphones or earphones, please remove them or lower your device volume before proceeding."),
+                    message: Text(isRu ? "Некоторые процессы симуляции и пасхалки в приложении сопровождаются внезапными громкими звуковыми эффектами.\n\nЕсли вы используете наушники, пожалуйста, снимите их перед продолжением." : "Some simulation sequences and Easter eggs in this app include sudden high-volume sound effects.\n\nIf you are using headphones or earphones, please remove them before proceeding."),
                     dismissButton: .default(Text(isRu ? "Понятно" : "I Understand")) {
                         self.hasSeenFirstLaunchWelcome = true
                         UserDefaults.standard.set(true, forKey: "hasSeenFirstLaunchWelcome")
