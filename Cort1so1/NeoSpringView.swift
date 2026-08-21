@@ -46,7 +46,9 @@ struct NeoSpringView: View {
     }
 }
 
-private struct NeoSpringWebView: UIViewRepresentable {
+struct NeoSpringWebView: UIViewRepresentable {
+    typealias UIViewType = WKWebView
+
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
@@ -60,7 +62,7 @@ private struct NeoSpringWebView: UIViewRepresentable {
 
     func updateUIView(_ webView: WKWebView, context: Context) {}
 
-    private static let document = #"""
+    static let document = #"""
     <!DOCTYPE html>
     <html>
       <body>

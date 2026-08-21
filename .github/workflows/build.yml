@@ -42,11 +42,11 @@ jobs:
             AD_HOC_CODE_SIGNING_ALLOWED=YES \
             COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | tee xcodebuild.log
 
-      - name: Print errors and upload build log on failure
+      - name: Print full log on failure
         if: failure()
         run: |
-          echo "==================== BUILD FAILED: XCODEBUILD LOG ERRORS ===================="
-          grep -E "error:|fatal error:|BUILD FAILED" xcodebuild.log || tail -n 100 xcodebuild.log
+          echo "==================== FULL XCODEBUILD LOG ===================="
+          cat xcodebuild.log
 
       - name: Upload build log artifact on failure
         if: failure()
