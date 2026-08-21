@@ -8,6 +8,35 @@ struct CustomTweak: Identifiable, Codable, Equatable {
     var icon: String = ""
     var colorName: String
     var isEnabled: Bool = true
+    var alertButtonText: String = ""
+    var alertTitleText: String = ""
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, subtitle, icon, colorName, isEnabled, alertButtonText, alertTitleText
+    }
+
+    init(id: String = UUID().uuidString, title: String, subtitle: String, icon: String = "", colorName: String, isEnabled: Bool = true, alertButtonText: String = "", alertTitleText: String = "") {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+        self.colorName = colorName
+        self.isEnabled = isEnabled
+        self.alertButtonText = alertButtonText
+        self.alertTitleText = alertTitleText
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
+        self.title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle) ?? ""
+        self.icon = try container.decodeIfPresent(String.self, forKey: .icon) ?? ""
+        self.colorName = try container.decodeIfPresent(String.self, forKey: .colorName) ?? "purple"
+        self.isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+        self.alertButtonText = try container.decodeIfPresent(String.self, forKey: .alertButtonText) ?? ""
+        self.alertTitleText = try container.decodeIfPresent(String.self, forKey: .alertTitleText) ?? ""
+    }
 }
 
 /// Типы алертов на экране твиков
@@ -288,8 +317,8 @@ struct TweaksView: View {
                 switch alertItem {
                 case .applied:
                     return Alert(
-                        title: Text(strings.tweaksAppliedTitle),
-                        dismissButton: .default(Text(strings.tweaksAppliedButton))
+                        title: Text(appliedAlertTitle),
+                        dismissButton: .default(Text(appliedAlertButtonText))
                     )
                 case .joke:
                     return Alert(
@@ -304,6 +333,22 @@ struct TweaksView: View {
                 loadCustomTweaks()
             }
         }
+    }
+
+    /// Заголовок поп-апа применения (с поддержкой кастомного текста из добавленных твиков)
+    private var appliedAlertTitle: String {
+        if let custom = customTweaks.last(where: { $0.isEnabled && !$0.alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            return custom.alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return strings.tweaksAppliedTitle
+    }
+
+    /// Текст на кнопке поп-апа применения (с поддержкой кастомного текста из добавленных твиков)
+    private var appliedAlertButtonText: String {
+        if let custom = customTweaks.last(where: { $0.isEnabled && !$0.alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            return custom.alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return strings.tweaksAppliedButton
     }
 
     private func tweakToggleRow(
@@ -429,6 +474,8 @@ struct CustomTweakEditorSheet: View {
     @State private var title: String
     @State private var subtitle: String
     @State private var selectedColor: String
+    @State private var alertButtonText: String
+    @State private var alertTitleText: String
     
     init(initialTweak: CustomTweak? = nil, onSave: @escaping (CustomTweak) -> Void) {
         self.initialTweak = initialTweak
@@ -436,6 +483,8 @@ struct CustomTweakEditorSheet: View {
         _title = State(initialValue: initialTweak?.title ?? "")
         _subtitle = State(initialValue: initialTweak?.subtitle ?? "")
         _selectedColor = State(initialValue: initialTweak?.colorName ?? "purple")
+        _alertButtonText = State(initialValue: initialTweak?.alertButtonText ?? "")
+        _alertTitleText = State(initialValue: initialTweak?.alertTitleText ?? "")
     }
 
     private var strings: LocalizedStrings {
@@ -458,6 +507,24 @@ struct CustomTweakEditorSheet: View {
                         .font(.system(.body, design: .default))
                 }
 
+                // Текст кнопки и поп-апа после нажатия «Применить»
+                Section(
+                    header: Text(isRu ? "Кнопка и поп-ап после «Применить»" : "Button & Pop-up After Apply"),
+                    footer: Text(isRu ? "Настройте текст на кнопке и заголовок поп-апа, которые появятся при нажатии «Применить»" : "Customize the button label and title shown in the pop-up after clicking Apply")
+                ) {
+                    TextField(
+                        isRu ? "Текст на кнопке (по умолч.: «\(strings.tweaksAppliedButton)»)" : "Button text (default: \"\(strings.tweaksAppliedButton)\")",
+                        text: $alertButtonText
+                    )
+                    .font(.system(.body, design: .default))
+
+                    TextField(
+                        isRu ? "Заголовок поп-апа (по умолч.: «\(strings.tweaksAppliedTitle)»)" : "Pop-up title (default: \"\(strings.tweaksAppliedTitle)\")",
+                        text: $alertTitleText
+                    )
+                    .font(.system(.body, design: .default))
+                }
+
                 // Выбор цвета
                 Section(header: Text(strings.tweaksAddColorLabel)) {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -472,7 +539,7 @@ struct CustomTweakEditorSheet: View {
                                             .frame(width: 32, height: 32)
                                             .shadow(color: item.color.opacity(0.3), radius: 3, x: 0, y: 2)
 
-                                        if selectedColor == item.name {
+                                         if selectedColor == item.name {
                                             Image(systemName: "checkmark")
                                                 .font(.system(size: 14, weight: .bold))
                                                 .foregroundColor(.white)
@@ -525,7 +592,9 @@ struct CustomTweakEditorSheet: View {
                             subtitle: trimmedDesc,
                             icon: "",
                             colorName: selectedColor,
-                            isEnabled: initialTweak?.isEnabled ?? true
+                            isEnabled: initialTweak?.isEnabled ?? true,
+                            alertButtonText: alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines),
+                            alertTitleText: alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
                         )
                         self.onSave(newTweak)
                         self.presentationMode.wrappedValue.dismiss()
