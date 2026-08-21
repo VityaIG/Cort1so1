@@ -22,7 +22,7 @@ The interface is designed strictly according to **Apple Human Interface Guidelin
 
 ---
 
-## 🌟 What's New in Release 1.2
+## What's New in Release 1.2
 
 - **Dynamic Tweaks Tab Visibility**: The "Tweaks" tab unlocks and appears dynamically only after jailbreak is executed.
 - **Custom Post-Apply Pop-up System**:

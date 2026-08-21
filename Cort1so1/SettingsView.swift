@@ -417,7 +417,7 @@ struct SettingsView: View {
                         .textCase(.uppercase)
 
                     HStack(spacing: 5) {
-                        Text("@VityaV 🇷🇺")
+                        Text("@VityaV")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.primary)
 

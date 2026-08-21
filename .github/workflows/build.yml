@@ -76,11 +76,11 @@ jobs:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.2' }}
           name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.2' }}
           body: |
-            ### 🚀 Cort1so1 Release v1.2
+            ### Cort1so1 Release v1.2
 
             **Cort1so1** is an advanced iOS Jailbreak, Substrate Tweak Engine & Downgrade Environment Simulator built strictly with SwiftUI and Apple Human Interface Guidelines (HIG).
 
-            #### 🌟 What's New in v1.2:
+            #### What's New in v1.2:
             - **Dynamic Tweaks Tab**: The "Tweaks" tab is unlocked and visible only after completing the jailbreak sequence, automatically updating across the interface.
             - **Custom Post-Apply Pop-up System**:
               - Added custom pop-up title (`"son"` / `"Запустил"`) and button (`"bruh"` / `"Семя в арбуууз"`).
@@ -100,7 +100,7 @@ jobs:
               - Enhanced `AVPlayer` notification observer lifecycle management.
               - Fully updated bilingual English & Russian localization support.
 
-            #### 📲 Installation Instructions:
+            #### Installation Instructions:
             1. Download the `Cort1so1.ipa` file from the **Assets** section below.
             2. Sideload the application using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
           files: Cort1so1.ipa

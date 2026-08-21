@@ -133,8 +133,8 @@ struct ContentView: View {
             case .welcome:
                 return Alert(
                     title: Text(isRu ? "Привет!" : "Hello!"),
-                    message: Text(isRu ? "Добро пожаловать в Cort1so1!\n\nЗдесь вы можете выполнить джейлбрейк устройства методами Dopamine или Cortisol, откатывать версии iOS, настраивать и применять кастомные твики, а также исследовать скрытые возможности системы." : "Welcome to Cort1so1!\n\nHere you can jailbreak your device with Dopamine or Cortisol, downgrade iOS versions, customize and apply custom tweaks, and explore unique system features."),
-                    dismissButton: .default(Text(isRu ? "Далее" : "Next")) {
+                    message: Text(isRu ? "Добро пожаловать в Cort1so1!\n\nЭто приложение открывает возможности интерактивной среды iOS:\n\n• Выполнение джейлбрейка на движках Dopamine и Cortisol\n• Настройка и применение твиков подсистемы Substrate\n• Симуляция отката и восстановления прошивок iOS\n• Поиск скрытых системных пасхалок" : "Welcome to Cort1so1!\n\nThis app allows you to explore an interactive iOS environment:\n\n• Jailbreak with Dopamine or Cortisol engines\n• Customize and apply Substrate runtime tweaks\n• Simulate iOS firmware downgrades and restores\n• Discover secret system features and Easter eggs"),
+                    dismissButton: .default(Text(isRu ? "Продолжить" : "Continue")) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             self.activeFirstLaunchAlert = .volumeWarning
                         }
@@ -143,8 +143,8 @@ struct ContentView: View {
             case .volumeWarning:
                 return Alert(
                     title: Text(isRu ? "ВНИМАНИЕ!" : "WARNING!"),
-                    message: Text(isRu ? "Некоторые функции в этом приложении могут быть очень громкими! Если вы в наушниках, пожалуйста, снимите их!" : "WARNING! Some parts in this app may be very loud, if you're in headphones, please take them off!"),
-                    dismissButton: .default(Text(isRu ? "Понятно" : "OK, got it")) {
+                    message: Text(isRu ? "Некоторые процессы симуляции и пасхалки в приложении сопровождаются внезапными громкими звуковыми эффектами.\n\nЕсли вы используете наушники, пожалуйста, снимите их или убавьте громкость устройства перед продолжением." : "Some simulation sequences and Easter eggs in this app include sudden high-volume sound effects.\n\nIf you are using headphones or earphones, please remove them or lower your device volume before proceeding."),
+                    dismissButton: .default(Text(isRu ? "Понятно" : "I Understand")) {
                         self.hasSeenFirstLaunchWelcome = true
                         UserDefaults.standard.set(true, forKey: "hasSeenFirstLaunchWelcome")
                     }
