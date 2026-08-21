@@ -82,6 +82,8 @@ struct TweaksView: View {
 
     // Хранилище кастомных твиков в JSON
     @AppStorage("custom_tweaks_store") private var customTweaksJSON: String = "[]"
+    @AppStorage("custom_apply_button_text") private var customApplyButtonText: String = ""
+    @AppStorage("custom_apply_title_text") private var customApplyTitleText: String = ""
     @State private var customTweaks: [CustomTweak] = []
 
     // Состояния интерфейса
@@ -304,15 +306,32 @@ struct TweaksView: View {
                 }
             }
             .sheet(isPresented: $showManageSheet) {
-                ManageCustomTweaksSheet(customTweaks: $customTweaks, onSave: saveCustomTweaks)
+                ManageCustomTweaksSheet(
+                    customTweaks: $customTweaks,
+                    onSave: saveCustomTweaks,
+                    onApplyRequested: {
+                        self.applyTweaks()
+                    }
+                )
             }
             .sheet(isPresented: $showAddSheet) {
-                CustomTweakEditorSheet { newTweak in
-                    withAnimation {
-                        self.customTweaks.append(newTweak)
-                        self.saveCustomTweaks()
+                CustomTweakEditorSheet(
+                    onSave: { newTweak in
+                        withAnimation {
+                            self.customTweaks.append(newTweak)
+                            self.saveCustomTweaks()
+                        }
+                    },
+                    onSaveAndApply: { newTweak in
+                        withAnimation {
+                            self.customTweaks.append(newTweak)
+                            self.saveCustomTweaks()
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            self.applyTweaks()
+                        }
                     }
-                }
+                )
             }
             .alert(item: $activeAlert) { alertItem in
                 switch alertItem {
@@ -347,6 +366,10 @@ struct TweaksView: View {
 
     /// Заголовок поп-апа применения (с поддержкой кастомного текста из добавленных твиков)
     private var appliedAlertTitle: String {
+        let trimmedGlobal = customApplyTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedGlobal.isEmpty {
+            return trimmedGlobal
+        }
         if let custom = customTweaks.last(where: { $0.isEnabled && !$0.alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
             return custom.alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
         }
@@ -355,6 +378,10 @@ struct TweaksView: View {
 
     /// Текст на кнопке поп-апа применения (с поддержкой кастомного текста из добавленных твиков)
     private var appliedAlertButtonText: String {
+        let trimmedGlobal = customApplyButtonText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedGlobal.isEmpty {
+            return trimmedGlobal
+        }
         if let custom = customTweaks.last(where: { $0.isEnabled && !$0.alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
             return custom.alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines)
         }
@@ -407,6 +434,7 @@ struct ManageCustomTweaksSheet: View {
     
     @Binding var customTweaks: [CustomTweak]
     var onSave: () -> Void
+    var onApplyRequested: (() -> Void)? = nil
     
     @State private var tweakToEdit: CustomTweak?
     
@@ -461,12 +489,25 @@ struct ManageCustomTweaksSheet: View {
                 }
             }
             .sheet(item: $tweakToEdit) { tweak in
-                CustomTweakEditorSheet(initialTweak: tweak) { updatedTweak in
-                    if let index = self.customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
-                        self.customTweaks[index] = updatedTweak
-                        self.onSave()
+                CustomTweakEditorSheet(
+                    initialTweak: tweak,
+                    onSave: { updatedTweak in
+                        if let index = self.customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
+                            self.customTweaks[index] = updatedTweak
+                            self.onSave()
+                        }
+                    },
+                    onSaveAndApply: { updatedTweak in
+                        if let index = self.customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
+                            self.customTweaks[index] = updatedTweak
+                            self.onSave()
+                        }
+                        self.presentationMode.wrappedValue.dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            self.onApplyRequested?()
+                        }
                     }
-                }
+                )
             }
         }
     }
@@ -480,6 +521,7 @@ struct CustomTweakEditorSheet: View {
 
     var initialTweak: CustomTweak?
     var onSave: (CustomTweak) -> Void
+    var onSaveAndApply: ((CustomTweak) -> Void)? = nil
 
     @State private var title: String
     @State private var subtitle: String
@@ -488,9 +530,10 @@ struct CustomTweakEditorSheet: View {
     @State private var alertTitleText: String
     @State private var showTestAlert: Bool = false
     
-    init(initialTweak: CustomTweak? = nil, onSave: @escaping (CustomTweak) -> Void) {
+    init(initialTweak: CustomTweak? = nil, onSave: @escaping (CustomTweak) -> Void, onSaveAndApply: ((CustomTweak) -> Void)? = nil) {
         self.initialTweak = initialTweak
         self.onSave = onSave
+        self.onSaveAndApply = onSaveAndApply
         _title = State(initialValue: initialTweak?.title ?? "")
         _subtitle = State(initialValue: initialTweak?.subtitle ?? "")
         _selectedColor = State(initialValue: initialTweak?.colorName ?? "purple")
@@ -597,7 +640,7 @@ struct CustomTweakEditorSheet: View {
                 // Кнопка сохранения и применения внизу формы
                 Section {
                     Button(action: {
-                        self.saveTweak()
+                        self.saveAndApplyTweak()
                     }) {
                         HStack {
                             Spacer()
@@ -608,7 +651,6 @@ struct CustomTweakEditorSheet: View {
                         }
                         .padding(.vertical, 2)
                     }
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .navigationTitle(isRu ? (initialTweak == nil ? "Новый твик" : "Редактирование") : (initialTweak == nil ? "New Tweak" : "Edit Tweak"))
@@ -623,7 +665,6 @@ struct CustomTweakEditorSheet: View {
                     Button(strings.tweaksAddSaveBtn) {
                         self.saveTweak()
                     }
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .fontWeight(.bold)
                 }
             }
@@ -638,20 +679,61 @@ struct CustomTweakEditorSheet: View {
 
     private func saveTweak() {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalTitle = trimmedTitle.isEmpty ? (isRu ? "Пользовательский твик" : "Custom Tweak") : trimmedTitle
         let trimmedDesc = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedTitle.isEmpty else { return }
+        let trimmedButton = alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAlertTitle = alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if !trimmedButton.isEmpty {
+            UserDefaults.standard.set(trimmedButton, forKey: "custom_apply_button_text")
+        }
+        if !trimmedAlertTitle.isEmpty {
+            UserDefaults.standard.set(trimmedAlertTitle, forKey: "custom_apply_title_text")
+        }
 
         let newTweak = CustomTweak(
             id: initialTweak?.id ?? UUID().uuidString,
-            title: trimmedTitle,
+            title: finalTitle,
             subtitle: trimmedDesc,
             icon: "",
             colorName: selectedColor,
             isEnabled: initialTweak?.isEnabled ?? true,
-            alertButtonText: alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines),
-            alertTitleText: alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+            alertButtonText: trimmedButton,
+            alertTitleText: trimmedAlertTitle
         )
         self.onSave(newTweak)
+        self.presentationMode.wrappedValue.dismiss()
+    }
+
+    private func saveAndApplyTweak() {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalTitle = trimmedTitle.isEmpty ? (isRu ? "Пользовательский твик" : "Custom Tweak") : trimmedTitle
+        let trimmedDesc = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedButton = alertButtonText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAlertTitle = alertTitleText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if !trimmedButton.isEmpty {
+            UserDefaults.standard.set(trimmedButton, forKey: "custom_apply_button_text")
+        }
+        if !trimmedAlertTitle.isEmpty {
+            UserDefaults.standard.set(trimmedAlertTitle, forKey: "custom_apply_title_text")
+        }
+
+        let newTweak = CustomTweak(
+            id: initialTweak?.id ?? UUID().uuidString,
+            title: finalTitle,
+            subtitle: trimmedDesc,
+            icon: "",
+            colorName: selectedColor,
+            isEnabled: initialTweak?.isEnabled ?? true,
+            alertButtonText: trimmedButton,
+            alertTitleText: trimmedAlertTitle
+        )
+        if let onSaveAndApply = onSaveAndApply {
+            onSaveAndApply(newTweak)
+        } else {
+            self.onSave(newTweak)
+        }
         self.presentationMode.wrappedValue.dismiss()
     }
 }
