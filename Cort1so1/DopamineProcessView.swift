@@ -340,19 +340,14 @@ struct DopamineProcessView: View {
 
             // Нижняя компактная статусная строка
             HStack(spacing: 10) {
+                Spacer()
+
                 ProgressView()
-                    
                     .scaleEffect(0.8)
 
                 Text(isRu ? "Выполняется джейлбрейк..." : "Jailbreak in progress...")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
-
-                Spacer()
-
-                Text("rootless • arm64e")
-                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.55))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
