@@ -98,7 +98,7 @@ struct TweaksView: View {
                                 self.exist = newValue
                                 if !newValue {
                                     // Убрали fatalError, чтобы приложение не вылетало
-                                    showJokeAlert = true
+                                    self.showJokeAlert = true
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                         self.exist = true // автоматически включаем обратно
                                     }
@@ -158,10 +158,10 @@ struct TweaksView: View {
 
                 Section {
                     Button(action: {
-                        isApplying = true
+                        self.isApplying = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            isApplying = false
-                            showAppliedAlert = true
+                            self.isApplying = false
+                            self.showAppliedAlert = true
                         }
                     }) {
                         HStack {
@@ -311,7 +311,7 @@ struct ManageCustomTweaksSheet: View {
                     
                     // Если удалили все, закрываем окно
                     if customTweaks.isEmpty {
-                        dismiss()
+                        self.dismiss()
                     }
                 }
             }
@@ -320,7 +320,7 @@ struct ManageCustomTweaksSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(isRu ? "Закрыть" : "Close") {
-                        dismiss()
+                        self.dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -432,7 +432,7 @@ struct CustomTweakEditorSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(strings.tweaksAddCancelBtn) {
-                        dismiss()
+                        self.dismiss()
                     }
                 }
 
@@ -451,7 +451,7 @@ struct CustomTweakEditorSheet: View {
                             isEnabled: initialTweak?.isEnabled ?? true
                         )
                         onSave(newTweak)
-                        dismiss()
+                        self.dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .fontWeight(.bold)

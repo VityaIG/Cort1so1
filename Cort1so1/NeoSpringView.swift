@@ -4,7 +4,7 @@ import SwiftUI
 struct NeoSpringView: View {
     var onFinished: () -> Void
     @AppStorage("appLanguage") private var appLanguage: String = "en"
-    @State private var isVisible = false
+    @State private var self.isVisible = false
     @State private var rotationAngle: Double = 0
 
     private var strings: LocalizedStrings {
@@ -30,16 +30,16 @@ struct NeoSpringView: View {
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.3)) {
-                isVisible = true
+                self.isVisible = true
             }
             
             // Симуляция времени респринга перед возвратом в систему
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeInOut(duration: 0.4)) {
-                    isVisible = false
+                    self.isVisible = false
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    onFinished()
+                    self.onFinished()
                 }
             }
         }

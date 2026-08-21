@@ -69,7 +69,7 @@ struct MainView: View {
             // 1. Стандартный алерт подтверждения перед джейлбрейком
             .alert(strings.confirmAlertTitle, isPresented: $showingConfirmAlert) {
                 Button(strings.confirmYesBtn) {
-                    showingProcessModal = true
+                    self.showingProcessModal = true
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
@@ -226,7 +226,7 @@ struct MainView: View {
     private var actionButtonsSection: some View {
         VStack(spacing: 10) {
             Button(action: {
-                showingConfirmAlert = true
+                self.showingConfirmAlert = true
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: jailbreakState == .completed ? "arrow.clockwise" : "bolt.fill")
@@ -246,7 +246,7 @@ struct MainView: View {
             if jailbreakState == .completed {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.25)) {
-                        jailbreakState = .respring
+                        self.jailbreakState = .respring
                     }
                 }) {
                     HStack(spacing: 6) {

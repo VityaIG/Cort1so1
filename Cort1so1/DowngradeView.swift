@@ -48,7 +48,7 @@ struct DowngradeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         
                         Button {
-                            triggerSelectionHaptic()
+                            self.triggerSelectionHaptic()
                             let androidFirmware = FirmwareVersion(
                                 version: "Android 17 Beta",
                                 build: "SWEET_CAT",
@@ -58,7 +58,7 @@ struct DowngradeView: View {
                                 group: "EASTER EGG",
                                 sha256: "deadbeef00000000000000000000000000000000000000000000000000000000"
                             )
-                            activeFirmware = androidFirmware
+                            self.activeFirmware = androidFirmware
                         } label: {
                             Text("Android 17 Beta")
                                 .font(.system(size: 16, weight: .bold))
@@ -154,7 +154,7 @@ struct DowngradeView: View {
             
             // Кнопка
             Button {
-                triggerSelectionHaptic()
+                self.triggerSelectionHaptic()
                 activeFirmware = item
             } label: {
                 HStack(spacing: 4) {
@@ -173,7 +173,7 @@ struct DowngradeView: View {
         .padding(16)
     }
     
-    private func triggerSelectionHaptic() {
+    private func self.triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
@@ -290,10 +290,10 @@ struct DowngradeExecutionSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(isRu ? "Закрыть" : "Close") {
-                        if isRestoring {
-                            showCancelAlert = true
+                        if self.isRestoring {
+                            self.showCancelAlert = true
                         } else {
-                            dismiss()
+                            self.dismiss()
                         }
                     }
                     .foregroundColor(Color(white: 0.6))
@@ -301,15 +301,15 @@ struct DowngradeExecutionSheet: View {
             }
             // Алерт успешного завершения процесса отката
             .alert(strings.downgradeFinished, isPresented: $showSuccessAlert) {
-                Button("OK", role: .cancel) { dismiss() }
+                Button("OK", role: .cancel) { self.dismiss() }
             } message: {
                 Text(strings.downgradeFinishedMsg)
             }
             // Алерт прерывания
             .alert(isRu ? "Прервать откат?" : "Cancel Downgrade?", isPresented: $showCancelAlert) {
                 Button(isRu ? "Прервать" : "Stop", role: .destructive) {
-                    cancelFlashing()
-                    dismiss()
+                    self.cancelFlashing()
+                    self.dismiss()
                 }
                 Button(strings.cancelBtn, role: .cancel) { }
             } message: {
@@ -401,7 +401,7 @@ struct DowngradeExecutionSheet: View {
                     Image(systemName: "terminal")
                     Text("Futurerestore Engine")
                     Spacer()
-                    if isRestoring {
+                    if self.isRestoring {
                         Text("\(String(format: "%.1f", restoreSpeedMBs)) MB/s")
                             .foregroundColor(firmware.badgeColor)
                     }
@@ -446,9 +446,9 @@ struct DowngradeExecutionSheet: View {
             )
             
             // Кнопка
-            if isRestoring {
+            if self.isRestoring {
                 Button(action: {
-                    showCancelAlert = true
+                    self.showCancelAlert = true
                 }) {
                     HStack(spacing: 8) {
                         ProgressView()
@@ -499,81 +499,81 @@ struct DowngradeExecutionSheet: View {
             "[00:01] [TSS] Handshake with gs.apple.com:443 established"
         ]
 
-        restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            elapsedSeconds += 0.1
-            let currentSecondsInt = Int(elapsedSeconds)
+        self.restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            self.elapsedSeconds += 0.1
+            let currentSecondsInt = Int(self.elapsedSeconds)
             let formattedTime = String(format: "[%02d:%02d]", currentSecondsInt / 60, currentSecondsInt % 60)
 
-            if elapsedSeconds <= 10.0 {
-                if currentStageIndex != 0 {
-                    currentStageIndex = 0
-                    triggerSelectionHaptic()
+            if self.elapsedSeconds <= 10.0 {
+                if self.currentStageIndex != 0 {
+                    self.currentStageIndex = 0
+                    self.triggerSelectionHaptic()
                 }
-                restoreSpeedMBs = Double.random(in: 44.0...54.0)
-                if currentSecondsInt == 3 && terminalLogs.count < 3 {
-                    terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK")
-                } else if currentSecondsInt == 7 && terminalLogs.count < 4 {
-                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(firmware.sha256.prefix(10))...")
-                }
-            }
-            else if elapsedSeconds <= 25.0 {
-                if currentStageIndex != 1 {
-                    currentStageIndex = 1
-                    triggerSelectionHaptic()
-                    terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1")
-                }
-                restoreSpeedMBs = Double.random(in: 55.0...68.0)
-                if currentSecondsInt == 18 && terminalLogs.count < 6 {
-                    terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
+                self.restoreSpeedMBs = Double.random(in: 44.0...54.0)
+                if currentSecondsInt == 3 && self.terminalLogs.count < 3 {
+                    self.terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK")
+                } else if currentSecondsInt == 7 && self.terminalLogs.count < 4 {
+                    self.terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(self.firmware.sha256.prefix(10))...")
                 }
             }
-            else if elapsedSeconds <= 40.0 {
-                if currentStageIndex != 2 {
-                    currentStageIndex = 2
-                    triggerSelectionHaptic()
-                    terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode to SEP chip...")
+            else if self.elapsedSeconds <= 25.0 {
+                if self.currentStageIndex != 1 {
+                    self.currentStageIndex = 1
+                    self.triggerSelectionHaptic()
+                    self.terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1")
                 }
-                restoreSpeedMBs = Double.random(in: 52.0...64.0)
-                if currentSecondsInt == 33 && terminalLogs.count < 8 {
-                    terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
-                }
-            }
-            else if elapsedSeconds <= 52.0 {
-                if currentStageIndex != 3 {
-                    currentStageIndex = 3
-                    triggerSelectionHaptic()
-                    terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update-\(firmware.build)")
-                }
-                restoreSpeedMBs = Double.random(in: 60.0...75.0)
-                if currentSecondsInt == 47 && terminalLogs.count < 10 {
-                    terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
+                self.restoreSpeedMBs = Double.random(in: 55.0...68.0)
+                if currentSecondsInt == 18 && self.terminalLogs.count < 6 {
+                    self.terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
                 }
             }
-            else if elapsedSeconds < 60.0 {
-                if currentStageIndex != 4 {
-                    currentStageIndex = 4
-                    triggerSelectionHaptic()
-                    terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1")
+            else if self.elapsedSeconds <= 40.0 {
+                if self.currentStageIndex != 2 {
+                    self.currentStageIndex = 2
+                    self.triggerSelectionHaptic()
+                    self.terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode to SEP chip...")
                 }
-                restoreSpeedMBs = Double.random(in: 25.0...40.0)
-                if currentSecondsInt == 56 && terminalLogs.count < 12 {
-                    terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
+                self.restoreSpeedMBs = Double.random(in: 52.0...64.0)
+                if currentSecondsInt == 33 && self.terminalLogs.count < 8 {
+                    self.terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
+                }
+            }
+            else if self.elapsedSeconds <= 52.0 {
+                if self.currentStageIndex != 3 {
+                    self.currentStageIndex = 3
+                    self.triggerSelectionHaptic()
+                    self.terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update-\(self.firmware.build)")
+                }
+                self.restoreSpeedMBs = Double.random(in: 60.0...75.0)
+                if currentSecondsInt == 47 && self.terminalLogs.count < 10 {
+                    self.terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
+                }
+            }
+            else if self.elapsedSeconds < 60.0 {
+                if self.currentStageIndex != 4 {
+                    self.currentStageIndex = 4
+                    self.triggerSelectionHaptic()
+                    self.terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1")
+                }
+                self.restoreSpeedMBs = Double.random(in: 25.0...40.0)
+                if currentSecondsInt == 56 && self.terminalLogs.count < 12 {
+                    self.terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
                 }
             }
             else {
-                elapsedSeconds = 60.0
-                restoreSpeedMBs = 0.0
-                terminalLogs.append("[01:00] [Done] Restore completed successfully in 60s! System ready.")
+                self.elapsedSeconds = 60.0
+                self.restoreSpeedMBs = 0.0
+                self.terminalLogs.append("[01:00] [Done] Restore completed successfully in 60s! System ready.")
                 timer.invalidate()
-                restoreTimer = nil
-                isRestoring = false
-                triggerNotificationSuccess()
-                showSuccessAlert = true
+                self.restoreTimer = nil
+                self.isRestoring = false
+                self.triggerNotificationSuccess()
+                self.showSuccessAlert = true
             }
         }
     }
 
-    private func cancelFlashing() {
+    private func self.cancelFlashing() {
         restoreTimer?.invalidate()
         restoreTimer = nil
         isRestoring = false
@@ -582,7 +582,7 @@ struct DowngradeExecutionSheet: View {
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
     }
 
-    private func triggerSelectionHaptic() {
+    private func self.triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
@@ -594,7 +594,7 @@ struct DowngradeExecutionSheet: View {
         generator.impactOccurred()
     }
 
-    private func triggerNotificationSuccess() {
+    private func self.triggerNotificationSuccess() {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(.success)

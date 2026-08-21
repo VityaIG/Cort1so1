@@ -64,7 +64,7 @@ struct SettingsView: View {
             .alert(strings.removeJailbreakAlertTitle, isPresented: $showRemoveJailbreakAlert) {
                 Button(strings.cancelBtn, role: .cancel) { }
                 Button(strings.removeConfirmBtn, role: .destructive) {
-                    removeJailbreak()
+                    self.removeJailbreak()
                 }
             } message: {
                 Text(strings.removeJailbreakAlertMsg)
@@ -312,7 +312,7 @@ struct SettingsView: View {
                 let generator = UIImpactFeedbackGenerator(style: .medium)
                 generator.prepare()
                 generator.impactOccurred()
-                showRemoveJailbreakAlert = true
+                self.showRemoveJailbreakAlert = true
             }) {
                 HStack(spacing: 12) {
                     ZStack {
@@ -426,7 +426,7 @@ struct SettingsView: View {
 
     // MARK: - Логика действий
 
-    private func removeJailbreak() {
+    private func self.removeJailbreak() {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(.success)

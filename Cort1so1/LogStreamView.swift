@@ -67,7 +67,7 @@ struct LogStreamView: View {
         }
         .onDisappear {
             timer?.invalidate()
-            timer = nil
+            self.timer = nil
         }
     }
 
@@ -76,13 +76,13 @@ struct LogStreamView: View {
         currentLogIndex = 0
         let allLogs = LogData.systemLogs
         
-        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [self] t in
-            if currentLogIndex < allLogs.count {
-                visibleLogs.append(allLogs[currentLogIndex])
-                currentLogIndex += 1
+        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
+            if self.currentLogIndex < allLogs.count {
+                self.visibleLogs.append(allLogs[currentLogIndex])
+                self.currentLogIndex += 1
             } else {
                 t.invalidate()
-                timer = nil
+                self.timer = nil
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     onCompleted()
