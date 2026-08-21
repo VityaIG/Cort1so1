@@ -75,13 +75,18 @@ struct MainView: View {
     private var systemStatusCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Label {
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.15))
+                            .frame(width: 28, height: 28)
+                        Image(systemName: "lock.open.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                    }
                     Text(strings.statusTitle)
                         .font(.system(.body, design: .default))
-                        .fontWeight(.semibold)
-                } icon: {
-                    Image(systemName: "lock.open.fill")
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        .fontWeight(.bold)
                 }
 
                 Spacer()
@@ -90,13 +95,13 @@ struct MainView: View {
                     Circle()
                         .fill(jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor))
                         .frame(width: 8, height: 8)
+                        .shadow(color: (jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor)).opacity(0.6), radius: 4)
                     Text(statusBadgeText)
                         .foregroundColor(jailbreakState == .completed ? .green : AppTheme.resolveColor(name: appThemeColor))
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.semibold)
+                        .font(.system(size: 12, weight: .bold))
                 }
                 .padding(.horizontal, 10)
-                .padding(.vertical, 4)
+                .padding(.vertical, 5)
                 .background(
                     (jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor)).opacity(0.12)
                 )
@@ -106,36 +111,52 @@ struct MainView: View {
             Divider()
 
             HStack {
-                Label {
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(Color.orange.opacity(0.15))
+                            .frame(width: 26, height: 26)
+                        Image(systemName: "cpu")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.orange)
+                    }
                     Text(strings.kernelTitle)
                         .font(.system(.subheadline, design: .default))
-                } icon: {
-                    Image(systemName: "cpu")
-                        .foregroundColor(.secondary)
                 }
                 Spacer()
                 Text(kernelStatusText)
                     .foregroundColor(.secondary)
-                    .font(.system(.subheadline, design: .default))
+                    .font(.system(.subheadline, design: .monospaced))
+                    .fontWeight(.medium)
             }
 
             HStack {
-                Label {
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(Color.purple.opacity(0.15))
+                            .frame(width: 26, height: 26)
+                        Image(systemName: "memorychip")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.purple)
+                    }
                     Text(strings.archTitle)
                         .font(.system(.subheadline, design: .default))
-                } icon: {
-                    Image(systemName: "memorychip")
-                        .foregroundColor(.secondary)
                 }
                 Spacer()
                 Text(strings.archValue)
                     .foregroundColor(.secondary)
-                    .font(.system(.subheadline, design: .default))
+                    .font(.system(.subheadline, design: .monospaced))
+                    .fontWeight(.medium)
             }
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
     /// Карточка статуса Dopamine
@@ -145,9 +166,14 @@ struct MainView: View {
                 // Состояние завершенного джейлбрейка
                 VStack(spacing: 14) {
                     HStack(spacing: 14) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
-                            .font(.system(size: 38))
+                        ZStack {
+                            Circle()
+                                .fill(Color.green.opacity(0.15))
+                                .frame(width: 52, height: 52)
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 32, weight: .semibold))
+                        }
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(strings.completedTitle)
@@ -165,24 +191,32 @@ struct MainView: View {
                     HStack(spacing: 10) {
                         Label("Procursus", systemImage: "cube.fill")
                             .font(.caption)
+                            .fontWeight(.medium)
                             .foregroundColor(.secondary)
                         Spacer()
-                        Label("Cort1so1 Installer", systemImage: "shippingbox.fill")
+                        Label("Cort1so1", systemImage: "shippingbox.fill")
                             .font(.caption)
+                            .fontWeight(.medium)
                             .foregroundColor(.secondary)
                         Spacer()
                         Label("tfp0: OK", systemImage: "terminal.fill")
                             .font(.caption)
+                            .fontWeight(.bold)
                             .foregroundColor(.green)
                     }
                 }
-                .padding(.vertical, 6)
+                .padding(.vertical, 4)
             } else {
                 // Исходное состояние готовности
                 HStack(spacing: 14) {
-                    Image(systemName: "lock.open.fill")
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                        .font(.system(size: 34))
+                    ZStack {
+                        Circle()
+                            .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                            .frame(width: 50, height: 50)
+                        Image(systemName: "lock.open.fill")
+                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            .font(.system(size: 26, weight: .bold))
+                    }
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text(strings.readyTitle(for: UIDevice.current.systemVersion))
@@ -194,33 +228,48 @@ struct MainView: View {
                     }
                     Spacer()
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 4)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
     /// Секция кнопок действий
     private var actionButtonsSection: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Button(action: {
                 self.showingConfirmAlert = true
             }) {
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     Image(systemName: jailbreakState == .completed ? "arrow.clockwise" : "bolt.fill")
+                        .font(.system(size: 17, weight: .bold))
 
                     Text(buttonTitle)
                         .font(.system(.body, design: .default))
                         .fontWeight(.bold)
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(AppTheme.resolveColor(name: appThemeColor))
+                .frame(height: 52)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            AppTheme.resolveColor(name: appThemeColor),
+                            AppTheme.resolveColor(name: appThemeColor).opacity(0.85)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .foregroundColor(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.35), radius: 8, x: 0, y: 4)
             }
 
             // Дополнительная кнопка Respring при активном джейлбрейке
@@ -230,17 +279,18 @@ struct MainView: View {
                         self.jailbreakState = .respring
                     }
                 }) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 15, weight: .bold))
                         Text(strings.buttonRespring)
+                            .font(.system(.subheadline, design: .default))
+                            .fontWeight(.semibold)
                     }
-                    .font(.system(.subheadline, design: .default))
-                    .fontWeight(.medium)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
+                    .frame(height: 46)
                     .background(Color(uiColor: .tertiarySystemGroupedBackground))
                     .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
         }
@@ -248,27 +298,62 @@ struct MainView: View {
 
     private var deviceInfoCard: some View {
         VStack(spacing: 0) {
-            infoRow(title: isRu ? "Модель" : "Model", value: UIDevice.current.friendlyModelName, isLast: false)
-            infoRow(title: isRu ? "Версия iOS" : "iOS Version", value: UIDevice.current.systemVersion, isLast: false)
-            infoRow(title: isRu ? "Идентификатор" : "Identifier", value: UIDevice.current.hardwareIdentifier, isLast: true)
+            infoRow(
+                title: isRu ? "Модель" : "Model",
+                value: UIDevice.current.friendlyModelName,
+                icon: "iphone",
+                color: .blue,
+                isLast: false
+            )
+            infoRow(
+                title: isRu ? "Версия iOS" : "iOS Version",
+                value: UIDevice.current.systemVersion,
+                icon: "apple.logo",
+                color: .indigo,
+                isLast: false
+            )
+            infoRow(
+                title: isRu ? "Идентификатор" : "Identifier",
+                value: UIDevice.current.hardwareIdentifier,
+                icon: "number",
+                color: .purple,
+                isLast: true
+            )
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
-    private func infoRow(title: String, value: String, isLast: Bool) -> some View {
+    private func infoRow(title: String, value: String, icon: String, color: Color, isLast: Bool) -> some View {
         VStack(spacing: 0) {
-            HStack {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(color.opacity(0.15))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(color)
+                }
+
                 Text(title)
                     .font(.system(.subheadline, design: .default))
+                    .fontWeight(.medium)
+
                 Spacer()
+
                 Text(value)
                     .foregroundColor(.secondary)
                     .font(.system(.subheadline, design: .default))
+                    .fontWeight(.regular)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             
             if !isLast {
                 Divider()

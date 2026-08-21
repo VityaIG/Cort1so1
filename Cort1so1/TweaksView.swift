@@ -238,19 +238,44 @@ struct TweaksView: View {
         binding: Binding<Bool>
     ) -> some View {
         Toggle(isOn: binding) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(.body, design: .default))
-                    .foregroundColor(.primary)
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(iconColor.opacity(0.15))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: tweakIconName(for: title))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(iconColor)
+                }
 
-                Text(subtitle)
-                    .font(.system(.caption, design: .default))
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(.body, design: .default))
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+
+                    Text(subtitle)
+                        .font(.system(.caption, design: .default))
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
             }
-            .padding(.vertical, 2)
+            .padding(.vertical, 3)
         }
         .toggleStyle(SwitchToggleStyle(tint: iconColor))
+    }
+
+    private func tweakIconName(for title: String) -> String {
+        if title.contains("RAM") || title.contains("память") { return "memorychip.fill" }
+        if title.contains("Pentagon") || title.contains("Пентагон") { return "terminal.fill" }
+        if title.contains("Life") || title.contains("Жизнь") { return "sparkles" }
+        if title.contains("Nitrogen") || title.contains("азотом") { return "snowflake" }
+        if title.contains("Microwave") || title.contains("Микроволновая") { return "bolt.batteryblock.fill" }
+        if title.contains("Money") || title.contains("деньги") { return "banknote.fill" }
+        if title.contains("Tinfoil") || title.contains("фольги") { return "shield.checkered" }
+        if title.contains("Couch") || title.contains("телепортация") { return "paperplane.circle.fill" }
+        if title.contains("Gravity") || title.contains("гравитации") { return "globe.americas.fill" }
+        return "puzzlepiece.extension.fill"
     }
 
     private func loadCustomTweaks() {

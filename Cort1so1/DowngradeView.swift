@@ -50,17 +50,37 @@ struct DowngradeView: View {
         NavigationView {
             Form {
                 Section(header: Text(isRu ? "Профиль устройства" : "Device Profile")) {
-                    HStack(spacing: 16) {
-                        Image(systemName: "iphone")
-                            .font(.system(size: 38, weight: .light))
-                            .foregroundColor(.primary)
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.blue.opacity(0.12))
+                                .frame(width: 48, height: 48)
+                            Image(systemName: "iphone")
+                                .font(.system(size: 26, weight: .medium))
+                                .foregroundColor(.blue)
+                        }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(UIDevice.current.friendlyModelName)
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("iOS \(UIDevice.current.systemVersion)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 16, weight: .bold))
+                            
+                            HStack(spacing: 6) {
+                                Text("iOS \(UIDevice.current.systemVersion)")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.blue.opacity(0.12))
+                                    .clipShape(Capsule())
+
+                                Text("arm64e")
+                                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(.purple)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.purple.opacity(0.12))
+                                    .clipShape(Capsule())
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -79,21 +99,58 @@ struct DowngradeView: View {
                 
                 Section(header: Text(isRu ? "Статус подписи (TSS)" : "TSS Status")) {
                     HStack {
-                        Text(isRu ? "Статус окна" : "Signing Window")
+                        Label {
+                            Text(isRu ? "Статус окна" : "Signing Window")
+                        } icon: {
+                            Image(systemName: "key.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                        }
                         Spacer()
                         if let fw = sampleFirmwares.first(where: { $0.id == selectedFirmwareId }), fw.version == "iOS 18.0" {
-                            Text(isRu ? "Открыто" : "Signed")
-                                .foregroundColor(.green)
+                            HStack(spacing: 4) {
+                                Circle().fill(Color.green).frame(width: 6, height: 6)
+                                Text(isRu ? "Открыто" : "Signed")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.green.opacity(0.12))
+                            .clipShape(Capsule())
                         } else {
-                            Text(isRu ? "Закрыто" : "Unsigned")
-                                .foregroundColor(.red)
+                            HStack(spacing: 4) {
+                                Circle().fill(Color.red).frame(width: 6, height: 6)
+                                Text(isRu ? "Закрыто" : "Unsigned")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.red.opacity(0.12))
+                            .clipShape(Capsule())
                         }
                     }
                     HStack {
-                        Text("SHSH2 Blobs")
+                        Label {
+                            Text("SHSH2 Blobs")
+                        } icon: {
+                            Image(systemName: "doc.zipper")
+                                .foregroundColor(.indigo)
+                                .font(.caption)
+                        }
                         Spacer()
-                        Text(isRu ? "Найдены локально" : "Found Locally")
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption2)
+                            Text(isRu ? "Найдены локально" : "Found Locally")
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.indigo)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.indigo.opacity(0.12))
+                        .clipShape(Capsule())
                     }
                 }
                 
@@ -110,9 +167,16 @@ struct DowngradeView: View {
                     footer: Text(isRu ? "Откат на несовместимый SEP может привести к поломке FaceID или код-пароля." : "Downgrading to an incompatible SEP may corrupt FaceID or Passcode data.")
                 ) {
                     HStack {
-                        Text(isRu ? "Последняя копия" : "Last Backup")
+                        Label {
+                            Text(isRu ? "Последняя копия" : "Last Backup")
+                        } icon: {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .foregroundColor(.teal)
+                                .font(.caption)
+                        }
                         Spacer()
                         Text(isRu ? "Сегодня в 10:42" : "Today at 10:42 AM")
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -133,13 +197,16 @@ struct DowngradeView: View {
                             self.activeFirmware = fw
                         }
                     }) {
-                        HStack {
+                        HStack(spacing: 8) {
                             Spacer()
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: 16, weight: .bold))
                             Text(isRu ? "Начать Откат" : "Start Downgrade")
-                                .fontWeight(.semibold)
+                                .font(.system(size: 16, weight: .bold))
                             Spacer()
                         }
                         .foregroundColor(.red)
+                        .padding(.vertical, 4)
                     }
                 }
                 

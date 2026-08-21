@@ -80,13 +80,13 @@ struct SettingsView: View {
 
     private var appHeaderCard: some View {
         VStack(spacing: 14) {
-            HStack(alignment: .center, spacing: 12) {
+            HStack(alignment: .center, spacing: 14) {
                 // Новая фирменная иконка приложения
                 ZStack {
                     RoundedRectangle(cornerRadius: 13, style: .continuous)
                         .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .shadow(color: Color.black.opacity(0.12), radius: 3, x: 0, y: 1)
+                        .frame(width: 52, height: 52)
+                        .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.3), radius: 6, x: 0, y: 2)
                         .overlay(
                             RoundedRectangle(cornerRadius: 13, style: .continuous)
                                 .stroke(Color.black.opacity(0.1), lineWidth: 1)
@@ -98,20 +98,20 @@ struct SettingsView: View {
                 }
                 .fixedSize()
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .center, spacing: 6) {
                         Text("Cort1so1")
-                            .font(.system(size: 19, weight: .bold))
+                            .font(.system(size: 20, weight: .bold))
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
                             .layoutPriority(2)
 
                         Text("v1.2")
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.12))
+                            .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
                             .clipShape(Capsule())
                             .fixedSize(horizontal: true, vertical: false)
                     }
@@ -129,6 +129,7 @@ struct SettingsView: View {
                     Circle()
                         .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.4))
                         .frame(width: 6, height: 6)
+                        .shadow(color: (isJailbroken || jailbreakState == .completed ? Color.green : Color.clear).opacity(0.6), radius: 3)
 
                     Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Не активен" : "Stock"))
                         .font(.system(size: 11, weight: .bold))
@@ -141,11 +142,14 @@ struct SettingsView: View {
                 .clipShape(Capsule())
                 .fixedSize(horizontal: true, vertical: false)
             }
-
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
     // MARK: - 2. Внешний вид и язык
@@ -352,33 +356,62 @@ struct SettingsView: View {
     // MARK: - 7. Создатель & Разработчик
     private var creatorCard: some View {
         Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(telegramColor.opacity(0.15))
-                        .frame(width: 40, height: 40)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [telegramColor, telegramColor.opacity(0.8)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 44, height: 44)
+                        .shadow(color: telegramColor.opacity(0.4), radius: 6, x: 0, y: 3)
+
                     Image(systemName: "paperplane.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(telegramColor)
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundColor(.white)
                 }
-                VStack(alignment: .leading, spacing: 4) {
+
+                VStack(alignment: .leading, spacing: 3) {
                     Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    Text("@VityaV 🇷🇺")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(telegramColor)
-                        .lineLimit(1)
+                        .textCase(.uppercase)
+
+                    HStack(spacing: 5) {
+                        Text("@VityaV 🇷🇺")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.primary)
+
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(telegramColor)
+                    }
                 }
+
                 Spacer()
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(telegramColor)
+
+                HStack(spacing: 4) {
+                    Text("Telegram")
+                        .font(.system(size: 12, weight: .bold))
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .bold))
+                }
+                .foregroundColor(telegramColor)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(telegramColor.opacity(0.12))
+                .clipShape(Capsule())
             }
             .padding(16)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(telegramColor.opacity(0.15), lineWidth: 1)
+            )
         }
     }
 
