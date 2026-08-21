@@ -5,6 +5,7 @@ import Darwin
 /// Выполнение реального перезапуска SpringBoard (Respring) без искусственных спиннеров
 struct NeoSpringView: View {
     var onFinished: (() -> Void)? = nil
+    @AppStorage("customRespringDuration") private var customRespringDuration: Double = 2.5
 
     var body: some View {
         ZStack {
@@ -23,7 +24,9 @@ struct NeoSpringView: View {
         }
         .task {
             // 2. Фоллбэк таймаут для сред без креша SpringBoard (симулятор)
-            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            let duration = max(0.5, customRespringDuration)
+            let nanoseconds = UInt64(duration * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
             onFinished?()
         }
     }

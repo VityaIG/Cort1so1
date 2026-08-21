@@ -6,6 +6,10 @@ struct MainView: View {
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
+    @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
+    @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
+    @AppStorage("customOSVersion") private var customOSVersion: String = ""
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -20,10 +24,14 @@ struct MainView: View {
         LocalizedStrings(langCode: appLanguage)
     }
 
+    private var displayTitle: String {
+        customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? strings.mainTitle : customAppName
+    }
+
     var body: some View {
         NavigationView {
             ZStack {
-                Color(uiColor: .systemGroupedBackground)
+                AppBgTheme.resolveColor(id: customAppBgTheme)
                     .ignoresSafeArea()
 
                 ScrollView(.vertical, showsIndicators: false) {
@@ -46,7 +54,7 @@ struct MainView: View {
                     .padding(.top, 12)
                 }
             }
-            .navigationTitle(strings.mainTitle)
+            .navigationTitle(displayTitle)
             // 1. Стандартный алерт подтверждения перед джейлбрейком
             .alert(isPresented: $showingConfirmAlert) {
                 Alert(
@@ -301,14 +309,14 @@ struct MainView: View {
         VStack(spacing: 0) {
             infoRow(
                 title: isRu ? "Модель" : "Model",
-                value: UIDevice.current.friendlyModelName,
+                value: customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.friendlyModelName : customDeviceModel,
                 icon: "iphone",
                 color: .blue,
                 isLast: false
             )
             infoRow(
                 title: isRu ? "Версия iOS" : "iOS Version",
-                value: UIDevice.current.systemVersion,
+                value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.systemVersion : customOSVersion,
                 icon: "apple.logo",
                 color: .indigo,
                 isLast: false

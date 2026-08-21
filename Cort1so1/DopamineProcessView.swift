@@ -37,6 +37,7 @@ struct DopamineProcessView: View {
     @AppStorage("verboseLogs") private var verboseLogs: Bool = true
     @AppStorage("autoRespring") private var autoRespring: Bool = true
     @AppStorage("safeMode") private var safeMode: Bool = false
+    @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
     var method: JailbreakMethod = .dopamine
     var onComplete: () -> Void
 
@@ -376,6 +377,7 @@ struct DopamineProcessView: View {
     // MARK: - Асинхронный пайплайн выполнения
 
     private func runExecutionPipeline(stepIndex: Int) {
+        let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
         if stepIndex < logSteps.count {
             let step = logSteps[stepIndex]
             self.currentStepIndex = stepIndex + 1
@@ -383,14 +385,14 @@ struct DopamineProcessView: View {
                 self.visibleLogs.append(step)
             }
             
-            let baseDelay = method.stepDelay(verbose: verboseLogs)
+            let baseDelay = method.stepDelay(verbose: verboseLogs) / speed
             let delay: Double = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
             }
         } else {
             // Завершение логов -> Переход к экрану восстановления с белым яблоком и полосой
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (0.8 / speed)) {
                 withAnimation(.easeInOut(duration: 0.4)) {
                     self.phase = .restoreWhite
                 }
@@ -402,8 +404,9 @@ struct DopamineProcessView: View {
 
     /// Запуск 10-секундной полосы восстановления (без вибрации во время заполнения)
     private func start10SecondsRestoreSequence() {
+        let speed = max(0.2, min(20.0, simulationSpeedMultiplier))
         self.restoreProgress = 0.0
-        let totalDuration: Double = 10.0
+        let totalDuration: Double = 10.0 / speed
         let interval: Double = 0.05
         let increment: Double = interval / totalDuration
         

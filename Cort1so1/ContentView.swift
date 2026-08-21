@@ -25,6 +25,8 @@ struct ContentView: View {
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
     @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
+    @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("easterEggChancePercent") private var easterEggChancePercent: Int = 1
 
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
@@ -41,6 +43,9 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
+            AppBgTheme.resolveColor(id: customAppBgTheme)
+                .ignoresSafeArea()
+
             // Нативный системный TabView
             TabView(selection: $selectedTab) {
                 MainView(jailbreakState: $jailbreakState)
@@ -116,9 +121,10 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { newTab in
-            // Фиксированный шанс 1% при открытии Настроек (только 1 раз за сессию приложения)
+            // Шанс пасхалки при открытии Настроек (по умолчанию 1%, настраивается в ADMIN)
             if newTab == 3 && !ContentView.hasPlayedSecretEasterEggInSession && !showSecretEasterEgg {
-                if Int.random(in: 1...100) == 1 {
+                let chance = max(0, min(100, easterEggChancePercent))
+                if chance > 0 && Int.random(in: 1...100) <= chance {
                     ContentView.hasPlayedSecretEasterEggInSession = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {

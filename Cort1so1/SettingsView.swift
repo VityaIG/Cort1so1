@@ -24,6 +24,22 @@ struct SettingsView: View {
     @AppStorage("tweakInjection") private var tweakInjection: Bool = true
     @AppStorage("safeMode") private var safeMode: Bool = false
 
+    // ADMIN State
+    @AppStorage("isAdminUnlocked") private var isAdminUnlocked: Bool = false
+    @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
+    @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
+    @AppStorage("customOSVersion") private var customOSVersion: String = ""
+    @AppStorage("customPackageManager") private var customPackageManager: String = ""
+    @AppStorage("simulationSpeedMultiplier") private var simulationSpeedMultiplier: Double = 1.0
+    @AppStorage("easterEggChancePercent") private var easterEggChancePercent: Int = 1
+    @AppStorage("customRespringDuration") private var customRespringDuration: Double = 2.5
+    @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
+
+    @State private var adminTapCount: Int = 0
+    @State private var lastAdminTapDate: Date = Date.distantPast
+    @State private var showAdminUnlockedAlert: Bool = false
+
     @State private var showRemoveJailbreakAlert: Bool = false
     @State private var showToast: Bool = false
     @State private var toastMessage: String = ""
@@ -44,12 +60,18 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(uiColor: .systemGroupedBackground)
+                AppBgTheme.resolveColor(id: customAppBgTheme)
                     .ignoresSafeArea()
 
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 18) {
+                            // Секретная панель ADMIN (появляется при 5 тапах по названию «Настройки»)
+                            if isAdminUnlocked {
+                                adminSectionCard
+                                    .transition(.scale(scale: 0.95).combined(with: .opacity))
+                            }
+
                             // 1. Профиль приложения и разработчика
                             appHeaderCard
                                 .id("topHeader")
@@ -91,8 +113,27 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(strings.settingsTitle)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(strings.settingsTitle)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            handleAdminTap()
+                        }
+                }
+            }
             .fullScreenCover(isPresented: $showEasterEggVideo) {
                 EasterEggVideoPlayerView(isPresented: $showEasterEggVideo, hasPlayedEasterEgg: $hasPlayedEasterEgg)
+            }
+            // Алерт разблокировки режима ADMIN
+            .alert(isPresented: $showAdminUnlockedAlert) {
+                Alert(
+                    title: Text("ADMIN MODE"),
+                    message: Text(isRu ? "Секретный раздел ADMIN разблокирован! Теперь вам доступны расширенные параметры приложения, смена фона и переименование." : "Secret ADMIN section unlocked! Advanced tuning, app renaming, and background customization are now available."),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             // Подтверждение удаления джейлбрейка
             .alert(isPresented: $showRemoveJailbreakAlert) {
@@ -106,6 +147,341 @@ struct SettingsView: View {
                 )
             }
         }
+    }
+
+    /// Обработка 5 нажатий на название «Настройки»
+    private func handleAdminTap() {
+        let now = Date()
+        if now.timeIntervalSince(lastAdminTapDate) > 2.5 {
+            adminTapCount = 1
+        } else {
+            adminTapCount += 1
+        }
+        lastAdminTapDate = now
+
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+
+        if adminTapCount >= 5 {
+            adminTapCount = 0
+            let haptic = UINotificationFeedbackGenerator()
+            haptic.notificationOccurred(.success)
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                isAdminUnlocked = true
+                showAdminUnlockedAlert = true
+            }
+        }
+    }
+
+    // MARK: - 0. Секретный раздел ADMIN
+    private var adminSectionCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: "terminal.fill")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.purple)
+
+                Text("ADMIN")
+                    .font(.system(size: 17, weight: .heavy, design: .monospaced))
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                Text("SECRET")
+                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.purple)
+                    .clipShape(Capsule())
+
+                Button(action: {
+                    withAnimation(.spring()) {
+                        isAdminUnlocked = false
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Divider()
+
+            // 1. Название приложения
+            VStack(alignment: .leading, spacing: 6) {
+                Text(isRu ? "Название приложения" : "App Name")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 8) {
+                    TextField("Cort1so1", text: $customAppName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.system(size: 14, weight: .medium))
+
+                    if customAppName != "Cort1so1" && !customAppName.isEmpty {
+                        Button(action: {
+                            customAppName = "Cort1so1"
+                        }) {
+                            Text(isRu ? "Сброс" : "Reset")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+            }
+
+            // 2. Цвет фона (То есть не элементов)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(isRu ? "Цвет фона приложения (не элементов)" : "App Background Color (Non-elements)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(AppBgTheme.availableThemes) { theme in
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    customAppBgTheme = theme.id
+                                }
+                            }) {
+                                VStack(spacing: 4) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                            .fill(theme.color)
+                                            .frame(width: 44, height: 32)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                    .stroke(customAppBgTheme == theme.id ? Color.purple : Color.primary.opacity(0.15), lineWidth: customAppBgTheme == theme.id ? 2 : 1)
+                                            )
+
+                                        if customAppBgTheme == theme.id {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundColor(theme.id == "pure_black" || theme.id == "deep_navy" || theme.id == "crimson_dark" || theme.id == "forest_dark" || theme.id == "purple_midnight" ? .white : .primary)
+                                        }
+                                    }
+
+                                    Text(isRu ? theme.nameRu : theme.nameEn)
+                                        .font(.system(size: 9, weight: .medium))
+                                        .foregroundColor(customAppBgTheme == theme.id ? .primary : .secondary)
+                                        .frame(width: 60)
+                                        .lineLimit(1)
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            Divider()
+
+            // 3. Подмена системных значений (Кастомизация параметров)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(isRu ? "Подмена системных значений" : "System Diagnostics Overrides")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                VStack(spacing: 8) {
+                    HStack {
+                        Text(isRu ? "Версия iOS:" : "iOS Version:")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+
+                        TextField(isRu ? "По умолчанию (18.0 / 26.0)" : "Default (18.0 / 26.0)", text: $customOSVersion)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.system(size: 13))
+                    }
+
+                    HStack {
+                        Text(isRu ? "Модель:" : "Device Model:")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+
+                        TextField(isRu ? "По умолчанию (iPhone)" : "Default (iPhone)", text: $customDeviceModel)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.system(size: 13))
+                    }
+
+                    HStack {
+                        Text(isRu ? "Пакет-менеджер:" : "Package Mgr:")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+
+                        TextField("Cort1so1 Installer", text: $customPackageManager)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.system(size: 13))
+                    }
+                }
+            }
+
+            Divider()
+
+            // 4. Тюнинг симуляции и вероятностей
+            VStack(alignment: .leading, spacing: 10) {
+                Text(isRu ? "Параметры симуляции" : "Simulation Tuning")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                // Множитель скорости
+                HStack {
+                    Text(isRu ? "Скорость симуляции:" : "Simulation Speed:")
+                        .font(.system(size: 12))
+                    Spacer()
+                    Picker("", selection: $simulationSpeedMultiplier) {
+                        Text("1.0x (Норма)").tag(1.0)
+                        Text("2.0x (Быстро)").tag(2.0)
+                        Text("5.0x (Турбо)").tag(5.0)
+                        Text("10x (Мгновенно)").tag(10.0)
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+
+                // Шанс пасхалки
+                HStack {
+                    Text(isRu ? "Шанс видео-пасхалки:" : "Easter Egg Chance:")
+                        .font(.system(size: 12))
+                    Spacer()
+                    Picker("", selection: $easterEggChancePercent) {
+                        Text("0% (Выкл)").tag(0)
+                        Text("1% (Стандарт)").tag(1)
+                        Text("25% (Высокий)").tag(25)
+                        Text("100% (Всегда)").tag(100)
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+
+                // Длительность респринга
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(isRu ? "Длительность респринга:" : "Respring Duration:")
+                            .font(.system(size: 12))
+                        Spacer()
+                        Text(String(format: "%.1f сек", customRespringDuration))
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(.purple)
+                    }
+                    Slider(value: $customRespringDuration, in: 0.5...8.0, step: 0.5)
+                        .accentColor(.purple)
+                }
+            }
+
+            Divider()
+
+            // 5. Быстрые триггеры и действия
+            VStack(alignment: .leading, spacing: 8) {
+                Text(isRu ? "Быстрые действия ADMIN" : "Admin Quick Actions")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 8) {
+                    Button(action: {
+                        showEasterEggVideo = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "play.circle.fill")
+                            Text(isRu ? "Тест видео" : "Test Video")
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.purple)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.purple.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+
+                    Button(action: {
+                        showSecretEasterEgg = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                            Text(isRu ? "Тест Бутлупа" : "Test Bootloop")
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.red.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Button(action: {
+                        hasSeenFirstLaunchWelcome = false
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "bell.badge.fill")
+                            Text(isRu ? "Сброс Онбординга" : "Reset Onboard")
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.blue.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+
+                    Button(action: {
+                        withAnimation {
+                            isJailbroken.toggle()
+                            jailbreakState = isJailbroken ? .completed : .idle
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text(isJailbroken ? (isRu ? "Снять JB" : "Unjailbreak") : (isRu ? "Дать JB" : "Set Jailbroken"))
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.green)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
+            }
+
+            Divider()
+
+            // Кнопка сброса всех настроек админа
+            Button(action: {
+                withAnimation {
+                    customAppName = "Cort1so1"
+                    customAppBgTheme = "default"
+                    customOSVersion = ""
+                    customDeviceModel = ""
+                    customPackageManager = ""
+                    simulationSpeedMultiplier = 1.0
+                    easterEggChancePercent = 1
+                    customRespringDuration = 2.5
+                }
+            }) {
+                HStack {
+                    Spacer()
+                    Image(systemName: "arrow.counterclockwise")
+                    Text(isRu ? "Сбросить все параметры ADMIN" : "Reset All Admin Parameters")
+                        .font(.system(size: 12, weight: .medium))
+                    Spacer()
+                }
+                .foregroundColor(.secondary)
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.purple.opacity(0.4), lineWidth: 1.5)
+        )
+        .shadow(color: Color.purple.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 
     // MARK: - 1. Профиль приложения и разработчика
@@ -129,14 +505,20 @@ struct SettingsView: View {
                         .frame(width: 32, height: 32)
                 }
                 .fixedSize()
+                .onTapGesture {
+                    handleAdminTap()
+                }
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .center, spacing: 6) {
-                        Text("Cort1so1")
+                        Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
                             .font(.system(size: 20, weight: .bold))
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
                             .layoutPriority(2)
+                            .onTapGesture {
+                                handleAdminTap()
+                            }
 
                         Text("v1.2")
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
@@ -298,15 +680,15 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader(title: strings.systemSection, icon: "cpu.fill", color: .teal)
 
-            infoRow(title: strings.deviceModelLabel, value: UIDevice.current.model, icon: "ipad.and.iphone", color: .blue)
+            infoRow(title: strings.deviceModelLabel, value: customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.model : customDeviceModel, icon: "ipad.and.iphone", color: .blue)
             Divider()
-            infoRow(title: strings.osVersionLabel, value: "iOS \(UIDevice.current.systemVersion)", icon: "iphone", color: .indigo)
+            infoRow(title: strings.osVersionLabel, value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS \(UIDevice.current.systemVersion)" : customOSVersion, icon: "iphone", color: .indigo)
             Divider()
             infoRow(title: strings.archTitle, value: "arm64e (SPTM & PAC Bypass)", icon: "cpu", color: .teal)
             Divider()
             infoRow(title: strings.exploitLabel, value: "PhysPuppet / LandCast", icon: "bolt.fill", color: .orange)
             Divider()
-            infoRow(title: strings.packageManagerLabel, value: "Cort1so1 Installer (Procursus)", icon: "shippingbox.fill", color: .cyan)
+            infoRow(title: strings.packageManagerLabel, value: customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1 Installer (Procursus)" : customPackageManager, icon: "shippingbox.fill", color: .cyan)
         }
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -361,7 +743,7 @@ struct SettingsView: View {
                 Text(strings.appNameLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                Text("Cort1so1")
+                Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
                     .fontWeight(.bold)
                     .font(.system(.subheadline, design: .default))
             }

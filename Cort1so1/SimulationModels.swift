@@ -262,3 +262,29 @@ struct AppTheme {
         return .blue
     }
 }
+
+/// Набор тем для кастомизации цвета фона приложения (не элементов)
+struct AppBgTheme: Identifiable {
+    let id: String
+    let nameRu: String
+    let nameEn: String
+    let color: Color
+
+    static let availableThemes: [AppBgTheme] = [
+        AppBgTheme(id: "default", nameRu: "Системный (По умолчанию)", nameEn: "System Default", color: Color(uiColor: .systemGroupedBackground)),
+        AppBgTheme(id: "pure_black", nameRu: "OLED Глубокий черный", nameEn: "OLED Pure Black", color: Color.black),
+        AppBgTheme(id: "deep_navy", nameRu: "Темно-синий океан", nameEn: "Deep Navy", color: Color(red: 0.04, green: 0.06, blue: 0.12)),
+        AppBgTheme(id: "cyber_slate", nameRu: "Кибер-Слейт", nameEn: "Cyber Slate", color: Color(red: 0.06, green: 0.09, blue: 0.14)),
+        AppBgTheme(id: "crimson_dark", nameRu: "Темно-бордовый", nameEn: "Crimson Velvet", color: Color(red: 0.12, green: 0.03, blue: 0.05)),
+        AppBgTheme(id: "forest_dark", nameRu: "Темный изумруд", nameEn: "Dark Emerald", color: Color(red: 0.03, green: 0.10, blue: 0.06)),
+        AppBgTheme(id: "purple_midnight", nameRu: "Полночный пурпур", nameEn: "Midnight Purple", color: Color(red: 0.08, green: 0.04, blue: 0.14)),
+        AppBgTheme(id: "charcoal", nameRu: "Графитовый серый", nameEn: "Charcoal Gray", color: Color(red: 0.10, green: 0.10, blue: 0.11))
+    ]
+
+    static func resolveColor(id: String) -> Color {
+        if let match = availableThemes.first(where: { $0.id == id }) {
+            return match.color
+        }
+        return Color(uiColor: .systemGroupedBackground)
+    }
+}
