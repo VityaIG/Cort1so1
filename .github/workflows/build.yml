@@ -22,6 +22,7 @@ jobs:
       - name: Select Xcode version
         run: |
           sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -p
+          xcodebuild -version
 
       - name: Build Xcode Project
         run: |
@@ -33,15 +34,21 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=YES \
             CODE_SIGN_ENTITLEMENTS="" \
             DEVELOPMENT_TEAM="" \
             AD_HOC_CODE_SIGNING_ALLOWED=YES \
-            COMPILER_INDEX_STORE_ENABLE=NO | tee xcodebuild.log
+            COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | tee xcodebuild.log
 
-      - name: Upload build log on failure
+      - name: Print errors and upload build log on failure
+        if: failure()
+        run: |
+          echo "==================== BUILD FAILED: XCODEBUILD LOG ERRORS ===================="
+          grep -E "error:|fatal error:|BUILD FAILED" xcodebuild.log || tail -n 100 xcodebuild.log
+
+      - name: Upload build log artifact on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -76,6 +83,7 @@ jobs:
             - Updated Tweak names to humorous equivalents ("Download More RAM", "Tinfoil Hat Pro", "Microwave Charging", etc.)
             - Added the ability to manage custom tweaks via a dedicated "Manage Tweaks" menu accessible from the top-left button on the Tweaks screen.
             - Fixed custom tweak swipe-to-delete behavior.
+            - Integrated real WebKit-based SpringBoard respring engine.
             - Clean and strict adherence to Apple Human Interface Guidelines.
             
             Installation Instructions:
