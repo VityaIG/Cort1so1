@@ -1,167 +1,221 @@
 import SwiftUI
 import UIKit
 
-/// Полностью переработанный экран «Откат iOS» (iOS Downgrade) в минималистичном стиле
-/// на основе предложенного дизайна
 struct DowngradeView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
-    
-    // Состояние процесса отката
     @State private var activeFirmware: FirmwareVersion? = nil
-    
+
     private var isRu: Bool {
         appLanguage == "ru"
-    }
-
-    private var strings: LocalizedStrings {
-        LocalizedStrings(langCode: appLanguage)
     }
 
     var body: some View {
         NavigationView {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 24) {
+                    // Modern Header
+                    headerSection
+                    
+                    // Device Banner
+                    deviceInfoBanner
+
+                    // Firmware List
                     firmwareSection(title: "LATEST & BETAS", groupName: "LATEST & BETAS")
                     firmwareSection(title: "STABLE RELEASES", groupName: "STABLE RELEASES")
-                    
-                    // --- EASTER EGG ---
-                    Color.clear.frame(height: 1500)
-                    
-                    VStack(spacing: 16) {
-                        ZStack {
-                            Color(white: 0.2)
-                            Text("🐱")
-                                .font(.system(size: 100))
-                        }
-                        .frame(width: 240, height: 240)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        
-                        Button {
-                            self.triggerSelectionHaptic()
-                            let androidFirmware = FirmwareVersion(
-                                version: "Android 17 Beta",
-                                build: "SWEET_CAT",
-                                features: "Easter Egg Bypass",
-                                badgeText: "SECRET",
-                                badgeColor: .green,
-                                group: "EASTER EGG",
-                                sha256: "deadbeef00000000000000000000000000000000000000000000000000000000"
-                            )
-                            self.activeFirmware = androidFirmware
-                        } label: {
-                            Text("Android 17 Beta")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 14)
-                                .background(Color.green)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .padding(.bottom, 100)
+
+                    // Easter Egg Spacer
+                    Color.clear.frame(height: 100)
+
+                    // Easter Egg Section
+                    easterEggSection
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                .padding(.bottom, 32)
+                .padding(.bottom, 60)
             }
-            .background(Color.black.ignoresSafeArea())
-            .navigationTitle(strings.downgradeTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            // Использование sheet для показа процесса отката
+            .background(
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    // Subtle background gradient
+                    LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.15), Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                        .ignoresSafeArea()
+                }
+            )
+            .navigationBarHidden(true)
             .sheet(item: $activeFirmware) { firmware in
                 DowngradeExecutionSheet(firmware: firmware, appLanguage: appLanguage)
             }
         }
         .preferredColorScheme(.dark)
     }
-    
-    // MARK: - Список прошивок
-    
+
+    private var headerSection: some View {
+        VStack(spacing: 8) {
+            Text("Downgrade")
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text(isRu ? "Восстановление прошивок через Checkm8" : "Restore firmware versions via Checkm8")
+                .font(.system(size: 14, weight: .medium, design: .default))
+                .foregroundColor(Color(white: 0.6))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.top, 10)
+    }
+
+    private var deviceInfoBanner: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "iphone.gen3")
+                .font(.system(size: 30))
+                .foregroundColor(.blue)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("iPhone 15 Pro Max")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                Text("A17 Pro • iOS 17.5.1")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color(white: 0.5))
+            }
+            Spacer()
+            Image(systemName: "checkmark.seal.fill")
+                .foregroundColor(.green)
+                .font(.system(size: 20))
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(white: 0.1))
+                .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
+    }
+
     @ViewBuilder
     private func firmwareSection(title: String, groupName: String) -> some View {
         let items = sampleFirmwares.filter { $0.group == groupName }
         if !items.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(title)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(Color(white: 0.4))
+                    .font(.system(size: 12, weight: .black, design: .monospaced))
+                    .foregroundColor(Color.gray)
+                    .tracking(1.5)
                     .padding(.leading, 4)
-                
-                VStack(spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        firmwareRow(item)
-                        
-                        if index < items.count - 1 {
-                            Divider()
-                                .background(Color.white.opacity(0.1))
-                                .padding(.leading, 60)
-                        }
+
+                VStack(spacing: 12) {
+                    ForEach(items) { item in
+                        firmwareCard(item)
                     }
                 }
-                .background(Color(white: 0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
     }
-    
+
     @ViewBuilder
-    private func firmwareRow(_ item: FirmwareVersion) -> some View {
-        HStack(spacing: 14) {
-            // Иконка
-            ZStack {
-                Circle()
-                    .strokeBorder(Color(white: 0.3), lineWidth: 1.5)
-                    .frame(width: 44, height: 44)
-                
-                Image(systemName: "gearshape")
-                    .font(.system(size: 22))
-                    .foregroundColor(Color(white: 0.7))
-            }
-            
-            // Информация
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(item.version)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text(item.badgeText)
-                        .font(.system(size: 10, weight: .heavy))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(item.badgeColor.opacity(0.2))
+    private func firmwareCard(_ item: FirmwareVersion) -> some View {
+        Button {
+            triggerSelectionHaptic()
+            activeFirmware = item
+        } label: {
+            HStack(spacing: 16) {
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(item.badgeColor.opacity(0.15))
+                        .frame(width: 50, height: 50)
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 22))
                         .foregroundColor(item.badgeColor)
-                        .clipShape(Capsule())
                 }
-                
-                Text("Build \(item.build) • \(item.features)")
-                    .font(.system(size: 13, design: .monospaced))
-                    .foregroundColor(Color(white: 0.5))
+
+                // Info
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(item.version)
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text(item.badgeText)
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(item.badgeColor.opacity(0.2))
+                            .foregroundColor(item.badgeColor)
+                            .clipShape(Capsule())
+                    }
+                    
+                    HStack {
+                        Text("Build: \(item.build)")
+                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .foregroundColor(Color(white: 0.6))
+                        Spacer()
+                        Text(item.features)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(white: 0.5))
+                    }
+                }
             }
+            .padding(16)
+            .background(Color(white: 0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+        }
+        .buttonStyle(ModernScaleButtonStyle())
+    }
+
+    private var easterEggSection: some View {
+        VStack(spacing: 24) {
+            Image("IMG_9744")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 240, height: 240)
+                .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+                .shadow(color: .black.opacity(0.5), radius: 20, y: 10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 32, style: .continuous)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
             
-            Spacer(minLength: 0)
-            
-            // Кнопка
             Button {
-                self.triggerSelectionHaptic()
-                self.activeFirmware = item
+                triggerSelectionHaptic()
+                let androidFirmware = FirmwareVersion(
+                    version: "Android 17 Beta",
+                    build: "SWEET_CAT",
+                    features: "Easter Egg Bypass",
+                    badgeText: "SECRET",
+                    badgeColor: .green,
+                    group: "EASTER EGG",
+                    sha256: "deadbeef00000000000000000000000000000000000000000000000000000000"
+                )
+                activeFirmware = androidFirmware
             } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.counterclockwise.circle")
-                        .font(.system(size: 12, weight: .bold))
-                    Text("Downgrade")
-                        .font(.system(size: 13, weight: .bold))
+                HStack(spacing: 12) {
+                    Image(systemName: "ant.fill")
+                        .font(.system(size: 20))
+                    Text("Android 17 Beta")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                 }
                 .foregroundColor(.black)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(item.badgeColor)
+                .frame(height: 56)
+                .frame(maxWidth: 240)
+                .background(
+                    LinearGradient(gradient: Gradient(colors: [Color.green, Color.green.opacity(0.8)]), startPoint: .top, endPoint: .bottom)
+                )
                 .clipShape(Capsule())
+                .shadow(color: Color.green.opacity(0.4), radius: 12, y: 4)
             }
+            .buttonStyle(ModernScaleButtonStyle())
         }
-        .padding(16)
+        .padding(.bottom, 60)
     }
-    
+
     private func triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
@@ -169,306 +223,252 @@ struct DowngradeView: View {
     }
 }
 
-// MARK: - Экран выполнения процесса (Sheet)
+// Custom button scale effect for firmwares
+struct ModernScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+// MARK: - 60-Second Flash Execution View
 
 struct DowngradeExecutionSheet: View {
-    @Environment(\.presentationMode) private var presentationMode
-    
     let firmware: FirmwareVersion
     let appLanguage: String
-    
-    @State private var isRestoring: Bool = false
-    @State private var elapsedSeconds: Double = 0.0
-    @State private var totalSeconds: Double = 60.0
-    @State private var currentStageIndex: Int = 0
-    @State private var restoreSpeedMBs: Double = 0.0
-    @State private var terminalLogs: [String] = []
-    @State private var restoreTimer: Timer?
-    @State private var showSuccessAlert: Bool = false
-    @State private var showCancelAlert: Bool = false
+    @Environment(\.presentationMode) var presentationMode
     
     private var isRu: Bool {
         appLanguage == "ru"
     }
-
-    private var strings: LocalizedStrings {
-        LocalizedStrings(langCode: appLanguage)
+    
+    // Status
+    @State private var isRestoring = false
+    @State private var elapsedSeconds: Double = 0.0
+    @State private var restoreSpeedMBs: Double = 0.0
+    @State private var terminalLogs: [String] = []
+    @State private var currentStageIndex: Int = -1
+    
+    // Alerts
+    @State private var showCancelAlert = false
+    @State private var showSuccessAlert = false
+    
+    @State private var restoreTimer: Timer?
+    
+    // 60-second downgrade stages
+    struct RestoreStage {
+        let title: String
+        let range: ClosedRange<Double>
     }
-
-    private var progressRatio: Double {
-        min(1.0, elapsedSeconds / totalSeconds)
-    }
-
-    // 5 этапов восстановления
-    private var restoreStages: [(titleRu: String, titleEn: String, detailRu: String, detailEn: String, range: ClosedRange<Double>)] {
-        [
-            (
-                "1. Проверка подписи TSS / SHSH2",
-                "1. Validating TSS / SHSH2 Tickets",
-                "Запрос gs.apple.com & верификация бинарного ApTicket...",
-                "Querying gs.apple.com & validating ApTicket payload...",
-                0.0...10.0
-            ),
-            (
-                "2. Распаковка RootFS & Cryptex1",
-                "2. Extracting RootFS & Cryptex1 OS",
-                "Извлечение системного образа DMG и компонентов Cryptex OS...",
-                "Extracting DMG system image and Cryptex OS components...",
-                10.0...25.0
-            ),
-            (
-                "3. Прошивка SEP & Baseband",
-                "3. Flashing SEP & Baseband Firmware",
-                "Отправка подписанного Secure Enclave микрокода в чип безопасности...",
-                "Sending signed Secure Enclave microcode to security processor...",
-                25.0...40.0
-            ),
-            (
-                "4. Запись APFS Snapshot & Kernel",
-                "4. Writing APFS Snapshot & KernelCache",
-                "Создание корневого снимка APFS и синхронизация KernelCache...",
-                "Creating APFS root snapshot and synchronizing KernelCache...",
-                40.0...52.0
-            ),
-            (
-                "5. Финализация и NVRAM",
-                "5. Finalizing & NVRAM Boot Update",
-                "Обновление системных переменных NVRAM и верификация SHA-256...",
-                "Updating NVRAM boot variables and verifying SHA-256 integrity...",
-                52.0...60.0
-            )
-        ]
-    }
-
+    let stages: [RestoreStage] = [
+        RestoreStage(title: "Handshake & TSS", range: 0.0...10.0),
+        RestoreStage(title: "Mounting APFS & RootFS", range: 10.0...25.0),
+        RestoreStage(title: "Flashing SEP & Baseband", range: 25.0...40.0),
+        RestoreStage(title: "Creating Snapshots", range: 40.0...52.0),
+        RestoreStage(title: "Verifying Integrity", range: 52.0...60.0)
+    ]
+    
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color.black.ignoresSafeArea()
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Drag handle
+                Capsule()
+                    .fill(Color(white: 0.3))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 10)
+                
+                // Header
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(isRu ? "Установка прошивки" : "Flashing Firmware")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("\(firmware.version) (\(firmware.build))")
+                            .font(.system(size: 15, weight: .medium, design: .monospaced))
+                            .foregroundColor(firmware.badgeColor)
+                    }
+                    Spacer()
+                    
+                    if !isRestoring && elapsedSeconds == 0 {
+                        Button {
+                            presentationMode.wrappedValue.dismiss()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(Color(white: 0.5))
+                        }
+                    }
+                }
+                .padding(20)
                 
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        // Цель
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(isRu ? "Целевая прошивка" : "Target Firmware")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(Color(white: 0.5))
-                                Text(firmware.version)
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Text(firmware.badgeText)
-                                .font(.system(size: 12, weight: .heavy))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(firmware.badgeColor.opacity(0.2))
-                                .foregroundColor(firmware.badgeColor)
-                                .clipShape(Capsule())
-                        }
-                        .padding(.top, 20)
+                    VStack(spacing: 24) {
+                        // Progress ring and center data
+                        progressViewSection
                         
-                        // Процесс выполнения
-                        restoreExecutionCard
+                        // Action Button
+                        actionButton
+                        
+                        // Stages list
+                        stagesListSection
+                        
+                        // Terminal
+                        terminalSection
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 40)
                 }
             }
-            .navigationTitle(isRu ? "Откат устройства" : "Device Downgrade")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(isRu ? "Закрыть" : "Close") {
-                        if self.isRestoring {
-                            self.showCancelAlert = true
-                        } else {
-                            self.presentationMode.wrappedValue.dismiss()
-                        }
-                    }
-                    .foregroundColor(Color(white: 0.6))
+        }
+        .alert(isPresented: $showCancelAlert) {
+            Alert(
+                title: Text(isRu ? "Прервать Откат?" : "Cancel Downgrade?"),
+                message: Text(isRu ? "Прерывание процесса может привести к bootloop." : "Interrupting the flash process may cause a bootloop."),
+                primaryButton: .destructive(Text(isRu ? "Прервать" : "Cancel Process")) {
+                    cancelFlashing()
+                },
+                secondaryButton: .cancel(Text(isRu ? "Продолжить" : "Keep Flashing"))
+            )
+        }
+        .alert(isPresented: $showSuccessAlert) {
+            Alert(
+                title: Text(isRu ? "Откат Завершён!" : "Downgrade Complete!"),
+                message: Text(isRu ? "Устройство было успешно восстановлено на \(firmware.version)." : "Your device was successfully restored to \(firmware.version)."),
+                dismissButton: .default(Text("OK")) {
+                    presentationMode.wrappedValue.dismiss()
                 }
-            }
-            // Алерт успешного завершения процесса отката
-            .alert(isPresented: $showSuccessAlert) {
-                Alert(
-                    title: Text(strings.downgradeFinished),
-                    message: Text(strings.downgradeFinishedMsg),
-                    dismissButton: .default(Text("OK")) {
-                        self.presentationMode.wrappedValue.dismiss()
-                    }
-                )
-            }
-            // Алерт прерывания
-            .alert(isPresented: $showCancelAlert) {
-                Alert(
-                    title: Text(isRu ? "Прервать откат?" : "Cancel Downgrade?"),
-                    message: Text(isRu ? "Процесс прошивки будет безопасно остановлен." : "The restore process will be safely terminated."),
-                    primaryButton: .destructive(Text(isRu ? "Прервать" : "Stop")) {
-                        self.cancelFlashing()
-                        self.presentationMode.wrappedValue.dismiss()
-                    },
-                    secondaryButton: .cancel(Text(strings.cancelBtn))
-                )
-            }
-            .onAppear {
-                // Автозапуск можно включить, или ждать нажатия кнопки
-            }
+            )
+        }
+        .onDisappear {
+            restoreTimer?.invalidate()
         }
     }
     
-    private var restoreExecutionCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Прогресс бар
+    private var progressViewSection: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.1), lineWidth: 16)
+                .frame(width: 220, height: 220)
+            
+            Circle()
+                .trim(from: 0.0, to: CGFloat(elapsedSeconds / 60.0))
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: [firmware.badgeColor, firmware.badgeColor.opacity(0.5)]),
+                        center: .center,
+                        startAngle: .degrees(-90),
+                        endAngle: .degrees(270)
+                    ),
+                    style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                )
+                .frame(width: 220, height: 220)
+                .rotationEffect(.degrees(-90))
+                .animation(.linear(duration: 0.1), value: elapsedSeconds)
+            
             VStack(spacing: 8) {
-                HStack {
-                    Text(isRu ? "Прогресс" : "Progress")
-                        .font(.system(.subheadline, design: .default))
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("\(Int(progressRatio * 100))%")
-                        .font(.system(.subheadline, design: .monospaced))
-                        .fontWeight(.bold)
-                        .foregroundColor(firmware.badgeColor)
-                }
+                Text(String(format: "%.0f%%", (elapsedSeconds / 60.0) * 100))
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
                 
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color(white: 0.2))
-                            .frame(height: 8)
-                        Capsule()
-                            .fill(firmware.badgeColor)
-                            .frame(width: max(0, geo.size.width * progressRatio), height: 8)
-                            .animation(.linear(duration: 0.1), value: progressRatio)
-                    }
-                }
-                .frame(height: 8)
+                Text(String(format: "%.1f MB/s", restoreSpeedMBs))
+                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                    .foregroundColor(Color(white: 0.6))
             }
+        }
+        .padding(.vertical, 10)
+    }
+    
+    private var stagesListSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(isRu ? "СТАТУС УСТАНОВКИ" : "INSTALLATION STATUS")
+                .font(.system(size: 12, weight: .black, design: .monospaced))
+                .foregroundColor(.gray)
             
-            Divider().background(Color.white.opacity(0.1))
-            
-            // Этапы
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(0..<restoreStages.count, id: \.self) { i in
-                    let stage = restoreStages[i]
-                    let isActive = isRestoring && stage.range.contains(elapsedSeconds)
+            VStack(spacing: 12) {
+                ForEach(Array(stages.enumerated()), id: \.offset) { index, stage in
+                    let isActive = currentStageIndex == index
                     let isCompleted = elapsedSeconds > stage.range.upperBound
                     
-                    HStack(alignment: .top, spacing: 12) {
+                    HStack(spacing: 16) {
+                        // Checkbox / Circle
                         ZStack {
                             let fColor: Color = isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor.opacity(0.2) : Color.clear)
                             let sColor: Color = isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor : Color(white: 0.3))
+                            
                             Circle()
                                 .foregroundColor(fColor)
-                                .frame(width: 14, height: 14)
+                                .frame(width: 18, height: 18)
                                 .overlay(
                                     Circle()
-                                        .stroke(sColor, lineWidth: 1.5)
+                                        .stroke(sColor, lineWidth: 2)
                                 )
                             
                             if isCompleted {
                                 Image(systemName: "checkmark")
-                                    .font(.system(size: 8, weight: .bold))
+                                    .font(.system(size: 10, weight: .bold))
                                     .foregroundColor(.black)
                             } else if isActive {
                                 Circle()
                                     .fill(firmware.badgeColor)
-                                    .frame(width: 6, height: 6)
+                                    .frame(width: 8, height: 8)
                             }
                         }
-                        .padding(.top, 2)
                         
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(isRu ? stage.titleRu : stage.titleEn)
-                                .font(.system(.subheadline, design: .default))
-                                .fontWeight(.semibold)
-                                .foregroundColor(isActive || isCompleted ? .white : Color(white: 0.5))
-                            
-                            if isActive {
-                                Text(isRu ? stage.detailRu : stage.detailEn)
-                                    .font(.system(.caption2, design: .default))
-                                    .foregroundColor(firmware.badgeColor)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
+                        Text(stage.title)
+                            .font(.system(size: 15, weight: isActive ? .bold : .medium))
+                            .foregroundColor(isCompleted ? .white : (isActive ? firmware.badgeColor : Color(white: 0.5)))
+                        
+                        Spacer()
                     }
                 }
             }
-            
-            // Терминал
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Image(systemName: "terminal")
-                    Text("Futurerestore Engine")
-                    Spacer()
-                    if self.isRestoring {
-                        Text("\(String(format: "%.1f", restoreSpeedMBs)) MB/s")
-                            .foregroundColor(firmware.badgeColor)
-                    }
-                }
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundColor(Color(white: 0.5))
-                .padding(.bottom, 8)
-                
-                ScrollViewReader { proxy in
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            if self.terminalLogs.isEmpty {
-                                Text("Awaiting command...")
-                                    .foregroundColor(Color(white: 0.3))
-                            } else {
-                                ForEach(terminalLogs.indices, id: \.self) { i in
-                                    Text(terminalLogs[i])
-                                        .id(i)
-                                }
-                            }
-                        }
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundColor(Color(white: 0.8))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .frame(height: 120)
-                    .onChange(of: self.terminalLogs.count) { _ in
-                        if !self.terminalLogs.isEmpty {
-                            withAnimation {
-                                proxy.scrollTo(self.terminalLogs.count - 1, anchor: .bottom)
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(12)
-            .background(Color(white: 0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-            )
-            
-            // Кнопка
-            if self.isRestoring {
+            .padding()
+            .background(Color(white: 0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+    
+    private var actionButton: some View {
+        Group {
+            if isRestoring {
                 Button(action: {
-                    self.showCancelAlert = true
+                    showCancelAlert = true
                 }) {
                     HStack(spacing: 8) {
                         ProgressView()
                             .scaleEffect(0.9)
-                        Text(isRu ? "Откат выполняется... Прервать" : "Flashing... Cancel")
+                        Text(isRu ? "Остановить" : "Stop Flashing")
                     }
                     .font(.system(.body, design: .default))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.red)
-                    .foregroundColor(.white)
+                    .background(Color.red.opacity(0.2))
+                    .foregroundColor(.red)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red, lineWidth: 1))
+                }
+            } else if elapsedSeconds == 60 {
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    Text(isRu ? "Завершить" : "Done")
+                        .font(.system(.body, design: .default))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.green)
+                        .foregroundColor(.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             } else {
-                Button(action: { self.start60SecondsFlashingSequence() }) {
+                Button(action: { start60SecondsFlashingSequence() }) {
                     HStack(spacing: 8) {
-                        Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
-                            .font(.system(size: 18))
-                        Text(isRu ? "Начать откат (60 сек)" : "Start Downgrade (60s)")
+                        Image(systemName: "bolt.fill")
+                        Text(isRu ? "Начать откат (60 сек)" : "Start Flashing (60s)")
                     }
                     .font(.system(.body, design: .default))
                     .fontWeight(.bold)
@@ -480,126 +480,145 @@ struct DowngradeExecutionSheet: View {
                 }
             }
         }
-        .padding(16)
-        .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .buttonStyle(ModernScaleButtonStyle())
     }
     
-    // MARK: - Логика 60-секундного отката (1 минута)
+    private var terminalSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(isRu ? "ТЕРМИНАЛ" : "TERMINAL LOG")
+                .font(.system(size: 12, weight: .black, design: .monospaced))
+                .foregroundColor(.gray)
+            
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: true) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if terminalLogs.isEmpty {
+                            Text("Waiting for command...")
+                                .foregroundColor(Color(white: 0.4))
+                        } else {
+                            ForEach(terminalLogs.indices, id: \.self) { i in
+                                Text(terminalLogs[i])
+                                    .id(i)
+                            }
+                        }
+                    }
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(Color(white: 0.8))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                }
+                .frame(height: 140)
+                .background(Color(white: 0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+                .onChange(of: terminalLogs.count) { _ in
+                    if !terminalLogs.isEmpty {
+                        withAnimation {
+                            proxy.scrollTo(terminalLogs.count - 1, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Logic
+    
     private func start60SecondsFlashingSequence() {
         triggerMajorHaptic()
         isRestoring = true
         elapsedSeconds = 0.0
-        totalSeconds = 60.0
         currentStageIndex = 0
         restoreSpeedMBs = 48.5
         terminalLogs = [
             "[00:00] [Futurerestore v2.4.1] Initializing downgrade engine...",
             "[00:01] [TSS] Handshake with gs.apple.com:443 established"
         ]
-
-        self.restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            self.elapsedSeconds += 0.1
-            let currentSecondsInt = Int(self.elapsedSeconds)
+        
+        restoreTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            elapsedSeconds += 0.1
+            let currentSecondsInt = Int(elapsedSeconds)
             let formattedTime = String(format: "[%02d:%02d]", currentSecondsInt / 60, currentSecondsInt % 60)
-
-            if self.elapsedSeconds <= 10.0 {
-                if self.currentStageIndex != 0 {
-                    self.currentStageIndex = 0
-                    self.triggerSelectionHaptic()
-                }
-                self.restoreSpeedMBs = Double.random(in: 44.0...54.0)
-                if currentSecondsInt == 3 && self.terminalLogs.count < 3 {
-                    self.terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket cryptographic payload: OK")
-                } else if currentSecondsInt == 7 && self.terminalLogs.count < 4 {
-                    self.terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(self.firmware.sha256.prefix(10))...")
+            
+            if elapsedSeconds <= 10.0 {
+                if currentStageIndex != 0 { currentStageIndex = 0; triggerSelectionHaptic() }
+                restoreSpeedMBs = Double.random(in: 44.0...54.0)
+                if currentSecondsInt == 3 && terminalLogs.count < 3 {
+                    terminalLogs.append("\(formattedTime) [ApTicket] Validating SHSH2 ApTicket payload")
+                } else if currentSecondsInt == 7 && terminalLogs.count < 4 {
+                    terminalLogs.append("\(formattedTime) [TSS] Received signed ApTicket hash: \(firmware.sha256.prefix(10))...")
                 }
             }
-            else if self.elapsedSeconds <= 25.0 {
-                if self.currentStageIndex != 1 {
-                    self.currentStageIndex = 1
-                    self.triggerSelectionHaptic()
-                    self.terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1")
-                }
-                self.restoreSpeedMBs = Double.random(in: 55.0...68.0)
-                if currentSecondsInt == 18 && self.terminalLogs.count < 6 {
-                    self.terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
+            else if elapsedSeconds <= 25.0 {
+                if currentStageIndex != 1 { currentStageIndex = 1; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Mounting DMG RootFS container: disk0s1s1") }
+                restoreSpeedMBs = Double.random(in: 55.0...68.0)
+                if currentSecondsInt == 18 && terminalLogs.count < 6 {
+                    terminalLogs.append("\(formattedTime) [Cryptex1] Verifying OS TrustCache and entitlements...")
                 }
             }
-            else if self.elapsedSeconds <= 40.0 {
-                if self.currentStageIndex != 2 {
-                    self.currentStageIndex = 2
-                    self.triggerSelectionHaptic()
-                    self.terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode to SEP chip...")
-                }
-                self.restoreSpeedMBs = Double.random(in: 52.0...64.0)
-                if currentSecondsInt == 33 && self.terminalLogs.count < 8 {
-                    self.terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
+            else if elapsedSeconds <= 40.0 {
+                if currentStageIndex != 2 { currentStageIndex = 2; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [SEP] Sending signed Secure Enclave microcode...") }
+                restoreSpeedMBs = Double.random(in: 52.0...64.0)
+                if currentSecondsInt == 33 && terminalLogs.count < 8 {
+                    terminalLogs.append("\(formattedTime) [Baseband] Flashing modem firmware version 4.02.01: OK")
                 }
             }
-            else if self.elapsedSeconds <= 52.0 {
-                if self.currentStageIndex != 3 {
-                    self.currentStageIndex = 3
-                    self.triggerSelectionHaptic()
-                    self.terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update-\(self.firmware.build)")
-                }
-                self.restoreSpeedMBs = Double.random(in: 60.0...75.0)
-                if currentSecondsInt == 47 && self.terminalLogs.count < 10 {
-                    self.terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
+            else if elapsedSeconds <= 52.0 {
+                if currentStageIndex != 3 { currentStageIndex = 3; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [APFS] Creating root snapshot com.apple.os.update") }
+                restoreSpeedMBs = Double.random(in: 60.0...75.0)
+                if currentSecondsInt == 47 && terminalLogs.count < 10 {
+                    terminalLogs.append("\(formattedTime) [Kernel] Updating KASLR slide & devicetree components...")
                 }
             }
-            else if self.elapsedSeconds < 60.0 {
-                if self.currentStageIndex != 4 {
-                    self.currentStageIndex = 4
-                    self.triggerSelectionHaptic()
-                    self.terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1")
-                }
-                self.restoreSpeedMBs = Double.random(in: 25.0...40.0)
-                if currentSecondsInt == 56 && self.terminalLogs.count < 12 {
-                    self.terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
+            else if elapsedSeconds < 60.0 {
+                if currentStageIndex != 4 { currentStageIndex = 4; triggerSelectionHaptic(); terminalLogs.append("\(formattedTime) [NVRAM] Updating boot-args: rootless=1 cs_enforcement=1") }
+                restoreSpeedMBs = Double.random(in: 25.0...40.0)
+                if currentSecondsInt == 56 && terminalLogs.count < 12 {
+                    terminalLogs.append("\(formattedTime) [SHA256] System partition integrity check passed: OK")
                 }
             }
             else {
-                self.elapsedSeconds = 60.0
-                self.restoreSpeedMBs = 0.0
-                self.terminalLogs.append("[01:00] [Done] Restore completed successfully in 60s! System ready.")
+                elapsedSeconds = 60.0
+                restoreSpeedMBs = 0.0
+                currentStageIndex = 5 // Fully done
+                terminalLogs.append("[01:00] [Done] Restore completed successfully in 60s! System ready.")
                 timer.invalidate()
-                self.restoreTimer = nil
-                self.isRestoring = false
-                self.triggerNotificationSuccess()
-                self.showSuccessAlert = true
+                restoreTimer = nil
+                isRestoring = false
+                triggerNotificationSuccess()
+                showSuccessAlert = true
             }
         }
     }
-
+    
     private func cancelFlashing() {
         restoreTimer?.invalidate()
         restoreTimer = nil
         isRestoring = false
         elapsedSeconds = 0.0
         restoreSpeedMBs = 0.0
+        currentStageIndex = -1
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
     }
-
+    
     private func triggerSelectionHaptic() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
     }
-
+    
     private func triggerMajorHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
     }
-
+    
     private func triggerNotificationSuccess() {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(.success)
     }
-}
-
-#Preview {
-    DowngradeView()
 }
