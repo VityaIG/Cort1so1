@@ -86,15 +86,15 @@ struct DopamineProcessView: View {
             ),
             JailbreakLogStep(
                 id: 6,
-                titleRu: "Обход защиты Page Protection Layer (PPL)",
-                titleEn: "Bypassing Page Protection Layer (PPL)",
+                titleRu: "Обход защиты Secure Page Table Monitor (SPTM)",
+                titleEn: "Bypassing Secure Page Table Monitor (SPTM)",
                 isMajorPhase: false,
                 iconName: "shield.slash.fill"
             ),
             JailbreakLogStep(
                 id: 7,
-                titleRu: "Анализ Pointer Authentication (PAC)",
-                titleEn: "Evaluating Pointer Authentication (PAC)",
+                titleRu: "Анализ Pointer Authentication (PAC & TXM)",
+                titleEn: "Evaluating Pointer Authentication (PAC & TXM)",
                 isMajorPhase: false,
                 iconName: "key.fill"
             ),

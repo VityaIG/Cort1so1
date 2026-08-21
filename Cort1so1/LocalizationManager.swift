@@ -74,7 +74,7 @@ struct LocalizedStrings {
     var kernelRootless: String { "Rootless (tfp0)" }
 
     var archTitle: String { lang == .ru ? "Архитектура" : "Architecture" }
-    var archValue: String { "arm64e (PPL Bypass)" }
+    var archValue: String { "arm64e (SPTM Bypass)" }
 
     func readyTitle(for version: String) -> String {
         "iOS \(version) — " + (lang == .ru ? "Совместимо" : "Compatible")

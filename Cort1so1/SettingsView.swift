@@ -263,7 +263,7 @@ struct SettingsView: View {
             Divider()
             infoRow(title: strings.osVersionLabel, value: "iOS \(UIDevice.current.systemVersion)", icon: "iphone", color: .indigo)
             Divider()
-            infoRow(title: strings.archTitle, value: "arm64e (PPL & PAC Bypass)", icon: "cpu", color: .teal)
+            infoRow(title: strings.archTitle, value: "arm64e (SPTM & PAC Bypass)", icon: "cpu", color: .teal)
             Divider()
             infoRow(title: strings.exploitLabel, value: "PhysPuppet / LandCast", icon: "bolt.fill", color: .orange)
             Divider()
