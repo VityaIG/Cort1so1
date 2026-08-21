@@ -23,6 +23,53 @@ struct DowngradeView: View {
                 VStack(spacing: 24) {
                     firmwareSection(title: "LATEST & BETAS", groupName: "LATEST & BETAS")
                     firmwareSection(title: "STABLE RELEASES", groupName: "STABLE RELEASES")
+                    
+                    // --- EASTER EGG ---
+                    Color.clear.frame(height: 1500)
+                    
+                    VStack(spacing: 16) {
+                        AsyncImage(url: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1280px-Cat_August_2010-4.jpg")) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } else {
+                                ZStack {
+                                    Color(white: 0.2)
+                                    Image(systemName: "cat.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .foregroundColor(Color(white: 0.5))
+                                        .padding(40)
+                                }
+                            }
+                        }
+                        .frame(width: 240, height: 240)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        
+                        Button {
+                            triggerSelectionHaptic()
+                            let androidFirmware = FirmwareVersion(
+                                version: "Android 17 Beta",
+                                build: "SWEET_CAT",
+                                features: "Easter Egg Bypass",
+                                badgeText: "SECRET",
+                                badgeColor: .green,
+                                group: "EASTER EGG",
+                                sha256: "deadbeef00000000000000000000000000000000000000000000000000000000"
+                            )
+                            activeFirmware = androidFirmware
+                        } label: {
+                            Text("Android 17 Beta")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 14)
+                                .background(Color.green)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.bottom, 100)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
