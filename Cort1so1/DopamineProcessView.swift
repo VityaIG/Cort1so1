@@ -475,8 +475,11 @@ struct DopamineProcessView: View {
                 UserDefaults.standard.set(true, forKey: "isJailbroken")
                 
                 if autoRespring {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        self.phase = .respring
+                    // Задержка ровно 620 мс после окончания красного яблока и звука
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            self.phase = .respring
+                        }
                     }
                 } else {
                     self.onComplete()
