@@ -30,6 +30,11 @@ extension UIDevice {
 
 struct DowngradeView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
+    @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
+    @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
+    @AppStorage("customOSVersion") private var customOSVersion: String = ""
+    @AppStorage("customArch") private var customArch: String = ""
     @State private var activeFirmware: FirmwareVersion? = nil
     
     @State private var selectedFirmwareId: UUID? = sampleFirmwares.first?.id
@@ -61,11 +66,11 @@ struct DowngradeView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(UIDevice.current.friendlyModelName)
+                            Text(customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.friendlyModelName : customDeviceModel)
                                 .font(.system(size: 16, weight: .bold))
                             
                             HStack(spacing: 6) {
-                                Text("iOS \(UIDevice.current.systemVersion)")
+                                Text(customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS \(UIDevice.current.systemVersion)" : customOSVersion)
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.blue)
                                     .padding(.horizontal, 6)
@@ -73,7 +78,7 @@ struct DowngradeView: View {
                                     .background(Color.blue.opacity(0.12))
                                     .clipShape(Capsule())
 
-                                Text("arm64e")
+                                Text(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e" : customArch)
                                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
                                     .foregroundColor(.purple)
                                     .padding(.horizontal, 6)
@@ -248,9 +253,15 @@ struct DowngradeView: View {
                     .listRowInsets(EdgeInsets())
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme).ignoresSafeArea())
             .navigationTitle(isRu ? "Откат iOS" : "iOS Downgrade")
             .sheet(item: $activeFirmware) { firmware in
                 DowngradeExecutionSheet(firmware: firmware, appLanguage: appLanguage, verbose: verboseRestore)
+            }
+            .onAppear {
+                UITableView.appearance().backgroundColor = .clear
+                UICollectionView.appearance().backgroundColor = .clear
             }
         }
     }

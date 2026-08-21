@@ -171,376 +171,44 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 0. Карточка входа в отдельный раздел ADMIN
+    // MARK: - 0. Кнопка входа в отдельный раздел ADMIN
     private var adminEntryCard: some View {
         Button(action: {
             self.showAdminDashboardSheet = true
         }) {
-            HStack(spacing: 14) {
+            HStack(spacing: 12) {
                 ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.purple, Color.indigo],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 44, height: 44)
-                        .shadow(color: Color.purple.opacity(0.4), radius: 6, x: 0, y: 3)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.purple.opacity(0.15))
+                        .frame(width: 32, height: 32)
 
-                    Image(systemName: "terminal.fill")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.purple)
                 }
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text("ADMIN")
-                            .font(.system(size: 15, weight: .heavy, design: .monospaced))
-                            .foregroundColor(.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("ADMIN")
+                        .font(.system(.subheadline, design: .default))
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
 
-                        Text("OPEN")
-                            .font(.system(size: 9, weight: .black, design: .monospaced))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.purple)
-                            .clipShape(Capsule())
-                    }
-
-                    Text(isRu ? "Нажмите для входа в отдельный раздел ADMIN" : "Tap to open the dedicated full ADMIN dashboard")
-                        .font(.system(size: 12))
+                    Text(isRu ? "Панель разработчика и конфигурации" : "Developer configuration panel")
+                        .font(.system(size: 11))
                         .foregroundColor(.secondary)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.purple)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.secondary)
             }
-            .padding(16)
+            .padding(14)
             .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.purple.opacity(0.4), lineWidth: 1.5)
-            )
-            .shadow(color: Color.purple.opacity(0.15), radius: 8, x: 0, y: 3)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-
-    // MARK: - 0. Секретный раздел ADMIN
-    private var adminSectionCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Header
-            HStack(spacing: 8) {
-                Image(systemName: "terminal.fill")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.purple)
-
-                Text("ADMIN")
-                    .font(.system(size: 17, weight: .heavy, design: .monospaced))
-                    .foregroundColor(.primary)
-
-                Spacer()
-
-                Text("SECRET")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.purple)
-                    .clipShape(Capsule())
-
-                Button(action: {
-                    withAnimation(.spring()) {
-                        isAdminUnlocked = false
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Divider()
-
-            // 1. Название приложения
-            VStack(alignment: .leading, spacing: 6) {
-                Text(isRu ? "Название приложения" : "App Name")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-
-                HStack(spacing: 8) {
-                    TextField("Cort1so1", text: $customAppName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(size: 14, weight: .medium))
-
-                    if customAppName != "Cort1so1" && !customAppName.isEmpty {
-                        Button(action: {
-                            customAppName = "Cort1so1"
-                        }) {
-                            Text(isRu ? "Сброс" : "Reset")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.red)
-                        }
-                    }
-                }
-            }
-
-            // 2. Цвет фона (То есть не элементов)
-            VStack(alignment: .leading, spacing: 8) {
-                Text(isRu ? "Цвет фона приложения (не элементов)" : "App Background Color (Non-elements)")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(AppBgTheme.availableThemes) { theme in
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    customAppBgTheme = theme.id
-                                }
-                            }) {
-                                VStack(spacing: 4) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                            .fill(theme.color)
-                                            .frame(width: 44, height: 32)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                    .stroke(customAppBgTheme == theme.id ? Color.purple : Color.primary.opacity(0.15), lineWidth: customAppBgTheme == theme.id ? 2 : 1)
-                                            )
-
-                                        if customAppBgTheme == theme.id {
-                                            Image(systemName: "checkmark")
-                                                .font(.system(size: 12, weight: .bold))
-                                                .foregroundColor(theme.id == "pure_black" || theme.id == "deep_navy" || theme.id == "crimson_dark" || theme.id == "forest_dark" || theme.id == "purple_midnight" ? .white : .primary)
-                                        }
-                                    }
-
-                                    Text(isRu ? theme.nameRu : theme.nameEn)
-                                        .font(.system(size: 9, weight: .medium))
-                                        .foregroundColor(customAppBgTheme == theme.id ? .primary : .secondary)
-                                        .frame(width: 60)
-                                        .lineLimit(1)
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
-
-            Divider()
-
-            // 3. Подмена системных значений (Кастомизация параметров)
-            VStack(alignment: .leading, spacing: 10) {
-                Text(isRu ? "Подмена системных значений" : "System Diagnostics Overrides")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-
-                VStack(spacing: 8) {
-                    HStack {
-                        Text(isRu ? "Версия iOS:" : "iOS Version:")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
-
-                        TextField(isRu ? "По умолчанию (18.0 / 26.0)" : "Default (18.0 / 26.0)", text: $customOSVersion)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size: 13))
-                    }
-
-                    HStack {
-                        Text(isRu ? "Модель:" : "Device Model:")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
-
-                        TextField(isRu ? "По умолчанию (iPhone)" : "Default (iPhone)", text: $customDeviceModel)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size: 13))
-                    }
-
-                    HStack {
-                        Text(isRu ? "Пакет-менеджер:" : "Package Mgr:")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
-
-                        TextField("Cort1so1 Installer", text: $customPackageManager)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size: 13))
-                    }
-                }
-            }
-
-            Divider()
-
-            // 4. Тюнинг симуляции и вероятностей
-            VStack(alignment: .leading, spacing: 10) {
-                Text(isRu ? "Параметры симуляции" : "Simulation Tuning")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-
-                // Множитель скорости
-                HStack {
-                    Text(isRu ? "Скорость симуляции:" : "Simulation Speed:")
-                        .font(.system(size: 12))
-                    Spacer()
-                    Picker("", selection: $simulationSpeedMultiplier) {
-                        Text("1.0x (Норма)").tag(1.0)
-                        Text("2.0x (Быстро)").tag(2.0)
-                        Text("5.0x (Турбо)").tag(5.0)
-                        Text("10x (Мгновенно)").tag(10.0)
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                }
-
-                // Шанс пасхалки
-                HStack {
-                    Text(isRu ? "Шанс видео-пасхалки:" : "Easter Egg Chance:")
-                        .font(.system(size: 12))
-                    Spacer()
-                    Picker("", selection: $easterEggChancePercent) {
-                        Text("0% (Выкл)").tag(0)
-                        Text("1% (Стандарт)").tag(1)
-                        Text("25% (Высокий)").tag(25)
-                        Text("100% (Всегда)").tag(100)
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                }
-
-                // Длительность респринга
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(isRu ? "Длительность респринга:" : "Respring Duration:")
-                            .font(.system(size: 12))
-                        Spacer()
-                        Text(String(format: "%.1f сек", customRespringDuration))
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .foregroundColor(.purple)
-                    }
-                    Slider(value: $customRespringDuration, in: 0.5...8.0, step: 0.5)
-                        .accentColor(.purple)
-                }
-            }
-
-            Divider()
-
-            // 5. Быстрые триггеры и действия
-            VStack(alignment: .leading, spacing: 8) {
-                Text(isRu ? "Быстрые действия ADMIN" : "Admin Quick Actions")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-
-                HStack(spacing: 8) {
-                    Button(action: {
-                        showEasterEggVideo = true
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "play.circle.fill")
-                            Text(isRu ? "Тест видео" : "Test Video")
-                        }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.purple)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.purple.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-
-                    Button(action: {
-                        showSecretEasterEgg = true
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                            Text(isRu ? "Тест Бутлупа" : "Test Bootloop")
-                        }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.red.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-
-                HStack(spacing: 8) {
-                    Button(action: {
-                        hasSeenFirstLaunchWelcome = false
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "bell.badge.fill")
-                            Text(isRu ? "Сброс Онбординга" : "Reset Onboard")
-                        }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.blue.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-
-                    Button(action: {
-                        withAnimation {
-                            isJailbroken.toggle()
-                            jailbreakState = isJailbroken ? .completed : .idle
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                            Text(isJailbroken ? (isRu ? "Снять JB" : "Unjailbreak") : (isRu ? "Дать JB" : "Set Jailbroken"))
-                        }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.green)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.green.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-            }
-
-            Divider()
-
-            // Кнопка сброса всех настроек админа
-            Button(action: {
-                withAnimation {
-                    customAppName = "Cort1so1"
-                    customAppBgTheme = "default"
-                    customOSVersion = ""
-                    customDeviceModel = ""
-                    customPackageManager = ""
-                    simulationSpeedMultiplier = 1.0
-                    easterEggChancePercent = 1
-                    customRespringDuration = 2.5
-                }
-            }) {
-                HStack {
-                    Spacer()
-                    Image(systemName: "arrow.counterclockwise")
-                    Text(isRu ? "Сбросить все параметры ADMIN" : "Reset All Admin Parameters")
-                        .font(.system(size: 12, weight: .medium))
-                    Spacer()
-                }
-                .foregroundColor(.secondary)
-                .padding(.vertical, 4)
-            }
-        }
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.purple.opacity(0.4), lineWidth: 1.5)
-        )
-        .shadow(color: Color.purple.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 
     // MARK: - 1. Профиль приложения и разработчика
@@ -617,7 +285,7 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -678,7 +346,7 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -729,7 +397,7 @@ struct SettingsView: View {
             .accentColor(AppTheme.resolveColor(name: appThemeColor))
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -750,7 +418,7 @@ struct SettingsView: View {
             infoRow(title: strings.packageManagerLabel, value: customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1 Installer (Procursus)" : customPackageManager, icon: "shippingbox.fill", color: .cyan)
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -788,7 +456,7 @@ struct SettingsView: View {
             }
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -826,7 +494,7 @@ struct SettingsView: View {
                 .lineSpacing(3)
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -883,7 +551,7 @@ struct SettingsView: View {
                 .clipShape(Capsule())
             }
             .padding(16)
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)

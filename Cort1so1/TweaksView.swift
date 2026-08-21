@@ -84,6 +84,8 @@ struct TweaksView: View {
     @AppStorage("custom_tweaks_store") private var customTweaksJSON: String = "[]"
     @AppStorage("custom_apply_button_text") private var customApplyButtonText: String = ""
     @AppStorage("custom_apply_title_text") private var customApplyTitleText: String = ""
+    @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
+    @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
     @State private var customTweaks: [CustomTweak] = []
 
     // Состояния интерфейса
@@ -285,6 +287,8 @@ struct TweaksView: View {
                     )
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme).ignoresSafeArea())
             .navigationTitle(strings.tweaksTitle)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -350,6 +354,8 @@ struct TweaksView: View {
             }
             .onAppear {
                 exist = true
+                UITableView.appearance().backgroundColor = .clear
+                UICollectionView.appearance().backgroundColor = .clear
                 loadCustomTweaks()
             }
         }
