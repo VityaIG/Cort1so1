@@ -238,19 +238,12 @@ struct DopamineProcessView: View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
             HStack {
-                // Левая сторона: Инфо о системном эксплойте
+                // Левая сторона: Три белые точки
                 HStack(spacing: 6) {
-                    Image(systemName: "cpu.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                    Text("PhysPuppet • SPTM")
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.85))
+                    Circle().fill(Color.white.opacity(0.85)).frame(width: 8, height: 8)
+                    Circle().fill(Color.white.opacity(0.85)).frame(width: 8, height: 8)
+                    Circle().fill(Color.white.opacity(0.85)).frame(width: 8, height: 8)
                 }
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4)
-                .background(Color.white.opacity(0.1))
-                .clipShape(Capsule())
 
                 Spacer()
 
@@ -265,7 +258,7 @@ struct DopamineProcessView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.vertical, 12)
             .background(Color.black)
 
             // Прогресс-бар с динамической подсветкой
@@ -360,12 +353,12 @@ struct DopamineProcessView: View {
             HStack(spacing: 10) {
                 Spacer()
 
-                ProgressView()
-                    .scaleEffect(0.8)
-
                 Text(isRu ? "Выполняется джейлбрейк..." : "Jailbreak in progress...")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
+
+                ProgressView()
+                    .scaleEffect(0.8)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
