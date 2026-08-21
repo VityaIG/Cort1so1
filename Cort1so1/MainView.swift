@@ -65,7 +65,6 @@ struct MainView: View {
                 }
             }
             .navigationTitle(strings.mainTitle)
-            .navigationBarTitleDisplayMode(.inline)
             // 1. Стандартный алерт подтверждения перед джейлбрейком
             .alert(isPresented: $showingConfirmAlert) {
                 Alert(

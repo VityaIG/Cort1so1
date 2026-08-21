@@ -180,7 +180,6 @@ struct TweaksView: View {
                 }
             }
             .navigationTitle(strings.tweaksTitle)
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !customTweaks.isEmpty {
                     ToolbarItem(placement: .navigationBarLeading) {
@@ -320,7 +319,6 @@ struct ManageCustomTweaksSheet: View {
                 }
             }
             .navigationTitle(isRu ? "Управление твиками" : "Manage Tweaks")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(isRu ? "Закрыть" : "Close") {
@@ -432,7 +430,6 @@ struct CustomTweakEditorSheet: View {
                 }
             }
             .navigationTitle(isRu ? (initialTweak == nil ? "Новый твик" : "Редактирование") : (initialTweak == nil ? "New Tweak" : "Edit Tweak"))
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(strings.tweaksAddCancelBtn) {

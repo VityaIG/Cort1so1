@@ -115,13 +115,6 @@ struct DowngradeView: View {
                 // Easter Egg
                 Section {
                     VStack(alignment: .center, spacing: 20) {
-                        Image("IMG_9744")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 200, height: 200)
-                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                            .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
-                        
                         Button(action: {
                             triggerSelectionHaptic()
                             let androidFirmware = FirmwareVersion(
@@ -205,6 +198,56 @@ struct DowngradeExecutionSheet: View {
     var body: some View {
         NavigationView {
             Form {
+                Section {
+                    if isRestoring {
+                        Button(action: {
+                            showCancelAlert = true
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text(isRu ? "Прервать Откат" : "Stop Flashing")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                            .foregroundColor(.red)
+                        }
+                    } else if elapsedSeconds > 0 && elapsedSeconds < 60 {
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text(isRu ? "Закрыть" : "Close")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                            .foregroundColor(.blue)
+                        }
+                    } else if elapsedSeconds == 60 {
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text(isRu ? "Завершить" : "Done")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                            .foregroundColor(.green)
+                        }
+                    } else {
+                        Button(action: { start60SecondsFlashingSequence() }) {
+                            HStack {
+                                Spacer()
+                                Text(isRu ? "Начать установку (60 сек)" : "Start Flashing (60s)")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                            .foregroundColor(firmware.badgeColor)
+                        }
+                    }
+                }
+
                 Section(header: Text(isRu ? "Прогресс" : "Progress")) {
                     VStack(spacing: 16) {
                         ZStack {
@@ -290,44 +333,6 @@ struct DowngradeExecutionSheet: View {
                                     proxy.scrollTo(terminalLogs.count - 1, anchor: .bottom)
                                 }
                             }
-                        }
-                    }
-                }
-                
-                Section {
-                    if isRestoring {
-                        Button(action: {
-                            showCancelAlert = true
-                        }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Прервать Откат" : "Stop Flashing")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                            .foregroundColor(.red)
-                        }
-                    } else if elapsedSeconds == 60 {
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Завершить" : "Done")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                            .foregroundColor(.green)
-                        }
-                    } else {
-                        Button(action: { start60SecondsFlashingSequence() }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Начать установку (60 сек)" : "Start Flashing (60s)")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                            .foregroundColor(firmware.badgeColor)
                         }
                     }
                 }
@@ -445,9 +450,6 @@ struct DowngradeExecutionSheet: View {
         restoreTimer?.invalidate()
         restoreTimer = nil
         isRestoring = false
-        elapsedSeconds = 0.0
-        restoreSpeedMBs = 0.0
-        currentStageIndex = -1
         terminalLogs.append("[Terminated] Downgrade process cancelled by user.")
     }
     

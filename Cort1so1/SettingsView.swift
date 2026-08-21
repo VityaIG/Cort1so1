@@ -59,7 +59,6 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(strings.settingsTitle)
-            .navigationBarTitleDisplayMode(.inline)
             // Подтверждение удаления джейлбрейка
             .alert(isPresented: $showRemoveJailbreakAlert) {
                 Alert(
