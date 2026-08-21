@@ -1110,7 +1110,6 @@ struct EasterFirmwareProcessView: View {
                 if safeMode {
                     // Safe Mode: Flying DVD logo without sound
                     renderOSLogo(color: alertColor)
-                        .rotationEffect(.degrees(dvdRotation))
                         .shadow(color: alertColor.opacity(0.85), radius: 22)
                         .position(
                             x: geo.size.width / 2 + dvdPosition.x,
@@ -1273,8 +1272,6 @@ struct EasterFirmwareProcessView: View {
             x: CGFloat.random(in: -maxDvdOffsetX...maxDvdOffsetX),
             y: CGFloat.random(in: -maxDvdOffsetY...maxDvdOffsetY)
         )
-        self.dvdRotation = 0.0
-        self.dvdAngularVelocity = Double.random(in: 180...300) * (Bool.random() ? 1 : -1)
     }
 
     private func startSafeModeDVDSequence() {
@@ -1283,8 +1280,8 @@ struct EasterFirmwareProcessView: View {
         let totalDuration: Double = 10.0
         var elapsed: Double = 0.0
 
-        var vx: CGFloat = CGFloat.random(in: 180...260) * (Bool.random() ? 1 : -1)
-        var vy: CGFloat = CGFloat.random(in: 200...290) * (Bool.random() ? 1 : -1)
+        var vx: CGFloat = CGFloat.random(in: 190...250) * (Bool.random() ? 1 : -1)
+        var vy: CGFloat = CGFloat.random(in: 180...240) * (Bool.random() ? 1 : -1)
 
         self.dvdTimer = Timer.scheduledTimer(withTimeInterval: dt, repeats: true) { timer in
             elapsed += dt
@@ -1292,34 +1289,23 @@ struct EasterFirmwareProcessView: View {
             var newX = self.dvdPosition.x + vx * CGFloat(dt)
             var newY = self.dvdPosition.y + vy * CGFloat(dt)
 
-            var bounced = false
             if newX <= -self.maxDvdOffsetX {
                 newX = -self.maxDvdOffsetX
-                vx = -vx
-                bounced = true
+                vx = abs(vx)
             } else if newX >= self.maxDvdOffsetX {
                 newX = self.maxDvdOffsetX
-                vx = -vx
-                bounced = true
+                vx = -abs(vx)
             }
 
             if newY <= -self.maxDvdOffsetY {
                 newY = -self.maxDvdOffsetY
-                vy = -vy
-                bounced = true
+                vy = abs(vy)
             } else if newY >= self.maxDvdOffsetY {
                 newY = self.maxDvdOffsetY
-                vy = -vy
-                bounced = true
-            }
-
-            if bounced {
-                let spin = Double.random(in: 150...350)
-                self.dvdAngularVelocity = (self.dvdAngularVelocity > 0 ? -spin : spin)
+                vy = -abs(vy)
             }
 
             self.dvdPosition = CGPoint(x: newX, y: newY)
-            self.dvdRotation += self.dvdAngularVelocity * dt
 
             if elapsed >= totalDuration {
                 timer.invalidate()

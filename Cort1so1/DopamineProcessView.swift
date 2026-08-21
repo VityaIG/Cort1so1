@@ -354,7 +354,6 @@ struct DopamineProcessView: View {
                     .foregroundColor(color)
             }
         }
-        .rotationEffect(.degrees(dvdRotation))
         .shadow(color: color.opacity(0.85), radius: 22)
     }
 
@@ -515,7 +514,7 @@ struct DopamineProcessView: View {
         }
     }
 
-    // MARK: - Safe Mode DVD Animation (10 секунд полета с физикой вращения)
+    // MARK: - Safe Mode DVD Animation (10 секунд прямого полета и отскока)
 
     private func initDVDBoundaries(screenSize: CGSize) {
         let itemSize: CGFloat = 110
@@ -525,8 +524,6 @@ struct DopamineProcessView: View {
             x: CGFloat.random(in: -maxDvdOffsetX...maxDvdOffsetX),
             y: CGFloat.random(in: -maxDvdOffsetY...maxDvdOffsetY)
         )
-        self.dvdRotation = 0.0
-        self.dvdAngularVelocity = Double.random(in: 180...300) * (Bool.random() ? 1 : -1)
     }
 
     private func startSafeModeDVDSequence() {
@@ -535,38 +532,31 @@ struct DopamineProcessView: View {
         let totalDuration: Double = 10.0
         var elapsed: Double = 0.0
         
-        var vx: CGFloat = 205.0 * (Bool.random() ? 1 : -1)
-        var vy: CGFloat = 185.0 * (Bool.random() ? 1 : -1)
+        var vx: CGFloat = 220.0 * (Bool.random() ? 1 : -1)
+        var vy: CGFloat = 190.0 * (Bool.random() ? 1 : -1)
         
         self.dvdTimer = Timer.scheduledTimer(withTimeInterval: dt, repeats: true) { timer in
             elapsed += dt
             
-            // Непрерывное физическое вращение
-            self.dvdRotation += self.dvdAngularVelocity * dt
-            
             var newX = self.dvdPosition.x + vx * CGFloat(dt)
             var newY = self.dvdPosition.y + vy * CGFloat(dt)
             
-            // Отскок по оси X с передачей крутящего момента
+            // Прямой отскок по оси X
             if newX >= self.maxDvdOffsetX {
                 newX = self.maxDvdOffsetX
                 vx = -abs(vx)
-                self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? 1 : -1)
             } else if newX <= -self.maxDvdOffsetX {
                 newX = -self.maxDvdOffsetX
                 vx = abs(vx)
-                self.dvdAngularVelocity = Double.random(in: 240...480) * (vy > 0 ? -1 : 1)
             }
             
-            // Отскок по оси Y с передачей крутящего момента
+            // Прямой отскок по оси Y
             if newY >= self.maxDvdOffsetY {
                 newY = self.maxDvdOffsetY
                 vy = -abs(vy)
-                self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? -1 : 1)
             } else if newY <= -self.maxDvdOffsetY {
                 newY = -self.maxDvdOffsetY
                 vy = abs(vy)
-                self.dvdAngularVelocity = Double.random(in: 240...480) * (vx > 0 ? 1 : -1)
             }
             
             self.dvdPosition = CGPoint(x: newX, y: newY)
