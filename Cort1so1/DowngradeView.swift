@@ -28,21 +28,10 @@ struct DowngradeView: View {
                     Color.clear.frame(height: 1500)
                     
                     VStack(spacing: 16) {
-                        AsyncImage(url: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1280px-Cat_August_2010-4.jpg")) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            } else {
-                                ZStack {
-                                    Color(white: 0.2)
-                                    Image(systemName: "cat.fill")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .foregroundColor(Color(white: 0.5))
-                                        .padding(40)
-                                }
-                            }
+                        ZStack {
+                            Color(white: 0.2)
+                            Text("🐱")
+                                .font(.system(size: 100))
                         }
                         .frame(width: 240, height: 240)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -155,7 +144,7 @@ struct DowngradeView: View {
             // Кнопка
             Button {
                 self.triggerSelectionHaptic()
-                activeFirmware = item
+                self.activeFirmware = item
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.counterclockwise.circle")

@@ -38,7 +38,7 @@ let defaultPipelineSteps: [PipelineStep] = [
 ]
 
 /// Модель прошивки для симуляции отката
-struct FirmwareVersion: Identifiable, Hashable {
+struct FirmwareVersion: Identifiable {
     let id = UUID()
     let version: String
     let build: String

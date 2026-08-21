@@ -66,7 +66,7 @@ struct TweaksView: View {
                                     set: { newValue in
                                         if let idx = customTweaks.firstIndex(where: { $0.id == tweak.id }) {
                                             customTweaks[idx].isEnabled = newValue
-                                            saveCustomTweaks()
+                                            self.saveCustomTweaks()
                                         }
                                     }
                                 )
@@ -185,7 +185,7 @@ struct TweaksView: View {
                 if !customTweaks.isEmpty {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button {
-                            showManageSheet = true
+                            self.showManageSheet = true
                         } label: {
                             Image(systemName: "list.bullet.rectangle")
                         }
@@ -194,7 +194,7 @@ struct TweaksView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showAddSheet = true
+                        self.showAddSheet = true
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -206,8 +206,8 @@ struct TweaksView: View {
             .sheet(isPresented: $showAddSheet) {
                 CustomTweakEditorSheet { newTweak in
                     withAnimation {
-                        customTweaks.append(newTweak)
-                        saveCustomTweaks()
+                        self.customTweaks.append(newTweak)
+                        self.saveCustomTweaks()
                     }
                 }
             }
@@ -258,7 +258,7 @@ struct TweaksView: View {
         self.customTweaks = decoded
     }
 
-    private func saveCustomTweaks() {
+    private func self.saveCustomTweaks() {
         if let encoded = try? JSONEncoder().encode(customTweaks),
            let jsonString = String(data: encoded, encoding: .utf8) {
             self.customTweaksJSON = jsonString
@@ -285,7 +285,7 @@ struct ManageCustomTweaksSheet: View {
             List {
                 ForEach(customTweaks) { tweak in
                     Button {
-                        tweakToEdit = tweak
+                        self.tweakToEdit = tweak
                     } label: {
                         HStack(spacing: 12) {
                             Circle()
@@ -307,7 +307,7 @@ struct ManageCustomTweaksSheet: View {
                 }
                 .onDelete { indexSet in
                     customTweaks.remove(atOffsets: indexSet)
-                    onSave()
+                    self.onSave()
                     
                     // Если удалили все, закрываем окно
                     if customTweaks.isEmpty {
@@ -329,9 +329,9 @@ struct ManageCustomTweaksSheet: View {
             }
             .sheet(item: $tweakToEdit) { tweak in
                 CustomTweakEditorSheet(initialTweak: tweak) { updatedTweak in
-                    if let index = customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
-                        customTweaks[index] = updatedTweak
-                        onSave()
+                    if let index = self.customTweaks.firstIndex(where: { $0.id == updatedTweak.id }) {
+                        self.customTweaks[index] = updatedTweak
+                        self.onSave()
                     }
                 }
             }
@@ -386,7 +386,7 @@ struct CustomTweakEditorSheet: View {
                         HStack(spacing: 16) {
                             ForEach(AppTheme.availableColors, id: \.name) { item in
                                 Button {
-                                    selectedColor = item.name
+                                    self.selectedColor = item.name
                                 } label: {
                                     ZStack {
                                         Circle()
@@ -450,7 +450,7 @@ struct CustomTweakEditorSheet: View {
                             colorName: selectedColor,
                             isEnabled: initialTweak?.isEnabled ?? true
                         )
-                        onSave(newTweak)
+                        self.onSave(newTweak)
                         self.dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

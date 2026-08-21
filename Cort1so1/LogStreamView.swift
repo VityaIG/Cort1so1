@@ -50,7 +50,6 @@ struct LogStreamView: View {
                                 Text(log)
                                     .font(.system(size: 10, design: .monospaced))
                                     .foregroundColor(logColor(for: log))
-                                    .textSelection(.enabled)
                                     .id(index)
                                     .scaleEffect(x: 1, y: -1, anchor: .center)
                             }
@@ -78,14 +77,14 @@ struct LogStreamView: View {
         
         timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
             if self.currentLogIndex < allLogs.count {
-                self.visibleLogs.append(allLogs[currentLogIndex])
+                self.visibleLogs.append(allLogs[self.currentLogIndex])
                 self.currentLogIndex += 1
             } else {
                 t.invalidate()
                 self.timer = nil
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    onCompleted()
+                    self.onCompleted()
                 }
             }
         }
