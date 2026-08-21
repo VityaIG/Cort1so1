@@ -356,10 +356,15 @@ struct DowngradeExecutionSheet: View {
                     
                     HStack(alignment: .top, spacing: 12) {
                         ZStack {
+                            let fColor: Color = isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor.opacity(0.2) : Color.clear)
+                            let sColor: Color = isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor : Color(white: 0.3))
                             Circle()
-                                .fill(isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor.opacity(0.2) : Color.clear))
-                                .stroke(isCompleted ? firmware.badgeColor : (isActive ? firmware.badgeColor : Color(white: 0.3)), lineWidth: 1.5)
+                                .foregroundColor(fColor)
                                 .frame(width: 14, height: 14)
+                                .overlay(
+                                    Circle()
+                                        .stroke(sColor, lineWidth: 1.5)
+                                )
                             
                             if isCompleted {
                                 Image(systemName: "checkmark")
