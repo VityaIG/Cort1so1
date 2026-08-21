@@ -30,12 +30,14 @@ struct ContentView: View {
                     }
                     .tag(0)
 
-                // Раздел «Твики»
-                TweaksView()
-                    .tabItem {
-                        Label(strings.tabTweaks, systemImage: "hammer.fill")
-                    }
-                    .tag(1)
+                // Раздел «Твики» (доступен только после выполнения джейлбрейка)
+                if isJailbroken || jailbreakState == .completed {
+                    TweaksView()
+                        .tabItem {
+                            Label(strings.tabTweaks, systemImage: "hammer.fill")
+                        }
+                        .tag(1)
+                }
 
                 DowngradeView()
                     .tabItem {
@@ -49,6 +51,7 @@ struct ContentView: View {
                     }
                     .tag(3)
             }
+            .id("tabview-\(isJailbroken)-\(jailbreakState == .completed)")
 
             // Секретная пасхалка по центру экрана (не закрывает навигацию и остается при смене страниц)
             if showSecretEasterEgg {
@@ -75,6 +78,19 @@ struct ContentView: View {
             // Если ранее был выполнен джейлбрейк, восстанавливаем состояние
             if isJailbroken {
                 jailbreakState = .completed
+            }
+        }
+        .onChange(of: isJailbroken) { newValue in
+            if newValue && jailbreakState != .completed {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    jailbreakState = .completed
+                }
+            }
+        }
+        .onChange(of: jailbreakState) { newState in
+            if newState == .completed && !isJailbroken {
+                isJailbroken = true
+                UserDefaults.standard.set(true, forKey: "isJailbroken")
             }
         }
         .onChange(of: selectedTab) { newTab in
