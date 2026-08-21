@@ -270,23 +270,10 @@ struct DowngradeView: View {
 
     @ViewBuilder
     private var easter2ImageView: some View {
-        if let image = UIImage(named: "easter2") {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-        } else if let path = Bundle.main.path(forResource: "easter2", ofType: "png"),
-                  let image = UIImage(contentsOfFile: path) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-        } else {
-            Image("easter2")
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-        }
+        Image("easter2")
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
     }
 }
 

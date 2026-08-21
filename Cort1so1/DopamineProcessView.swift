@@ -131,145 +131,59 @@ struct DopamineProcessView: View {
 
     // MARK: - Главный интерфейс логов
 
-    private func logTextColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
-        if step.isMajorPhase {
-            return method == .cortisol ? Color(red: 0.30, green: 0.95, blue: 1.00) : method.primaryColor
-        }
-        if isCurrentRunning {
-            return Color.white
-        }
-        return Color.white.opacity(0.82)
-    }
-
-    private func logFontWeight(step: JailbreakLogStep, isCurrentRunning: Bool) -> Font.Weight {
-        if step.isMajorPhase {
-            return .bold
-        }
-        if isCurrentRunning {
-            return .semibold
-        }
-        return .regular
-    }
-
-    private func logBackgroundColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
-        if isCurrentRunning {
-            return method == .cortisol ? Color.cyan.opacity(0.14) : method.primaryColor.opacity(0.12)
-        }
-        if step.isMajorPhase {
-            return method == .cortisol ? Color.cyan.opacity(0.09) : method.primaryColor.opacity(0.08)
-        }
-        return Color.clear
-    }
-
-    private func logStrokeColor(step: JailbreakLogStep, isCurrentRunning: Bool) -> Color {
-        if step.isMajorPhase {
-            return method == .cortisol ? Color.cyan.opacity(0.35) : method.primaryColor.opacity(0.25)
-        }
-        if isCurrentRunning {
-            return method.primaryColor.opacity(0.2)
-        }
-        return Color.clear
-    }
-
-    private var progressBarGradient: LinearGradient {
-        if method == .cortisol {
-            return LinearGradient(
-                colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [Color(red: 0.08, green: 0.70, blue: 0.40), Color(red: 0.12, green: 0.92, blue: 0.52)],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        }
-    }
-
-    private var verifiedBadgeGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color(red: 0.00, green: 0.88, blue: 1.00), Color(red: 0.72, green: 0.22, blue: 0.98)],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-    }
-
     private var loggingInterface: some View {
         VStack(spacing: 0) {
             // Верхняя нативная панель
-            HStack(alignment: .center, spacing: 10) {
+            HStack(alignment: .center) {
                 // Левая сторона: Индикаторы статуса
-                if method == .dopamine {
-                    HStack(spacing: 6) {
-                        Circle().fill(Color.red.opacity(0.85)).frame(width: 8, height: 8)
-                        Circle().fill(Color.yellow.opacity(0.85)).frame(width: 8, height: 8)
-                        Circle().fill(Color.green.opacity(0.85)).frame(width: 8, height: 8)
-                    }
-                } else {
-                    HStack(spacing: 5) {
-                        Circle().fill(Color(red: 0.00, green: 0.88, blue: 1.00)).frame(width: 8, height: 8)
-                            .shadow(color: Color.cyan.opacity(0.8), radius: 4)
-                        Circle().fill(Color(red: 0.72, green: 0.22, blue: 0.98)).frame(width: 8, height: 8)
-                            .shadow(color: Color.purple.opacity(0.8), radius: 4)
-                    }
+                HStack(spacing: 6) {
+                    Circle().fill(Color.red.opacity(0.85)).frame(width: 8, height: 8)
+                    Circle().fill(Color.yellow.opacity(0.85)).frame(width: 8, height: 8)
+                    Circle().fill(Color.green.opacity(0.85)).frame(width: 8, height: 8)
                 }
 
                 Spacer()
 
                 // Центральный счетчик шагов и процент
-                HStack(spacing: 4) {
-                    if method == .cortisol {
-                        Image(systemName: "bolt.fill")
-                            .font(.system(size: 10, weight: .black))
-                            .foregroundColor(Color.cyan)
-                    }
-                    Text(String(format: "%d%% • %d/%d", Int(progressRatio * 100), currentStepIndex, logSteps.count))
-                        .font(.system(size: 12, weight: .bold, design: .monospaced))
-                        .foregroundColor(method == .cortisol ? Color.cyan.opacity(0.9) : Color.white.opacity(0.75))
-                }
+                Text(String(format: "%d%% • %d/%d", Int(progressRatio * 100), currentStepIndex, logSteps.count))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.7))
 
                 Spacer()
 
-                // Правая сторона: Название метода и бейдж
+                // Правая сторона: Название метода
                 HStack(spacing: 6) {
-                    Image(systemName: method.systemIcon)
-                        .font(.system(size: 11, weight: .semibold))
+                    Image(systemName: method == .dopamine ? "drop.fill" : "bolt.shield.fill")
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(method.primaryColor)
                     Text(method.title)
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
-                    Text(method.badgeText)
-                        .font(.system(size: 8.5, weight: .heavy, design: .monospaced))
-                        .foregroundColor(method == .cortisol ? .black : .white)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(method == .cortisol ? Color.cyan : Color.white.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.white.opacity(0.06))
-                .clipShape(Capsule())
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(Color(white: 0.04))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color(white: 0.05))
 
             // Прогресс-бар с плавным spring-эффектом
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.white.opacity(0.10))
+                        .fill(Color.white.opacity(0.12))
                         .frame(height: 2.5)
 
                     Rectangle()
-                        .fill(progressBarGradient)
+                        .fill(
+                            LinearGradient(
+                                colors: [method.primaryColor.opacity(0.8), method.primaryColor],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(
                             width: max(8, geo.size.width * CGFloat(progressRatio)),
                             height: 2.5
                         )
-                        .shadow(color: (method == .cortisol ? Color.cyan : method.primaryColor).opacity(0.5), radius: 3)
                         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentStepIndex)
                 }
             }
@@ -278,70 +192,61 @@ struct DopamineProcessView: View {
             // Список логов: плавный поток и подсветка (снизу вверх)
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 9) {
                         ForEach(Array(visibleLogs.enumerated().reversed()), id: \.element.id) { index, step in
                             let isCurrentRunning = (index == visibleLogs.count - 1 && currentStepIndex < logSteps.count)
 
-                            HStack(alignment: .center, spacing: 10) {
+                            HStack(alignment: .center, spacing: 12) {
                                 // Иконка состояния
                                 if isCurrentRunning {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle(tint: method.primaryColor))
-                                        .scaleEffect(0.8)
-                                        .frame(width: 20, height: 20)
+                                        .scaleEffect(0.85)
+                                        .frame(width: 22, height: 22)
                                 } else if step.isMajorPhase {
-                                    Image(systemName: method == .cortisol ? "bolt.shield.fill" : "checkmark.circle.fill")
-                                        .font(.system(size: 16, weight: .bold))
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 17, weight: .bold))
                                         .foregroundColor(method.primaryColor)
-                                        .frame(width: 20, height: 20)
+                                        .frame(width: 22, height: 22)
                                 } else {
                                     Image(systemName: "checkmark")
-                                        .font(.system(size: 12, weight: .bold))
+                                        .font(.system(size: 13, weight: .bold))
                                         .foregroundColor(method.primaryColor.opacity(0.9))
-                                        .frame(width: 20, height: 20)
+                                        .frame(width: 22, height: 22)
                                 }
 
                                 // Текст лога
                                 Text(isRu ? step.titleRu : step.titleEn)
                                     .font(.system(
-                                        size: step.isMajorPhase ? 13.5 : 12.5,
-                                        weight: logFontWeight(step: step, isCurrentRunning: isCurrentRunning),
+                                        size: step.isMajorPhase ? 14 : 13,
+                                        weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular),
                                         design: .monospaced
                                     ))
-                                    .foregroundColor(logTextColor(step: step, isCurrentRunning: isCurrentRunning))
+                                    .foregroundColor(
+                                        step.isMajorPhase
+                                            ? method.primaryColor
+                                            : (isCurrentRunning ? Color.white : Color.white.opacity(0.8))
+                                    )
                                     .lineLimit(2)
 
                                 Spacer(minLength: 0)
 
                                 if step.isMajorPhase {
-                                    if method == .cortisol {
-                                        Text("VERIFIED")
-                                            .font(.system(size: 9, weight: .heavy, design: .rounded))
-                                            .foregroundColor(.black)
-                                            .padding(.horizontal, 7)
-                                            .padding(.vertical, 2.5)
-                                            .background(verifiedBadgeGradient)
-                                            .clipShape(Capsule())
-                                    } else {
-                                        Text(isRu ? "OK" : "DONE")
-                                            .font(.system(size: 9.5, weight: .heavy, design: .rounded))
-                                            .foregroundColor(.black)
-                                            .padding(.horizontal, 7)
-                                            .padding(.vertical, 2.5)
-                                            .background(method.primaryColor)
-                                            .clipShape(Capsule())
-                                    }
+                                    Text(isRu ? "OK" : "DONE")
+                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 7)
+                                        .padding(.vertical, 2.5)
+                                        .background(method.primaryColor)
+                                        .clipShape(Capsule())
                                 }
                             }
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 6.5)
-                            .background(logBackgroundColor(step: step, isCurrentRunning: isCurrentRunning))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .stroke(
-                                        logStrokeColor(step: step, isCurrentRunning: isCurrentRunning),
-                                        lineWidth: step.isMajorPhase ? 0.8 : 0.5
-                                    )
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(
+                                isCurrentRunning
+                                    ? method.primaryColor.opacity(0.12)
+                                    : (step.isMajorPhase ? method.primaryColor.opacity(0.08) : Color.clear)
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .id(step.id)
@@ -363,19 +268,9 @@ struct DopamineProcessView: View {
 
             // Нижняя статусная строка
             HStack(spacing: 10) {
-                if method == .cortisol {
-                    Text("SPTM")
-                        .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                        .foregroundColor(.cyan)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(Color.cyan.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-                }
-
                 Text(currentPhaseDescription)
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.88))
+                    .foregroundColor(.white.opacity(0.85))
                     .lineLimit(1)
 
                 Spacer()
@@ -385,11 +280,11 @@ struct DopamineProcessView: View {
                     .scaleEffect(0.75)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(white: 0.04))
+            .padding(.vertical, 13)
+            .background(Color(white: 0.05))
             .overlay(
                 Rectangle()
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color.white.opacity(0.1))
                     .frame(height: 0.5),
                 alignment: .top
             )
@@ -503,17 +398,7 @@ struct DopamineProcessView: View {
             }
             
             let baseDelay = method.stepDelay(verbose: verboseLogs) / speed
-            let delay: Double
-            if method == .cortisol {
-                if step.isMajorPhase {
-                    delay = baseDelay * 1.8
-                } else {
-                    let variance = Double.random(in: 0.85...1.15)
-                    delay = baseDelay * variance
-                }
-            } else {
-                delay = step.isMajorPhase ? (baseDelay * 1.5) : baseDelay
-            }
+            let delay: Double = step.isMajorPhase ? (baseDelay * 1.4) : baseDelay
             
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
@@ -814,19 +699,9 @@ struct DopamineProcessView: View {
 
     private func triggerHaptic(isMajor: Bool) {
         if isMajor {
-            let generator = UIImpactFeedbackGenerator(style: method == .cortisol ? .heavy : .medium)
+            let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.prepare()
             generator.impactOccurred()
-        } else {
-            if method == .cortisol {
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.prepare()
-                generator.impactOccurred()
-            } else {
-                let generator = UISelectionFeedbackGenerator()
-                generator.prepare()
-                generator.selectionChanged()
-            }
         }
     }
 
