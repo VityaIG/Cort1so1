@@ -2,6 +2,19 @@ import SwiftUI
 import AVFoundation
 import AVKit
 
+/// Перечисление всплывающих окон первого запуска
+enum FirstLaunchAlertItem: Identifiable {
+    case welcome
+    case volumeWarning
+
+    var id: String {
+        switch self {
+        case .welcome: return "welcome"
+        case .volumeWarning: return "volumeWarning"
+        }
+    }
+}
+
 /// Корневой контейнер приложения с нативным TabView в стиле iOS HIG
 struct ContentView: View {
     static var hasPlayedSecretEasterEggInSession: Bool = false
@@ -11,12 +24,19 @@ struct ContentView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("isJailbroken") private var isJailbroken: Bool = false
+    @AppStorage("hasSeenFirstLaunchWelcome") private var hasSeenFirstLaunchWelcome: Bool = false
+
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
     @State private var showSecretEasterEgg: Bool = false
+    @State private var activeFirstLaunchAlert: FirstLaunchAlertItem? = nil
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
+    }
+
+    private var isRu: Bool {
+        appLanguage == "ru"
     }
 
     var body: some View {
@@ -74,6 +94,13 @@ struct ContentView: View {
             if isJailbroken {
                 jailbreakState = .completed
             }
+
+            // Показ приветственного поп-апа при самом первом запуске
+            if !hasSeenFirstLaunchWelcome {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    self.activeFirstLaunchAlert = .welcome
+                }
+            }
         }
         .onChange(of: isJailbroken) { newValue in
             if newValue && jailbreakState != .completed {
@@ -99,6 +126,29 @@ struct ContentView: View {
                         }
                     }
                 }
+            }
+        }
+        .alert(item: $activeFirstLaunchAlert) { item in
+            switch item {
+            case .welcome:
+                return Alert(
+                    title: Text(isRu ? "Привет!" : "Hello!"),
+                    message: Text(isRu ? "Добро пожаловать в Cort1so1!\n\nЗдесь вы можете выполнить джейлбрейк устройства методами Dopamine или Cortisol, откатывать версии iOS, настраивать и применять кастомные твики, а также исследовать скрытые возможности системы." : "Welcome to Cort1so1!\n\nHere you can jailbreak your device with Dopamine or Cortisol, downgrade iOS versions, customize and apply custom tweaks, and explore unique system features."),
+                    dismissButton: .default(Text(isRu ? "Далее" : "Next")) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            self.activeFirstLaunchAlert = .volumeWarning
+                        }
+                    }
+                )
+            case .volumeWarning:
+                return Alert(
+                    title: Text(isRu ? "ВНИМАНИЕ!" : "WARNING!"),
+                    message: Text(isRu ? "Некоторые функции в этом приложении могут быть очень громкими! Если вы в наушниках, пожалуйста, снимите их!" : "WARNING! Some parts in this app may be very loud, if you're in headphones, please take them off!"),
+                    dismissButton: .default(Text(isRu ? "Понятно" : "OK, got it")) {
+                        self.hasSeenFirstLaunchWelcome = true
+                        UserDefaults.standard.set(true, forKey: "hasSeenFirstLaunchWelcome")
+                    }
+                )
             }
         }
         // Поддержка двух режимов оформления
