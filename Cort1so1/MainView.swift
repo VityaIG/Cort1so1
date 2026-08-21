@@ -12,6 +12,8 @@ struct MainView: View {
     }
 
     @State private var showingConfirmAlert: Bool = false
+    @State private var showingMethodDialog: Bool = false
+    @State private var selectedMethod: JailbreakMethod = .dopamine
     @State private var showingProcessModal: Bool = false
 
     private var strings: LocalizedStrings {
@@ -51,14 +53,34 @@ struct MainView: View {
                     title: Text(strings.confirmAlertTitle),
                     message: Text(strings.confirmAlertMessage),
                     primaryButton: .default(Text(strings.confirmYesBtn)) {
-                        self.showingProcessModal = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            self.showingMethodDialog = true
+                        }
                     },
                     secondaryButton: .cancel(Text(strings.cancelBtn))
                 )
             }
-            // 2. Модальное окно процесса (Dopamine style, non-dismissible)
+            // 2. Вторичный диалог выбора метода установки (Action Sheet / Pop-up)
+            .confirmationDialog(
+                "Какой метод установки вы хотите выбрать?",
+                isPresented: $showingMethodDialog,
+                titleVisibility: .visible
+            ) {
+                Button("Dopamine (Old)") {
+                    self.selectedMethod = .dopamine
+                    self.showingProcessModal = true
+                }
+                Button("Cortisol (New)") {
+                    self.selectedMethod = .cortisol
+                    self.showingProcessModal = true
+                }
+                Button(strings.cancelBtn, role: .cancel) { }
+            } message: {
+                Text(isRu ? "Выберите желаемый алгоритм и конфигурацию инсталляции" : "Select desired installation method")
+            }
+            // 3. Модальное окно процесса (Dopamine style, non-dismissible)
             .fullScreenCover(isPresented: $showingProcessModal) {
-                DopamineProcessView(onComplete: {
+                DopamineProcessView(method: selectedMethod, onComplete: {
                     showingProcessModal = false
                     isJailbroken = true
                     withAnimation(.easeInOut(duration: 0.3)) {

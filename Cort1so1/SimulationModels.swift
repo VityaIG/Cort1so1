@@ -1,6 +1,84 @@
 import Foundation
 import SwiftUI
 
+/// Доступные методы джейлбрейка
+enum JailbreakMethod: String, CaseIterable, Identifiable {
+    case dopamine
+    case cortisol
+    
+    var id: String { rawValue }
+    
+    var title: String {
+        switch self {
+        case .dopamine: return "Dopamine (Old)"
+        case .cortisol: return "Cortisol (New)"
+        }
+    }
+    
+    var subtitle: String {
+        switch self {
+        case .dopamine: return "Классический метод с изумрудной темой и PPL"
+        case .cortisol: return "Инновационный метод с неон-циан темой и обходом PAC/PPL"
+        }
+    }
+    
+    var primaryColor: Color {
+        switch self {
+        case .dopamine:
+            return Color(red: 0.10, green: 0.80, blue: 0.45) // Emerald Green
+        case .cortisol:
+            return Color(red: 0.00, green: 0.88, blue: 1.00) // Neon Cyan
+        }
+    }
+    
+    var accentColor: Color {
+        switch self {
+        case .dopamine:
+            return Color(red: 0.15, green: 0.20, blue: 0.25) // Dark Slate
+        case .cortisol:
+            return Color(red: 0.95, green: 0.15, blue: 0.30) // Crimson
+        }
+    }
+    
+    var stepDelay: Double {
+        switch self {
+        case .dopamine: return 0.9
+        case .cortisol: return 0.7
+        }
+    }
+    
+    func logs(isRu: Bool) -> [JailbreakLogStep] {
+        switch self {
+        case .dopamine:
+            return [
+                JailbreakLogStep(id: 1, titleRu: "[Finding kernel base...]", titleEn: "[Finding kernel base...]", isMajorPhase: false, iconName: "magnifyingglass"),
+                JailbreakLogStep(id: 2, titleRu: "[Extracting bootstrap...]", titleEn: "[Extracting bootstrap...]", isMajorPhase: false, iconName: "archivebox.fill"),
+                JailbreakLogStep(id: 3, titleRu: "[Bypassing PAC...]", titleEn: "[Bypassing PAC...]", isMajorPhase: false, iconName: "key.fill"),
+                JailbreakLogStep(id: 4, titleRu: "Фаза 1: База ядра найдена, PAC обход завершен", titleEn: "Phase 1: Kernel Base Found & PAC Bypassed", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 5, titleRu: "[Initializing libkrw...]", titleEn: "[Initializing libkrw...]", isMajorPhase: false, iconName: "bolt.horizontal.fill"),
+                JailbreakLogStep(id: 6, titleRu: "[Setting up PPL bypass...]", titleEn: "[Setting up PPL bypass...]", isMajorPhase: false, iconName: "shield.slash.fill"),
+                JailbreakLogStep(id: 7, titleRu: "[Installing ElleKit...]", titleEn: "[Installing ElleKit...]", isMajorPhase: false, iconName: "cube.fill"),
+                JailbreakLogStep(id: 8, titleRu: "Фаза 2: PPL и ElleKit успешно настроены", titleEn: "Phase 2: PPL & ElleKit Configured", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 9, titleRu: "[Starting launchd hook...]", titleEn: "[Starting launchd hook...]", isMajorPhase: false, iconName: "arrow.triangle.merge"),
+                JailbreakLogStep(id: 10, titleRu: "Джейлбрейк Dopamine подготовлен к респрингу", titleEn: "Dopamine Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
+            ]
+        case .cortisol:
+            return [
+                JailbreakLogStep(id: 1, titleRu: "[Bypassing PAC/PPL...]", titleEn: "[Bypassing PAC/PPL...]", isMajorPhase: false, iconName: "shield.slash.fill"),
+                JailbreakLogStep(id: 2, titleRu: "[Injecting tweak loader...]", titleEn: "[Injecting tweak loader...]", isMajorPhase: false, iconName: "bolt.fill"),
+                JailbreakLogStep(id: 3, titleRu: "[Resolving Cortisol kernel offsets...]", titleEn: "[Resolving Cortisol kernel offsets...]", isMajorPhase: false, iconName: "memorychip"),
+                JailbreakLogStep(id: 4, titleRu: "Фаза 1: Смещения ядра Cortisol разрешены", titleEn: "Phase 1: Cortisol Kernel Offsets Resolved", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 5, titleRu: "[Patching CoreTrust 2.0...]", titleEn: "[Patching CoreTrust 2.0...]", isMajorPhase: false, iconName: "checkmark.shield.fill"),
+                JailbreakLogStep(id: 6, titleRu: "[Escalating root privileges...]", titleEn: "[Escalating root privileges...]", isMajorPhase: false, iconName: "crown.fill"),
+                JailbreakLogStep(id: 7, titleRu: "[Mounting fakefs overlay...]", titleEn: "[Mounting fakefs overlay...]", isMajorPhase: false, iconName: "folder.fill"),
+                JailbreakLogStep(id: 8, titleRu: "Фаза 2: Права Root получены и fakefs смонтирован", titleEn: "Phase 2: Root Privileges & FakeFS Mounted", isMajorPhase: true, iconName: "checkmark.circle.fill"),
+                JailbreakLogStep(id: 9, titleRu: "[Initializing Cortisol daemon...]", titleEn: "[Initializing Cortisol daemon...]", isMajorPhase: false, iconName: "server.rack"),
+                JailbreakLogStep(id: 10, titleRu: "Джейлбрейк Cortisol подготовлен к респрингу", titleEn: "Cortisol Environment Ready for Respring", isMajorPhase: true, iconName: "sparkles")
+            ]
+        }
+    }
+}
+
 /// Состояния процесса джейлбрейка
 enum JailbreakState: Equatable {
     case idle

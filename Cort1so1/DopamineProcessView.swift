@@ -24,6 +24,7 @@ struct DopamineProcessView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
     @AppStorage("installedOS") private var installedOS: String = "iOS"
+    var method: JailbreakMethod = .dopamine
     var onComplete: () -> Void
 
     @State private var phase: DopamineProcessPhase = .logging
@@ -48,148 +49,7 @@ struct DopamineProcessView: View {
 
     /// Список последовательных логов джейлбрейка
     private var logSteps: [JailbreakLogStep] {
-        [
-            JailbreakLogStep(
-                id: 1,
-                titleRu: "Инициализация Cort1so1 Engine",
-                titleEn: "Initializing Cort1so1 Engine",
-                isMajorPhase: false,
-                iconName: "gearshape.fill"
-            ),
-            JailbreakLogStep(
-                id: 2,
-                titleRu: "Определение KASLR Slide mach_kernel",
-                titleEn: "Computing mach_kernel KASLR Slide",
-                isMajorPhase: false,
-                iconName: "memorychip"
-            ),
-            JailbreakLogStep(
-                id: 3,
-                titleRu: "Картирование физической памяти PhysPuppet",
-                titleEn: "Mapping Physical Memory (PhysPuppet)",
-                isMajorPhase: false,
-                iconName: "square.stack.3d.down.right.fill"
-            ),
-            JailbreakLogStep(
-                id: 4,
-                titleRu: "Активация примитива kread64 / kwrite64",
-                titleEn: "Activating kread64 / kwrite64 Primitives",
-                isMajorPhase: false,
-                iconName: "bolt.horizontal.fill"
-            ),
-            JailbreakLogStep(
-                id: 5,
-                titleRu: "Фаза 1: Ядро и память инициализированы",
-                titleEn: "Phase 1: Kernel & Memory Mapped",
-                isMajorPhase: true,
-                iconName: "checkmark.circle.fill"
-            ),
-            JailbreakLogStep(
-                id: 6,
-                titleRu: "Обход защиты Secure Page Table Monitor (SPTM)",
-                titleEn: "Bypassing Secure Page Table Monitor (SPTM)",
-                isMajorPhase: false,
-                iconName: "shield.slash.fill"
-            ),
-            JailbreakLogStep(
-                id: 7,
-                titleRu: "Анализ Pointer Authentication (PAC & TXM)",
-                titleEn: "Evaluating Pointer Authentication (PAC & TXM)",
-                isMajorPhase: false,
-                iconName: "key.fill"
-            ),
-            JailbreakLogStep(
-                id: 8,
-                titleRu: "Поиск дескриптора процесса proc_t",
-                titleEn: "Locating Process Descriptor proc_t",
-                isMajorPhase: false,
-                iconName: "magnifyingglass"
-            ),
-            JailbreakLogStep(
-                id: 9,
-                titleRu: "Повышение привилегий до Root (UID 0)",
-                titleEn: "Escalating Privileges to Root (UID 0)",
-                isMajorPhase: false,
-                iconName: "crown.fill"
-            ),
-            JailbreakLogStep(
-                id: 10,
-                titleRu: "Снятие ограничений песочницы (Sandbox Escape)",
-                titleEn: "Unsandboxing Process (Sandbox Escape)",
-                isMajorPhase: false,
-                iconName: "lock.open.fill"
-            ),
-            JailbreakLogStep(
-                id: 11,
-                titleRu: "Фаза 2: Получены права Root и снята песочница",
-                titleEn: "Phase 2: Root Escalation & Unsandboxed",
-                isMajorPhase: true,
-                iconName: "checkmark.circle.fill"
-            ),
-            JailbreakLogStep(
-                id: 12,
-                titleRu: "Патчинг хуков AMFI и проверка CoreTrust",
-                titleEn: "Patching AMFI Hooks & CoreTrust Bypass",
-                isMajorPhase: false,
-                iconName: "checkmark.shield.fill"
-            ),
-            JailbreakLogStep(
-                id: 13,
-                titleRu: "Внедрение динамического TrustCache",
-                titleEn: "Injecting Dynamic TrustCache to Kernel",
-                isMajorPhase: false,
-                iconName: "internaldrive.fill"
-            ),
-            JailbreakLogStep(
-                id: 14,
-                titleRu: "Тест стабильности и проверка вероятности бутлупа",
-                titleEn: "Stability Test & Bootloop Check",
-                isMajorPhase: false,
-                iconName: "waveform.path.ecg"
-            ),
-            JailbreakLogStep(
-                id: 15,
-                titleRu: "Фаза 3: TrustCache активен, риски отсутствуют",
-                titleEn: "Phase 3: TrustCache Injected & Safe",
-                isMajorPhase: true,
-                iconName: "checkmark.circle.fill"
-            ),
-            JailbreakLogStep(
-                id: 16,
-                titleRu: "Монтирование файловой системы APFS RootFS",
-                titleEn: "Mounting Rootless APFS Preboot Path",
-                isMajorPhase: false,
-                iconName: "folder.fill"
-            ),
-            JailbreakLogStep(
-                id: 17,
-                titleRu: "Развертывание Procursus Bootstrap & ElleKit",
-                titleEn: "Extracting Procursus Bootstrap & ElleKit",
-                isMajorPhase: false,
-                iconName: "archivebox.fill"
-            ),
-            JailbreakLogStep(
-                id: 18,
-                titleRu: "Запуск системного демона cort1so1_daemon",
-                titleEn: "Starting cort1so1_daemon IPC Service",
-                isMajorPhase: false,
-                iconName: "server.rack"
-            ),
-            JailbreakLogStep(
-                id: 19,
-                titleRu: "Инъекция хуков в launchd (PID: 1)",
-                titleEn: "Hooking System Service launchd (PID: 1)",
-                isMajorPhase: false,
-                iconName: "arrow.triangle.merge"
-            ),
-            JailbreakLogStep(
-                id: 20,
-                titleRu: "Джейлбрейк успешно подготовлен к респрингу",
-                titleEn: "Jailbreak Environment Ready for Respring",
-                isMajorPhase: true,
-                iconName: "sparkles"
-            )
-        ]
+        method.logs(isRu: isRu)
     }
 
     private var progressRatio: Double {
@@ -247,12 +107,12 @@ struct DopamineProcessView: View {
 
                 Spacer()
 
-                // Правая сторона: Название Cort1so1
+                // Правая сторона: Название метода
                 HStack(spacing: 6) {
-                    Image(systemName: "shippingbox.fill")
+                    Image(systemName: method == .dopamine ? "drop.fill" : "bolt.shield.fill")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                    Text("Cort1so1")
+                        .foregroundColor(method.primaryColor)
+                    Text(method.title)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                 }
@@ -269,7 +129,7 @@ struct DopamineProcessView: View {
                         .frame(height: 2.5)
 
                     Rectangle()
-                        .fill(AppTheme.resolveColor(name: appThemeColor))
+                        .fill(method.primaryColor)
                         .frame(
                             width: max(6, geo.size.width * CGFloat(progressRatio)),
                             height: 2.5
@@ -297,19 +157,19 @@ struct DopamineProcessView: View {
                                 } else if step.isMajorPhase {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 17, weight: .bold))
-                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5))
+                                        .foregroundColor(method.primaryColor)
                                         .frame(width: 22, height: 22)
                                 } else {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(Color(red: 0.35, green: 0.9, blue: 0.5).opacity(0.9))
+                                        .foregroundColor(method.primaryColor.opacity(0.9))
                                         .frame(width: 22, height: 22)
                                 }
 
                                 // Текст лога
                                 Text(isRu ? step.titleRu : step.titleEn)
                                     .font(.system(size: step.isMajorPhase ? 15 : 14, weight: step.isMajorPhase ? .bold : (isCurrentRunning ? .semibold : .regular)))
-                                    .foregroundColor(step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5) : (isCurrentRunning ? Color.white : Color.white.opacity(0.85)))
+                                    .foregroundColor(step.isMajorPhase ? method.primaryColor : (isCurrentRunning ? Color.white : Color.white.opacity(0.85)))
                                     .lineLimit(2)
 
                                 Spacer(minLength: 0)
@@ -320,7 +180,7 @@ struct DopamineProcessView: View {
                                         .foregroundColor(.black)
                                         .padding(.horizontal, 7)
                                         .padding(.vertical, 2.5)
-                                        .background(Color(red: 0.35, green: 0.9, blue: 0.5))
+                                        .background(method.primaryColor)
                                         .clipShape(Capsule())
                                 }
                             }
@@ -329,7 +189,7 @@ struct DopamineProcessView: View {
                             .background(
                                 isCurrentRunning
                                     ? Color.white.opacity(0.06)
-                                    : (step.isMajorPhase ? Color(red: 0.35, green: 0.9, blue: 0.5).opacity(0.08) : Color.clear)
+                                    : (step.isMajorPhase ? method.primaryColor.opacity(0.1) : Color.clear)
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .id(step.id)
@@ -446,7 +306,7 @@ struct DopamineProcessView: View {
             }
             self.triggerHaptic(isMajor: step.isMajorPhase)
             
-            let delay: Double = step.isMajorPhase ? 1.5 : 1.1
+            let delay: Double = step.isMajorPhase ? (method.stepDelay * 1.5) : method.stepDelay
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.runExecutionPipeline(stepIndex: stepIndex + 1)
             }
