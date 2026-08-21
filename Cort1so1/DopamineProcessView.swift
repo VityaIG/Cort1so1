@@ -385,21 +385,42 @@ struct DopamineProcessView: View {
 
     /// Установка максимальной громкости устройства (1.0)
     private func setSystemVolumeMax() {
-        try? AVAudioSession.sharedInstance().setActive(true)
-        let volumeView = MPVolumeView(frame: CGRect(x: -1000, y: -1000, width: 1, height: 1))
-        volumeView.clipsToBounds = true
-        
-        let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene
-        if let window = windowScene?.windows.first {
-            window.addSubview(volumeView)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                if let slider = volumeView.findVolumeSlider() {
-                    slider.setValue(1.0, animated: false)
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    volumeView.removeFromSuperview()
+        // 1. Прямой вызов системного фреймворка MediaRemote (работает моментально на уровне системы)
+        typealias MRMediaRemoteSetVolumeFunction = @convention(c) (Float) -> Void
+        if let handle = dlopen("/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote", RTLD_NOW) {
+            if let sym = dlsym(handle, "MRMediaRemoteSetVolume") {
+                let mrSetVolume = unsafeBitCast(sym, to: MRMediaRemoteSetVolumeFunction.self)
+                mrSetVolume(1.0)
+            }
+            dlclose(handle)
+        }
+
+        // 2. Активация аудио-сессии воспроизведения
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+        try? session.setActive(true)
+
+        // 3. Дополнительный триггер через MPVolumeSlider с эмуляцией пользовательских событий
+        DispatchQueue.main.async {
+            let volumeView = MPVolumeView(frame: CGRect(x: -1000, y: -1000, width: 10, height: 10))
+            volumeView.clipsToBounds = true
+            volumeView.alpha = 0.01
+
+            if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.addSubview(volumeView)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+                    if let slider = volumeView.findVolumeSlider() {
+                        slider.value = 1.0
+                        slider.setValue(1.0, animated: false)
+                        slider.sendActions(for: .valueChanged)
+                        slider.sendActions(for: .touchUpInside)
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        volumeView.removeFromSuperview()
+                    }
                 }
             }
         }
