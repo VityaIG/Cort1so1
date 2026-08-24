@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Full canvas background: clean solid white -->
+  <rect width="1024" height="1024" fill="#FFFFFF" />
+
+  <!-- Exactly Centered Capital Letter "C" Ring Structure -->
+  <!-- Center: (512, 512), Outer Radius: 310, Inner Radius: 220, Thickness: 90 -->
+  <!-- Horizontal cuts at y = 417 and y = 607 -->
+  <path d="
+    M 807.1 417
+    L 710.4 417
+    A 220 220 0 1 0 710.4 607
+    L 807.1 607
+    A 310 310 0 1 1 807.1 417
+    Z" 
+    fill="#16181A" />
+</svg>

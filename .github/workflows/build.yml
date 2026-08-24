@@ -1,0 +1,117 @@
+name: Build and Release Cort1so1 IPA
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: |
+          if [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+          elif [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app
+          fi
+          xcodebuild -version
+
+      - name: Build Xcode Project
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Cort1so1.xcodeproj \
+            -scheme Cort1so1 \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            DEVELOPMENT_TEAM="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | tee xcodebuild.log
+
+      - name: Print full log on failure
+        if: failure()
+        run: |
+          echo "==================== FULL XCODEBUILD LOG ===================="
+          cat xcodebuild.log
+
+      - name: Upload build log artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: xcodebuild.log
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/Cort1so1.app Payload/
+          zip -vr Cort1so1.ipa Payload
+          ls -la Cort1so1.ipa
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cort1so1-ipa
+          path: Cort1so1.ipa
+          retention-days: 30
+
+      - name: Create or Replace GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.3' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.3' }}
+          body: |
+            ### Cort1so1 Release v1.3
+
+            **Cort1so1** is an advanced iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & IPSW Downgrade Simulator built with SwiftUI and Apple Human Interface Guidelines (HIG).
+
+            #### What's New in v1.3:
+            - **Cortisol Terminal Tab**:
+              - Conditionally unlocked and visible ONLY when the user selects and runs the `"Cortisol"` jailbreak method (remains disabled for the legacy `"Dopamine"` method).
+              - Top standard `TextField` for interactive command input with autocomplete quick chips and console log history.
+              - Dedicated command hint: `Example: "battery color set orange" or "battery percentage set 100"`.
+              - Terminal commands support:
+                - `battery color set <color>` (orange, red, green, blue, purple, cyan, #hex, etc.)
+                - `battery percentage set <val>` (0–100%)
+                - `battery reset` (revert to real system battery metrics)
+                - `statusbar show` / `statusbar hide`
+                - `whoami`, `uname -a`, `help`, `clear`
+            - **Custom Status Bar Overlay Engine**:
+              - Dynamic real-time system clock updating each second.
+              - Live device battery query (`UIDevice.current.batteryLevel`) by default with automatic percentage rendering.
+              - Real-time dynamic battery level and color fill overrides.
+              - Standard iOS status bar hide management (`.statusBarHidden(true)`) when the custom status bar is active.
+            - **Localization Refinements**:
+              - Renamed the `"iOS Downgrade"` tab strictly to `"iOS"` in the English localization, keeping Russian (`"Откат iOS"`) preserved.
+            - **Build & Pipeline Polish**:
+              - Added `TerminalView.swift` to Xcode PBXBuildFile, PBXFileReference, and PBXSourcesBuildPhase for flawless CI/CD IPA compilation.
+
+            #### Installation Instructions:
+            1. Download the `Cort1so1.ipa` file from the **Assets** section below.
+            2. Sideload the application using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
+          files: Cort1so1.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
