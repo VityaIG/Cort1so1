@@ -81,15 +81,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.3.5' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.3.5' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.3' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.3' }}
           make_latest: true
           body: |
-            ### Cort1so1 Release v1.3.5
+            ### Cort1so1 Release v1.3
 
             **Cort1so1** - iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & Custom Status Bar Simulator.
 
-            #### What's New in v1.3.5:
+            #### What's New in v1.3:
             - **No Battery Limit (1000000% Support)**:
               - Removed 100% cap on battery percentage display and capsule fill calculation.
               - Added interactive UI controls in Terminal tab: tap "Уровень батареи" / "Battery Level" row directly in the UI to open an input dialog and enter any percentage (e.g. `1000000`, `9999999`, etc.).
@@ -98,6 +98,8 @@ jobs:
             - **Pixel-Perfect Native Status Bar Overlay**:
               - Dual-color inverted text with dynamic pill expansion for huge percentage numbers.
               - Seamless iOS Status Bar toggle and real-time battery sync.
+            - **Cortisol Terminal & iOS Simulator**:
+              - Interactive terminal with autocomplete chips, custom commands, and system info.
 
             #### Installation Instructions:
             1. Download the `Cort1so1.ipa` file from the **Assets** section below.
