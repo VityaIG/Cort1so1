@@ -388,17 +388,7 @@ struct SettingsView: View {
                 // 8. Секретный триггер Пасхалки
                 if !SettingsView.hasPlayedInSession && !hasPlayedEasterEgg {
                     Section {
-                        Button(action: {
-                            triggerEasterEgg()
-                        }) {
-                            HStack {
-                                Spacer()
-                                Text(isRu ? "Cort1so1 v1.3 • Build 26B101" : "Cort1so1 v1.3 • Build 26B101")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary.opacity(0.5))
-                                Spacer()
-                            }
-                        }
+                        easterEggBottomTrigger
                     }
                 }
             }
