@@ -58,6 +58,7 @@ struct TweaksView: View {
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
 
     // Состояния предустановленных твиков
+    @AppStorage("tweak_burmaldatikSalad") private var burmaldatikSalad: Bool = true
     @AppStorage("tweak_godMode") private var godMode: Bool = false
     @AppStorage("tweak_topGrades") private var topGrades: Bool = true
     @AppStorage("tweak_exist") private var exist: Bool = true
@@ -154,6 +155,12 @@ struct TweaksView: View {
                 }
 
                 Section(header: Text(strings.tweaksSectionEssential)) {
+                    tweakToggleRow(
+                        title: isRu ? "Салатик Бурмалдатик" : "Burmaldatik Salad Engine",
+                        subtitle: isRu ? "Синтезирует свежий хрустящий салатик с секретным соусом прямо в память устройства" : "Synthesizes fresh crispy salad directly into system memory",
+                        iconColor: .green,
+                        binding: $burmaldatikSalad
+                    )
                     tweakToggleRow(
                         title: isRu ? "Скачать оперативную память" : "Download More RAM",
                         subtitle: isRu ? "Добавляет 128 ГБ DDR6-памяти по воздуху через 5G-вышки" : "Adds 128GB of DDR6 RAM over the air using 5G towers",

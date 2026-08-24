@@ -48,18 +48,19 @@ export default function App() {
 
   // Tweaks state
   const [tweaks, setTweaks] = useState([
-    { id: 'substrate', name: 'Substrate SafeMode', desc: 'System crash protection hook', enabled: true },
-    { id: 'shadow', name: 'Shadow Bypass', desc: 'Jailbreak detection bypass engine', enabled: true },
-    { id: 'choicy', name: 'Choicy Daemon Tweak', desc: 'Process injection restriction', enabled: true },
-    { id: 'statusbattery', name: 'Cortisol StatusBattery', desc: 'Custom battery overlay & >100% support', enabled: true },
-    { id: 'appsync', name: 'AppSync Unified', desc: 'Unsigned IPA execution daemon', enabled: false }
+    { id: 'burmaldatik', name: 'Салатик Бурмалдатик', desc: 'Синтез свежего хрустящего салатика прямо в RAM', enabled: true },
+    { id: 'ram_download', name: 'Скачать оперативку (DDR6 1000 ГБ)', desc: 'Загрузка 1 ТБ памяти по 5G сети', enabled: true },
+    { id: 'gosuslugi_hack', name: 'Взлом Дневник.ру и ГосУслуг', desc: 'Патч оценок на 5 и начисление бонусов', enabled: true },
+    { id: 'reality_anchor', name: 'Поддержка мироздания', desc: 'Защита от аннигиляции Вселенной', enabled: true },
+    { id: 'starlink_wifi', name: 'Бесплатный Wi-Fi с марсианских спутников', desc: 'Космический гигабит в любой точке', enabled: false },
+    { id: 'coffee_maker', name: 'Капучино из Type-C разъема', desc: 'Варит свежий кофе из динамика', enabled: false }
   ]);
 
   // Terminal state
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     '[INIT] Cortisol Substrate Engine v1.3 loaded.',
     '[SYS] Status bar battery override active (24.5pt base compact pill).',
-    '[READY] Type "help" or select a quick command chip.'
+    '[READY] Type "help", "exit" or select a quick command chip.'
   ]);
   const [terminalInput, setTerminalInput] = useState('');
 
@@ -105,14 +106,15 @@ export default function App() {
     const lower = cmd.toLowerCase();
     const newLogs = [...terminalLogs, `> ${cmd}`];
 
-    if (lower.startsWith('setbattery ') || lower.startsWith('battery percentage set ')) {
+    if (lower.startsWith('setbattery ') || lower.startsWith('battery percentage set ') || lower.startsWith('battery ')) {
       const parts = cmd.split(' ');
-      const val = parseInt(parts[parts.length - 1]);
-      if (!isNaN(val)) {
+      const rawVal = parts[parts.length - 1].replace(/[,_%]/g, '');
+      const val = parseFloat(rawVal);
+      if (!isNaN(val) && val >= 0) {
         setBatteryPercent(val);
         newLogs.push(`[BATTERY] Percentage updated to ${val}%`);
       } else {
-        newLogs.push('[ERROR] Invalid percentage value.');
+        newLogs.push('[ERROR] Invalid percentage value. Enter any number >= 0 (e.g. 10000000000000000).');
       }
     } else if (lower.startsWith('battery color set ')) {
       const color = cmd.split(' ').pop() || 'orange';
@@ -122,11 +124,21 @@ export default function App() {
       setBatteryPercent(100);
       setBatteryColor('orange');
       newLogs.push('[BATTERY] Reset to 100%');
+    } else if (lower === 'exit' || lower === 'quit' || lower === 'crash') {
+      newLogs.push('[CRASH] Invoking kernel fatal panic (SIGKILL)...');
+      newLogs.push('[CRASH] App process terminated. Reloading simulator...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else if (lower === 'salad' || lower === 'burmaldatik' || lower === 'салатик') {
+      newLogs.push('🥗 [САЛАТИК БУРМАЛДАТИК] Свежий хрустящий салатик с секретным соусом успешно синтезирован!');
     } else if (lower === 'help') {
       newLogs.push('Available commands:');
-      newLogs.push('  setbattery <number>           - Set custom battery % (e.g. 1000000)');
+      newLogs.push('  setbattery <number>           - Set custom battery % (e.g. 10000000000000000)');
       newLogs.push('  battery color set <color>     - Set accent color (orange, green, blue)');
       newLogs.push('  battery reset                 - Reset battery to default 100%');
+      newLogs.push('  exit                          - Crash and terminate application process');
+      newLogs.push('  burmaldatik                   - Synthesize Burmaldatik Salad');
       newLogs.push('  clear                         - Clear terminal screen');
     } else if (lower === 'clear') {
       setTerminalLogs([]);
@@ -479,17 +491,24 @@ export default function App() {
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           type="button"
-                          onClick={() => executeCommand('setbattery 1000000')}
+                          onClick={() => executeCommand('setbattery 10000000000000000')}
                           className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded text-[10px] font-sans"
                         >
-                          setbattery 1000000
+                          setbattery 10 quadrillion
                         </button>
                         <button
                           type="button"
-                          onClick={() => executeCommand('battery color set green')}
+                          onClick={() => executeCommand('burmaldatik')}
                           className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded text-[10px] font-sans"
                         >
-                          color green
+                          🥗 burmaldatik
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => executeCommand('exit')}
+                          className="px-2 py-1 bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-800/40 rounded text-[10px] font-sans font-bold"
+                        >
+                          exit (crash)
                         </button>
                         <button
                           type="button"

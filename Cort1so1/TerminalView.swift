@@ -271,6 +271,7 @@ struct TerminalView: View {
     @AppStorage("customBatteryLevel") private var customBatteryLevel: Double = -1.0
     @AppStorage("customBatteryColor") private var customBatteryColor: String = "orange"
     @AppStorage("customBatteryPercentage") private var customBatteryPercentage: Int = -1
+    @AppStorage("tweak_burmaldatikSalad") private var burmaldatikSalad: Bool = true
     @AppStorage("installedPackagesList") private var installedPackagesListRaw: String = ""
 
     @State private var commandInput: String = ""
@@ -1155,7 +1156,17 @@ struct TerminalView: View {
             else { prefix = "battery " }
 
             let valuePart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
-            if let intVal = Int(valuePart), intVal >= 0 {
+            let cleanedVal = valuePart.replacingOccurrences(of: ",", with: "")
+                                      .replacingOccurrences(of: "_", with: "")
+                                      .replacingOccurrences(of: " ", with: "")
+                                      .replacingOccurrences(of: "%", with: "")
+
+            var parsedInt: Int? = Int(cleanedVal)
+            if parsedInt == nil, let dbl = Double(cleanedVal), dbl >= 0 {
+                parsedInt = dbl >= Double(Int.max) ? Int.max : Int(dbl)
+            }
+
+            if let intVal = parsedInt, intVal >= 0 {
                 self.customBatteryPercentage = intVal
                 self.customBatteryLevel = Double(intVal)
                 self.customStatusBarActive = true
@@ -1163,7 +1174,7 @@ struct TerminalView: View {
                 let fillVal = min(100, intVal)
                 terminalLogs.append(TerminalLogLine(
                     command: trimmed,
-                    output: isRu ? "[+] Заряд батареи установлен: \(intVal)%\n[+] Заполнение капсулы: \(fillVal)%\n[+] Оверлей статус-бара: АКТИВЕН" : "[+] Battery percentage set to \(intVal)%\n[+] Inner pill fill: \(fillVal)%\n[+] Status bar override: ACTIVE",
+                    output: isRu ? "[+] Заряд батареи установлен: \(valuePart)%\n[+] Заполнение капсулы: \(fillVal)%\n[+] Оверлей статус-бара: АКТИВЕН" : "[+] Battery percentage set to \(valuePart)%\n[+] Inner pill fill: \(fillVal)%\n[+] Status bar override: ACTIVE",
                     isError: false,
                     tag: "BAT"
                 ))
@@ -1171,12 +1182,42 @@ struct TerminalView: View {
             } else {
                 terminalLogs.append(TerminalLogLine(
                     command: trimmed,
-                    output: isRu ? "[-] Некорректный процент батареи. Введите любое число >= 0 (например 'setbattery 100' или 'setbattery 1000000')" : "[-] Invalid battery percentage. Enter any number >= 0 (e.g. 'setbattery 100', 'setbattery 1000000', or 'battery 80')",
+                    output: isRu ? "[-] Некорректный процент батареи. Введите число >= 0 (например 'setbattery 10000000000000000')" : "[-] Invalid battery percentage. Enter any number >= 0 (e.g. 'setbattery 10000000000000000')",
                     isError: true,
                     tag: "ERR"
                 ))
                 return
             }
+        }
+
+        // 3.1. Запрошенный пользователем краш приложения через exit / quit / crash
+        if lower == "exit" || lower == "quit" || lower == "crash" || lower == "exit 0" || lower == "kill" {
+            let impact = UIImpactFeedbackGenerator(style: .heavy)
+            impact.impactOccurred()
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[*] Invoking kernel fatal panic (SIGKILL). Terminating Cort1so1 app process...",
+                isError: true,
+                tag: "CRASH"
+            ))
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                fatalError("User requested app exit via terminal command '\(trimmed)'")
+            }
+            return
+        }
+
+        // 3.2. Салатик Бурмалдатик
+        if lower == "salad" || lower == "burmaldatik" || lower == "салатик" || lower.contains("бурмалдатик") {
+            self.burmaldatikSalad = true
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "🥗 [САЛАТИК БУРМАЛДАТИК] Свежий хрустящий салатик с секретным соусом успешно синтезирован в оперативную память!",
+                isError: false,
+                tag: "SALAD"
+            ))
+            return
         }
 
         // 4. Сброс всех настроек или батареи
