@@ -100,8 +100,8 @@ export default function App() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
             <Smartphone className="w-3.5 h-3.5" />
             {isRu
-              ? 'Обновление v1.3 — Терминал Cortisol & Оверлей статус-бара'
-              : 'Update v1.3 — Cortisol Terminal & Dynamic Status Bar'}
+              ? 'Обновление v1.3 — Терминал & Оверлей статус-бара'
+              : 'Update v1.3 — Terminal & Dynamic Status Bar'}
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">

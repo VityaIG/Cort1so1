@@ -78,21 +78,21 @@ struct CustomStatusBarView: View {
             Text(displayTime)
                 .font(.system(size: 15, weight: .semibold, design: .default))
                 .foregroundColor(.primary)
-                .padding(.leading, 32)
+                .padding(.leading, 28)
 
             Spacer()
 
             // Правая секция: Сигнал сотовой связи, Wi-Fi и Нативная батарея с процентом внутри
-            HStack(spacing: 6.5) {
+            HStack(spacing: 6.0) {
                 // 4-полосный индикатор сигнала сотовой связи (iOS-style)
                 HStack(alignment: .bottom, spacing: 1.8) {
-                    Capsule().frame(width: 3.1, height: 4)
+                    Capsule().frame(width: 3.0, height: 4.0)
                         .foregroundColor(.primary)
-                    Capsule().frame(width: 3.1, height: 6.5)
+                    Capsule().frame(width: 3.0, height: 6.5)
                         .foregroundColor(.primary)
-                    Capsule().frame(width: 3.1, height: 9)
+                    Capsule().frame(width: 3.0, height: 9.0)
                         .foregroundColor(.primary)
-                    Capsule().frame(width: 3.1, height: 11.5)
+                    Capsule().frame(width: 3.0, height: 11.5)
                         .foregroundColor(.primary.opacity(0.32))
                 }
 
@@ -100,12 +100,12 @@ struct CustomStatusBarView: View {
                 Image(systemName: "wifi")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.primary)
-                    .padding(.horizontal, 1)
+                    .padding(.horizontal, 0.5)
 
-                // Точная копия нативной батареи iOS (число процента ВНУТРИ капсулы)
+                // Точная копия нативной батареи iOS (число процента ВНУТРИ капсулы с двухтоновым инвертированием)
                 nativeBatteryPill(percentage: effectivePercentage, accentColor: resolvedBatteryColor)
             }
-            .padding(.trailing, 26)
+            .padding(.trailing, 28)
         }
         .frame(height: 22)
         .padding(.top, topSafeAreaPadding)
@@ -141,53 +141,59 @@ struct CustomStatusBarView: View {
         return 12
     }
 
-    /// Пиксель-перфектная батарея iOS с процентом внутри капсулы
+    /// Пиксель-перфектная батарея iOS с процентом внутри капсулы (100% совпадение с iOS)
     @ViewBuilder
     private func nativeBatteryPill(percentage: Int, accentColor: Color) -> some View {
         let pillWidth: CGFloat = 27.0
         let pillHeight: CGFloat = 13.0
         let clampedPct = min(100, max(0, percentage))
         let fillProgress = CGFloat(clampedPct) / 100.0
+        let fillW = max(0, (pillWidth - 2.8) * fillProgress)
 
-        HStack(spacing: 1.4) {
+        HStack(spacing: 1.2) {
             // Основной корпус батареи
             ZStack(alignment: .leading) {
-                // Внешний полупрозрачный контур капсулы
-                RoundedRectangle(cornerRadius: 4.0, style: .continuous)
-                    .stroke(Color.primary.opacity(0.35), lineWidth: 1)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4.0, style: .continuous)
-                            .fill(Color.primary.opacity(0.10))
-                    )
+                // 1. Внутренний фон незаполненной части
+                RoundedRectangle(cornerRadius: 4.2, style: .continuous)
+                    .fill(Color.primary.opacity(0.12))
                     .frame(width: pillWidth, height: pillHeight)
 
-                // Внутреннее заполнение цветом
-                let innerFillWidth = max(2.5, (pillWidth - 2.8) * fillProgress)
+                // 2. Базовый текст процента для незаполненной темной области (белый / primary)
+                Text("\(clampedPct)")
+                    .font(.system(size: 10.0, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
+                    .frame(width: pillWidth, height: pillHeight, alignment: .center)
+
+                // 3. Заполненная часть цветом акцента
                 RoundedRectangle(cornerRadius: 2.8, style: .continuous)
                     .fill(accentColor)
-                    .frame(width: innerFillWidth, height: pillHeight - 2.8)
+                    .frame(width: fillW, height: pillHeight - 2.8)
                     .padding(.leading, 1.4)
 
-                // Число процента строго внутри капсулы по центру
+                // 4. Инвертированный темный текст, видимый строго над заполненной частью
                 Text("\(clampedPct)")
-                    .font(.system(size: 10.0, weight: .bold, design: .default))
-                    .foregroundColor(textColorForFill(pct: clampedPct, color: accentColor))
+                    .font(.system(size: 10.0, weight: .bold, design: .rounded))
+                    .foregroundColor(Color.black.opacity(0.95))
                     .frame(width: pillWidth, height: pillHeight, alignment: .center)
+                    .mask(
+                        HStack(spacing: 0) {
+                            Rectangle()
+                                .frame(width: fillW + 1.4, height: pillHeight)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(width: pillWidth, height: pillHeight, alignment: .leading)
+                    )
+
+                // 5. Внешний четкий контур капсулы
+                RoundedRectangle(cornerRadius: 4.2, style: .continuous)
+                    .stroke(Color.primary.opacity(0.35), lineWidth: 1.0)
+                    .frame(width: pillWidth, height: pillHeight)
             }
 
             // Маленький контактный терминал на правом торце
             RoundedRectangle(cornerRadius: 1.0, style: .continuous)
                 .fill(Color.primary.opacity(0.40))
-                .frame(width: 1.5, height: 4.8)
-        }
-    }
-
-    /// Контрастный цвет текста внутри батареи
-    private func textColorForFill(pct: Int, color: Color) -> Color {
-        if pct >= 50 {
-            return Color.black.opacity(0.9)
-        } else {
-            return Color.primary
+                .frame(width: 1.4, height: 4.6)
         }
     }
 
@@ -312,7 +318,7 @@ struct TerminalView: View {
                     }
                 }
 
-                // Секция 2: Быстрая команда Справки
+                // Секция 2: Быстрые команды
                 Section(header: Text(isRu ? "Быстрые команды" : "Quick Actions")) {
                     Button(action: { executeCommand("help") }) {
                         Label {
@@ -321,6 +327,17 @@ struct TerminalView: View {
                         } icon: {
                             Image(systemName: "questionmark.circle.fill")
                                 .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        }
+                    }
+
+                    Button(action: { resetAllModifications() }) {
+                        Label {
+                            Text(strings.terminalResetAllBtn)
+                                .font(.system(.subheadline, design: .default))
+                                .foregroundColor(.red)
+                        } icon: {
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                                .foregroundColor(.red)
                         }
                     }
                 }
@@ -418,6 +435,15 @@ struct TerminalView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+
+                    Button(action: { resetAllModifications() }) {
+                        HStack {
+                            Spacer()
+                            Text(strings.terminalResetAllBtn)
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                    }
                 }
             }
             .navigationTitle(strings.terminalTitle)
@@ -448,6 +474,24 @@ struct TerminalView: View {
                 ))
             }
         }
+    }
+
+    /// Сброс всех модификаций терминала и статус-бара к системным значениям
+    private func resetAllModifications() {
+        self.customBatteryPercentage = -1
+        self.customBatteryLevel = -1.0
+        self.customBatteryColor = "orange"
+        self.customStatusBarActive = false
+        self.showCustomPopup = false
+        self.popupText = ""
+        self.popupButton = "OK"
+
+        terminalLogs.append(TerminalLogLine(
+            command: "reset",
+            output: "[+] All terminal modifications and status bar overrides cleared.\n[*] Restored native iOS system device status.",
+            isError: false,
+            tag: "RESET"
+        ))
     }
 
     private func formattedTime(date: Date) -> String {
@@ -592,7 +636,12 @@ struct TerminalView: View {
             }
         }
 
-        // 4. Сброс батареи: "battery reset"
+        // 4. Сброс всех настроек или батареи
+        if lower == "reset" || lower == "reset all" || lower == "clear all" || lower == "restore" {
+            resetAllModifications()
+            return
+        }
+
         if lower == "battery reset" || lower == "battery default" {
             self.customBatteryPercentage = -1
             self.customBatteryLevel = -1.0
@@ -644,6 +693,7 @@ struct TerminalView: View {
                 output: """
 Cort1so1 Subsystem Command Reference:
   help                          - Show this list of available commands
+  reset                         - Clear all modified settings & status bar overrides
   createpopup <text> <button>   - Trigger a native iOS popup dialog
   battery color set <color>     - Override battery color (e.g. orange, red, green, blue, #hex)
   battery percentage set <val>  - Override battery percentage (0-100)

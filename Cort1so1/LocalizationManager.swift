@@ -32,13 +32,14 @@ struct LocalizedStrings {
     var tabSettings: String { lang == .ru ? "Настройки" : "Settings" }
 
     // MARK: - Terminal View
-    var terminalTitle: String { lang == .ru ? "Терминал Cortisol" : "Cortisol Terminal" }
+    var terminalTitle: String { lang == .ru ? "Терминал" : "Terminal" }
     var terminalSubtitle: String { lang == .ru ? "Управление системными параметрами и оверлеем статус-бара" : "System parameter manipulation & status bar override" }
     var terminalInputPlaceholder: String { lang == .ru ? "Введите команду..." : "Enter command..." }
     var terminalExampleHint: String { "Example: \"battery color set orange\" or \"battery percentage set 100\"" }
     var terminalExecuteBtn: String { lang == .ru ? "Выполнить" : "Run" }
     var terminalClearBtn: String { lang == .ru ? "Очистить" : "Clear" }
     var terminalResetBatteryBtn: String { lang == .ru ? "Сбросить батарею" : "Reset Battery" }
+    var terminalResetAllBtn: String { lang == .ru ? "Сбросить все изменения" : "Reset All Modifications" }
 
     // MARK: - Tweaks View
     var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }
