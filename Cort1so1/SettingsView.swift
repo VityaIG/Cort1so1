@@ -75,9 +75,12 @@ struct SettingsView: View {
                                     .transition(.scale(scale: 0.95).combined(with: .opacity))
                             }
 
-                            // 1. Профиль приложения и разработчика
+                            // 1. Профиль приложения Cort1so1 (Улучшенная карточка)
                             appHeaderCard
                                 .id("topHeader")
+
+                            // 1.1. Star on GitHub (На самом верху, сразу под карточкой Cort1so1)
+                            starOnGithubCard
 
                             // 2. Внешний вид и язык
                             appearanceSectionCard
@@ -94,7 +97,7 @@ struct SettingsView: View {
                             // 6. О программе и сообщество
                             aboutProjectCard
                             
-                            // 7. Создатель & Разработчик
+                            // 7. Создатель & Разработчик (без иконки профиля)
                             creatorCard
                                 .padding(.bottom, (SettingsView.hasPlayedInSession || hasPlayedEasterEgg) ? 24 : 8)
 
@@ -236,25 +239,26 @@ struct SettingsView: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    // MARK: - 1. Профиль приложения и разработчика
+    // MARK: - 1. Профиль приложения Cort1so1 (Улучшенная карточка)
 
     private var appHeaderCard: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
+            // Верхняя строка: Иконка, Название, Версия и Статус
             HStack(alignment: .center, spacing: 14) {
-                // Новая фирменная иконка приложения
+                // Фирменная векторная иконка приложения
                 ZStack {
-                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(Color.white)
-                        .frame(width: 52, height: 52)
-                        .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.3), radius: 6, x: 0, y: 2)
+                        .frame(width: 54, height: 54)
+                        .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.28), radius: 8, x: 0, y: 3)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .stroke(Color.black.opacity(0.1), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.black.opacity(0.08), lineWidth: 1)
                         )
 
                     Cort1so1IconShape()
                         .fill(Color(red: 0.08, green: 0.09, blue: 0.10))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 34, height: 34)
                 }
                 .fixedSize()
                 .onTapGesture {
@@ -264,7 +268,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .center, spacing: 6) {
                         Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 21, weight: .bold))
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
                             .layoutPriority(2)
@@ -276,47 +280,177 @@ struct SettingsView: View {
                         Text(versionDisplay)
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2.5)
+                            .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.14))
                             .clipShape(Capsule())
                             .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS Jailbreak & IPSW Utility" : customSubtitle)
-                        .font(.system(size: 12, design: .default))
+                        .font(.system(size: 12, weight: .medium, design: .default))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
 
                 Spacer(minLength: 4)
 
-                // Статус джейлбрейка
-                HStack(spacing: 4) {
+                // Индикатор статуса джейлбрейка
+                HStack(spacing: 5) {
                     Circle()
-                        .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.4))
-                        .frame(width: 6, height: 6)
-                        .shadow(color: (isJailbroken || jailbreakState == .completed ? Color.green : Color.clear).opacity(0.6), radius: 3)
+                        .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.45))
+                        .frame(width: 7, height: 7)
+                        .shadow(color: (isJailbroken || jailbreakState == .completed ? Color.green : Color.clear).opacity(0.7), radius: 4)
 
                     Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Не активен" : "Stock"))
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
                         .lineLimit(1)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4.5)
                 .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
                 .clipShape(Capsule())
                 .fixedSize(horizontal: true, vertical: false)
             }
+
+            // Нижняя строка: Информационные чипы телеметрии
+            HStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "cpu")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e / SPTM" : customArch)
+                        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3.5)
+                .background(Color.primary.opacity(0.04))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+                HStack(spacing: 4) {
+                    Image(systemName: "shield.lefthalf.filled")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text("Rootless")
+                        .font(.system(size: 10.5, weight: .medium))
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3.5)
+                .background(Color.primary.opacity(0.04))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+                Spacer()
+
+                HStack(spacing: 3) {
+                    Image(systemName: "bolt.badge.checkmark.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                    Text(isRu ? "iOS 16–26" : "iOS 16–26")
+                        .font(.system(size: 10.5, weight: .semibold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3.5)
+                .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            }
         }
-        .padding(16)
+        .padding(15)
         .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                .stroke(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            AppTheme.resolveColor(name: appThemeColor).opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
         )
+    }
+
+    // MARK: - 1.1. Star on GitHub Card (На самом верху под карточкой Cort1so1)
+
+    private var starOnGithubCard: some View {
+        Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 1.0, green: 0.82, blue: 0.22),
+                                    Color(red: 0.98, green: 0.62, blue: 0.08)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 36, height: 36)
+                        .shadow(color: Color(red: 1.0, green: 0.72, blue: 0.1).opacity(0.35), radius: 6, x: 0, y: 2)
+
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Color(red: 0.2, green: 0.12, blue: 0.0))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Text(strings.starOnGithubBtn)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.primary)
+
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.75, blue: 0.1))
+                    }
+
+                    Text("github.com/VityaIG/Cort1so1")
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Text("Star")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                .clipShape(Capsule())
+            }
+            .padding(14)
+            .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 1.0, green: 0.8, blue: 0.2).opacity(0.28),
+                                Color.white.opacity(0.04)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     // MARK: - 2. Внешний вид и язык
@@ -529,20 +663,11 @@ struct SettingsView: View {
     // MARK: - 7. Создатель & Разработчик
     private var creatorCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Заголовок категории с маленькой круглой аватаркой профиля
+            // Заголовок категории
             HStack(spacing: 8) {
-                if let uiImage = UIImage(named: "creator_avatar") {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 20, height: 20)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 0.8))
-                } else {
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(.secondary)
-                }
+                Image(systemName: "person.2.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
 
                 Text(strings.creatorSection)
                     .font(.system(size: 12, weight: .bold))
@@ -553,22 +678,18 @@ struct SettingsView: View {
             }
             .padding(.horizontal, 4)
 
-            // Основная карточка информации и ссылок
+            // Основная карточка информации и контактов разработчика
             VStack(spacing: 0) {
-                // Имя и роль разработчика
+                // Имя и статус ведущего разработчика
                 HStack(spacing: 12) {
-                    if let uiImage = UIImage(named: "creator_avatar") {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 42, height: 42)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.primary.opacity(0.15), lineWidth: 1))
-                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
-                    } else {
-                        Circle()
-                            .fill(Color.secondary.opacity(0.2))
-                            .frame(width: 42, height: 42)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                            .frame(width: 38, height: 38)
+
+                        Image(systemName: "terminal.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                     }
 
                     VStack(alignment: .leading, spacing: 3) {
@@ -597,9 +718,15 @@ struct SettingsView: View {
                 // Telegram ссылка (@VityaV)
                 Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
                     HStack {
-                        Text("Telegram")
-                            .font(.system(size: 15, weight: .regular))
-                            .foregroundColor(.primary)
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(telegramColor)
+
+                            Text("Telegram")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.primary)
+                        }
 
                         Spacer()
 
@@ -633,9 +760,15 @@ struct SettingsView: View {
                     }
                 }) {
                     HStack {
-                        Text(strings.discordLabel)
-                            .font(.system(size: 15, weight: .regular))
-                            .foregroundColor(.primary)
+                        HStack(spacing: 8) {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.indigo)
+
+                            Text(strings.discordLabel)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.primary)
+                        }
 
                         Spacer()
 
@@ -646,35 +779,6 @@ struct SettingsView: View {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.secondary.opacity(0.7))
-                    }
-                    .padding(14)
-                }
-
-                Divider()
-                    .padding(.leading, 14)
-
-                // Кнопка Star on GitHub (открывает https://github.com/VityaIG/Cort1so1)
-                Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(Color(red: 1.0, green: 0.8, blue: 0.0))
-
-                        Text(strings.starOnGithubBtn)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.primary)
-
-                        Spacer()
-
-                        HStack(spacing: 4) {
-                            Text("VityaIG/Cort1so1")
-                                .font(.system(size: 12, weight: .regular, design: .monospaced))
-                                .foregroundColor(.secondary)
-
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary.opacity(0.7))
-                        }
                     }
                     .padding(14)
                 }
