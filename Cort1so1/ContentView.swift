@@ -99,7 +99,8 @@ struct ContentView: View {
             // Нативный оверлей кастомного статус-бара при активации через Терминал
             if customStatusBarActive && jailbreakState != .respring {
                 CustomStatusBarView()
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .ignoresSafeArea(edges: .top)
+                    .transition(.opacity)
                     .zIndex(15)
             }
 
