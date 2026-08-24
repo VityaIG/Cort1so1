@@ -62,85 +62,344 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
-                AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
-                    .ignoresSafeArea()
+            Form {
+                // Кнопка перехода в отдельный раздел ADMIN (если разблокирован)
+                if isAdminUnlocked {
+                    Section {
+                        Button(action: {
+                            self.showAdminDashboardSheet = true
+                        }) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "wrench.and.screwdriver.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.purple)
 
-                ScrollViewReader { proxy in
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 18) {
-                            // Кнопка перехода в отдельный раздел ADMIN (если разблокирован)
-                            if isAdminUnlocked {
-                                adminEntryCard
-                                    .transition(.scale(scale: 0.95).combined(with: .opacity))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("ADMIN")
+                                        .font(.system(.body, design: .default))
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.primary)
+
+                                    Text(isRu ? "Панель разработчика и конфигурации" : "Developer configuration panel")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
-
-                            // 1. Профиль приложения Cort1so1 (Улучшенная карточка)
-                            appHeaderCard
-                                .id("topHeader")
-
-                            // 1.1. Star on GitHub (На самом верху, сразу под карточкой Cort1so1)
-                            starOnGithubCard
-
-                            // 2. Внешний вид и язык
-                            appearanceSectionCard
-
-                            // 3. Параметры джейлбрейка
-                            utilitySectionCard
-
-                            // 4. Системные сведения
-                            systemDiagnosticsCard
-
-                            // 5. Управление джейлбрейком (Опасная зона)
-                            jailbreakManagementCard
-
-                            // 6. О программе и сообщество
-                            aboutProjectCard
-                            
-                            // 7. Создатель & Разработчик (без иконки профиля)
-                            creatorCard
-                                .padding(.bottom, (SettingsView.hasPlayedInSession || hasPlayedEasterEgg) ? 24 : 8)
-
-                            // 8. Секретный триггер Пасхалки (прокрутка ОЧЕНЬ ДАЛЕКО вниз)
-                            if !SettingsView.hasPlayedInSession && !hasPlayedEasterEgg {
-                                easterEggBottomTrigger
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                    }
-                    .onChange(of: showEasterEggVideo) { isShowing in
-                        if !isShowing && (SettingsView.hasPlayedInSession || hasPlayedEasterEgg) {
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                proxy.scrollTo("topHeader", anchor: .top)
-                            }
+                            .padding(.vertical, 2)
                         }
                     }
                 }
 
-                // Всплывающее уведомление (Toast)
-                if showToast {
-                    VStack {
-                        HStack(spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                                .font(.system(size: 14, weight: .semibold))
+                // 1. Профиль приложения Cort1so1 & Star on GitHub
+                Section {
+                    HStack(alignment: .center, spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.white)
+                                .frame(width: 48, height: 48)
+                                .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.24), radius: 6, x: 0, y: 2)
 
-                            Text(toastMessage)
-                                .font(.system(size: 13, weight: .semibold, design: .default))
-                                .foregroundColor(.white)
+                            Cort1so1IconShape()
+                                .fill(Color(red: 0.08, green: 0.09, blue: 0.10))
+                                .frame(width: 30, height: 30)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(Color.black.opacity(0.85))
+                        .fixedSize()
+                        .onTapGesture {
+                            handleAdminTap()
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(alignment: .center, spacing: 6) {
+                                Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .lineLimit(1)
+                                    .onTapGesture {
+                                        handleAdminTap()
+                                    }
+
+                                let versionDisplay = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "v1.3" : (customAppVersion.hasPrefix("v") ? customAppVersion : "v\(customAppVersion)")
+                                Text(versionDisplay)
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2.5)
+                                    .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.14))
+                                    .clipShape(Capsule())
+                            }
+
+                            Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS Jailbreak & IPSW Utility" : customSubtitle)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+
+                        Spacer(minLength: 4)
+
+                        HStack(spacing: 5) {
+                            Circle()
+                                .fill(isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary.opacity(0.45))
+                                .frame(width: 7, height: 7)
+
+                            Text(isJailbroken || jailbreakState == .completed ? (isRu ? "Активен" : "Active") : (isRu ? "Stock" : "Stock"))
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
+                                .lineLimit(1)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
                         .clipShape(Capsule())
-                        .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
-                        .padding(.top, 12)
+                    }
+                    .padding(.vertical, 4)
+                    .id("topHeader")
+
+                    Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.yellow)
+
+                            Text(strings.starOnGithubBtn)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+
+                // 2. Внешний вид и язык
+                Section(header: Text(strings.appearanceSection)) {
+                    Toggle(isOn: $isDarkMode) {
+                        settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+
+                    Toggle(isOn: $hideStatusBar) {
+                        settingRowLabel(title: strings.hideStatusBarToggle, icon: "eye.slash.circle.fill", color: .purple)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+
+                    HStack {
+                        settingRowLabel(title: isRu ? "Тема приложения" : "App Theme", icon: "paintpalette.fill", color: .pink)
+                        Spacer()
+                        Picker("", selection: $appThemeColor) {
+                            ForEach(AppTheme.availableColors, id: \.name) { theme in
+                                HStack {
+                                    Circle().fill(theme.color).frame(width: 14, height: 14)
+                                    Text(isRu ? localizedThemeName(theme.name) : theme.name.capitalized)
+                                }
+                                .tag(theme.name)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .accentColor(AppTheme.resolveColor(name: appThemeColor))
+                    }
+
+                    HStack {
+                        settingRowLabel(title: strings.languageLabel, icon: "globe", color: .blue)
 
                         Spacer()
+
+                        Picker("", selection: $appLanguage) {
+                            ForEach(AppLanguage.allCases) { lang in
+                                Text(lang.displayName).tag(lang.rawValue)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .accentColor(AppTheme.resolveColor(name: appThemeColor))
                     }
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .zIndex(100)
+                }
+
+                // 3. Параметры джейлбрейка
+                Section(header: Text(strings.utilitySection)) {
+                    Toggle(isOn: $verboseLogs) {
+                        settingRowLabel(title: strings.verboseLogsToggle, icon: "terminal.fill", color: .slateColor)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+
+                    Toggle(isOn: $autoRespring) {
+                        settingRowLabel(title: strings.autoRespringToggle, icon: "arrow.clockwise.circle.fill", color: .green)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+
+                    Toggle(isOn: $tweakInjection) {
+                        settingRowLabel(title: strings.tweakInjectionToggle, icon: "puzzlepiece.extension.fill", color: .orange)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+
+                    Toggle(isOn: $safeMode) {
+                        settingRowLabel(title: isRu ? "Безопасный режим (Safe Mode)" : "Safe Mode Fallback", icon: "shield.lefthalf.filled", color: .cyan)
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
+                }
+
+                // 4. Системные сведения
+                Section(header: Text(strings.systemSection)) {
+                    infoRow(title: strings.deviceModelLabel, value: customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.friendlyModelName : customDeviceModel, icon: "ipad.and.iphone", color: .blue)
+                    infoRow(title: strings.osVersionLabel, value: customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS \(UIDevice.current.systemVersion)" : (customOSVersion.lowercased().hasPrefix("ios") ? customOSVersion : "iOS \(customOSVersion)"), icon: "iphone", color: .indigo)
+                    infoRow(title: strings.archTitle, value: customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e (SPTM & PAC Bypass)" : customArch, icon: "cpu", color: .teal)
+                    infoRow(title: strings.exploitLabel, value: customExploitName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "PhysPuppet / LandCast" : customExploitName, icon: "bolt.fill", color: .orange)
+                    infoRow(title: strings.packageManagerLabel, value: customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1 Installer (Procursus)" : customPackageManager, icon: "shippingbox.fill", color: .cyan)
+                }
+
+                // 5. Управление джейлбрейком (Danger Zone)
+                Section(header: Text(strings.jbManagementSection)) {
+                    Button(action: {
+                        self.showRemoveJailbreakAlert = true
+                    }) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.red.opacity(0.12))
+                                    .frame(width: 28, height: 28)
+
+                                Image(systemName: "trash.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.red)
+                            }
+
+                            Text(strings.removeJailbreakBtn)
+                                .font(.system(.body, design: .default))
+                                .fontWeight(.semibold)
+                                .foregroundColor(.red)
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.red.opacity(0.6))
+                        }
+                    }
+                }
+
+                // 6. О программе
+                Section(header: Text(strings.aboutSection)) {
+                    HStack {
+                        settingRowLabel(title: strings.appNameLabel, icon: "app.fill", color: .blue)
+                        Spacer()
+                        Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
+                            .fontWeight(.bold)
+                            .font(.system(.subheadline, design: .default))
+                    }
+
+                    HStack {
+                        settingRowLabel(title: strings.versionLabel, icon: "number.circle.fill", color: .purple)
+                        Spacer()
+                        let v = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "1.3" : customAppVersion
+                        let b = customAppBuild.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "26B101" : customAppBuild
+                        Text("\(v) (Build \(b))")
+                            .foregroundColor(.secondary)
+                            .font(.system(.subheadline, design: .monospaced))
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(strings.aboutDisclaimer)
+                            .font(.system(.caption, design: .default))
+                            .foregroundColor(.secondary)
+                            .lineSpacing(2)
+                    }
+                    .padding(.vertical, 2)
+                }
+
+                // 7. Создатель & Разработчик
+                Section(header: Text(strings.creatorSection)) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                                .frame(width: 32, height: 32)
+
+                            Image(systemName: "terminal.fill")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 4) {
+                                Text("@VityaV")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.primary)
+
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            }
+
+                            Text(isRu ? "Создатель и ведущий разработчик" : "Lead Developer & Researcher")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 2)
+
+                    Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(telegramColor)
+
+                            Text("Telegram")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            Text("@VityaV")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://t.me/vitalyabk") ?? URL(string: "https://telegram.org")!) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperplane.circle.fill")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(telegramColor)
+
+                            Text(isRu ? "Канал в Telegram" : "Telegram Channel")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                // 8. Секретный триггер Пасхалки
+                if !SettingsView.hasPlayedInSession && !hasPlayedEasterEgg {
+                    Section {
+                        Button(action: {
+                            triggerEasterEgg()
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text(isRu ? "Cort1so1 v1.3 • Build 26B101" : "Cort1so1 v1.3 • Build 26B101")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary.opacity(0.5))
+                                Spacer()
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle(strings.settingsTitle)

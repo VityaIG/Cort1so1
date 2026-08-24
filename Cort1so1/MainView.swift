@@ -37,28 +37,159 @@ struct MainView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
-                AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
-                    .ignoresSafeArea()
+            Form {
+                // MARK: - 1. Статус системы и ядра
+                Section(header: Text(strings.statusTitle)) {
+                    HStack {
+                        Label {
+                            Text(strings.statusTitle)
+                                .font(.system(.body, design: .default))
+                                .fontWeight(.semibold)
+                        } icon: {
+                            Image(systemName: "lock.open.fill")
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        }
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        // Карточка системного состояния
-                        systemStatusCard
+                        Spacer()
 
-                        // Карточка готовности / статуса джейлбрейка
-                        dopamineStatusCard
-
-                        // Кнопки основного действия
-                        actionButtonsSection
-                            .padding(.top, 6)
-                            
-                        // Инфо об устройстве
-                        deviceInfoCard
-                            .padding(.bottom, 24)
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(jailbreakState == .completed ? Color.green : AppTheme.resolveColor(name: appThemeColor))
+                                .frame(width: 7, height: 7)
+                            Text(statusBadgeText)
+                                .foregroundColor(jailbreakState == .completed ? .green : AppTheme.resolveColor(name: appThemeColor))
+                                .font(.system(size: 13, weight: .bold))
+                        }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+
+                    HStack {
+                        Label {
+                            Text(strings.kernelTitle)
+                                .font(.system(.body, design: .default))
+                        } icon: {
+                            Image(systemName: "cpu")
+                                .foregroundColor(.orange)
+                        }
+
+                        Spacer()
+
+                        Text(kernelStatusText)
+                            .foregroundColor(.secondary)
+                            .font(.system(.subheadline, design: .monospaced))
+                            .fontWeight(.medium)
+                    }
+                }
+
+                // MARK: - 2. Готовность среды / Состояние джейлбрейка
+                Section(header: Text(isRu ? "Состояние среды" : "Environment State")) {
+                    HStack(spacing: 14) {
+                        Image(systemName: jailbreakState == .completed ? "checkmark.seal.fill" : "lock.open.fill")
+                            .foregroundColor(jailbreakState == .completed ? .green : AppTheme.resolveColor(name: appThemeColor))
+                            .font(.system(size: 28, weight: .semibold))
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            let os = customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.systemVersion : customOSVersion
+                            Text(jailbreakState == .completed ? strings.completedTitle : strings.readyTitle(for: os))
+                                .font(.headline)
+                                .fontWeight(.bold)
+
+                            Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (jailbreakState == .completed ? strings.completedSubtitle : strings.readySubtitle) : customSubtitle)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+
+                    if jailbreakState == .completed {
+                        HStack {
+                            Label(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Procursus" : customArch, systemImage: "cube.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Label(customPackageManager.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customPackageManager, systemImage: "shippingbox.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Label(customExploitName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "tfp0: OK" : customExploitName, systemImage: "terminal.fill")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                        }
+                    }
+                }
+
+                // MARK: - 3. Основные действия
+                Section(header: Text(isRu ? "Управление" : "Actions")) {
+                    Button(action: {
+                        self.showingConfirmAlert = true
+                    }) {
+                        HStack {
+                            Spacer()
+                            Image(systemName: jailbreakState == .completed ? "arrow.clockwise" : "bolt.fill")
+                                .font(.system(size: 16, weight: .bold))
+                            Text(buttonTitle)
+                                .font(.system(size: 17, weight: .semibold))
+                            Spacer()
+                        }
+                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        .padding(.vertical, 3)
+                    }
+
+                    if jailbreakState == .completed {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                self.jailbreakState = .respring
+                            }
+                        }) {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 15, weight: .bold))
+                                Text(strings.buttonRespring)
+                                    .font(.system(size: 16, weight: .semibold))
+                                Spacer()
+                            }
+                            .foregroundColor(.orange)
+                            .padding(.vertical, 3)
+                        }
+                    }
+                }
+
+                // MARK: - 4. Информация об устройстве
+                Section(header: Text(isRu ? "Сведения об устройстве" : "Device Information")) {
+                    HStack {
+                        Label(isRu ? "Модель" : "Model", systemImage: "iphone")
+                            .foregroundColor(.blue)
+                        Spacer()
+                        Text(customDeviceModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.friendlyModelName : customDeviceModel)
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Label(isRu ? "Версия iOS" : "iOS Version", systemImage: "apple.logo")
+                            .foregroundColor(.indigo)
+                        Spacer()
+                        Text(customOSVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UIDevice.current.systemVersion : customOSVersion)
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Label(isRu ? "Архитектура" : "Architecture", systemImage: "cpu")
+                            .foregroundColor(.teal)
+                        Spacer()
+                        Text(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e" : customArch)
+                            .foregroundColor(.secondary)
+                            .font(.system(.subheadline, design: .monospaced))
+                    }
+
+                    HStack {
+                        Label(isRu ? "Идентификатор" : "Identifier", systemImage: "number")
+                            .foregroundColor(.purple)
+                        Spacer()
+                        Text(UIDevice.current.hardwareIdentifier)
+                            .foregroundColor(.secondary)
+                            .font(.system(.subheadline, design: .monospaced))
+                    }
                 }
             }
             .navigationTitle(displayTitle)
