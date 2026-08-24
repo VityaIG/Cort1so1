@@ -707,6 +707,11 @@ struct TerminalView: View {
 
             let successHaptic = UINotificationFeedbackGenerator()
             successHaptic.notificationOccurred(.success)
+
+            // Новый нативный поп-ап об успешной установке приложения
+            self.popupText = self.strings.terminalInstallSuccessPopup(for: cleanName)
+            self.popupButton = "OK"
+            self.showCustomPopup = true
         }
     }
 

@@ -48,6 +48,9 @@ struct LocalizedStrings {
     func terminalInstallingProgress(for app: String) -> String {
         lang == .ru ? "Установка \(app)..." : "Installing \(app)..."
     }
+    func terminalInstallSuccessPopup(for app: String) -> String {
+        lang == .ru ? "Успешно установлен \(app)!" : "Successfully installed \(app)!"
+    }
 
     // MARK: - Tweaks View
     var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }

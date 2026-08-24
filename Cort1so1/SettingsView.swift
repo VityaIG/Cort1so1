@@ -375,79 +375,32 @@ struct SettingsView: View {
         )
     }
 
-    // MARK: - 1.1. Star on GitHub Card (На самом верху под карточкой Cort1so1)
+    // MARK: - 1.1. Star on GitHub Card (На самом верху под карточкой Cort1so1 - Минималистичный стиль)
 
     private var starOnGithubCard: some View {
         Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
-            HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 1.0, green: 0.82, blue: 0.22),
-                                    Color(red: 0.98, green: 0.62, blue: 0.08)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 36, height: 36)
-                        .shadow(color: Color(red: 1.0, green: 0.72, blue: 0.1).opacity(0.35), radius: 6, x: 0, y: 2)
+            HStack(spacing: 10) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.yellow)
 
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color(red: 0.2, green: 0.12, blue: 0.0))
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 5) {
-                        Text(strings.starOnGithubBtn)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.primary)
-
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Color(red: 1.0, green: 0.75, blue: 0.1))
-                    }
-
-                    Text("github.com/VityaIG/Cort1so1")
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                        .foregroundColor(.secondary)
-                }
+                Text(strings.starOnGithubBtn)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
 
                 Spacer()
 
-                HStack(spacing: 4) {
-                    Text("Star")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
-                .clipShape(Capsule())
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
             }
-            .padding(14)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
             .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.2).opacity(0.28),
-                                Color.white.opacity(0.04)
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
