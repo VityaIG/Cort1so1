@@ -9,7 +9,7 @@ public struct LiquidGlassModifier: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
+        if ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26 {
             content
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay(
