@@ -364,34 +364,29 @@ export default function App() {
                     </div>
 
                     {/* Section 3: Actions */}
-                    <div className="space-y-1.5">
-                      <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400 px-3">
-                        {isRu ? 'Управление' : 'Actions'}
-                      </div>
-                      <div className="space-y-2.5">
-                        <button
-                          type="button"
-                          onClick={handleRunJailbreak}
-                          disabled={isJailbreaking}
-                          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 active:scale-[0.98] text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 border border-blue-400/20"
-                        >
-                          <Zap className="w-4 h-4 fill-current" />
-                          {isJailbreaking 
-                            ? (isRu ? 'Выполняется...' : 'Executing...') 
-                            : (isJailbroken ? (isRu ? 'Повторный джейлбрейк' : 'Re-Jailbreak') : (isRu ? 'Взломать iOS' : 'Jailbreak iOS'))}
-                        </button>
+                    <div className="space-y-2.5">
+                      <button
+                        type="button"
+                        onClick={handleRunJailbreak}
+                        disabled={isJailbreaking}
+                        className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 active:scale-[0.98] text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 border border-blue-400/20"
+                      >
+                        <Zap className="w-4 h-4 fill-current" />
+                        {isJailbreaking 
+                          ? (isRu ? 'Выполняется...' : 'Executing...') 
+                          : (isJailbroken ? (isRu ? 'Повторный джейлбрейк' : 'Re-Jailbreak') : (isRu ? 'Взломать iOS' : 'Jailbreak iOS'))}
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsJailbroken(true);
-                          }}
-                          className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] text-slate-900 font-bold text-sm shadow-md shadow-black/10 transition-all flex items-center justify-center gap-2 border border-slate-200"
-                        >
-                          <RefreshCw className="w-4 h-4 text-slate-900" />
-                          {isRu ? 'Респринг SpringBoard' : 'Respring SpringBoard'}
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsJailbroken(true);
+                        }}
+                        className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] text-slate-900 font-bold text-sm shadow-md shadow-black/10 transition-all flex items-center justify-center gap-2 border border-slate-200"
+                      >
+                        <RefreshCw className="w-4 h-4 text-slate-900" />
+                        {isRu ? 'Респринг SpringBoard' : 'Respring SpringBoard'}
+                      </button>
                     </div>
 
                     {/* Section 4: Device Details */}

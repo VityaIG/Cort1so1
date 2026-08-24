@@ -119,7 +119,7 @@ struct MainView: View {
                 }
 
                 // MARK: - 3. Основные действия
-                Section(header: Text(isRu ? "Управление" : "Actions")) {
+                Section {
                     VStack(spacing: 12) {
                         Button(action: {
                             self.showingConfirmAlert = true
