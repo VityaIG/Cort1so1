@@ -389,6 +389,8 @@ struct SettingsView: View {
                 if !SettingsView.hasPlayedInSession && !hasPlayedEasterEgg {
                     Section {
                         easterEggBottomTrigger
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
                     }
                 }
             }
@@ -999,6 +1001,8 @@ struct SettingsView: View {
                 )
         }
         .padding(.bottom, 100)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
     }
 
     // MARK: - Вспомогательные компоненты разметки
