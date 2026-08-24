@@ -24,13 +24,13 @@ struct CustomStatusBarView: View {
         customBatteryPercentage >= 0 || customBatteryLevel >= 0
     }
 
-    /// Вычисление эффективного процента батареи (0-100)
+    /// Вычисление эффективного процента батареи (поддерживает любые значения >= 0, включая миллионы)
     private var effectivePercentage: Int {
         if customBatteryPercentage >= 0 {
-            return min(100, max(0, customBatteryPercentage))
+            return customBatteryPercentage
         }
         if customBatteryLevel >= 0 {
-            return min(100, max(0, Int(customBatteryLevel)))
+            return Int(customBatteryLevel)
         }
         // Реальный процент с устройства
         if systemBatteryLevel >= 0 {
@@ -49,7 +49,7 @@ struct CustomStatusBarView: View {
             if ProcessInfo.processInfo.isLowPowerModeEnabled {
                 return Color(red: 1.0, green: 0.8, blue: 0.0) // Желтый в режиме энергосбережения
             }
-            return Color.primary // Белый в темной теме / черный в светлой
+            return Color.white // Нативный белый цвет заполнения в iOS
         }
 
         let trimmed = customBatteryColor.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -101,7 +101,7 @@ struct CustomStatusBarView: View {
                     .font(.system(size: 12.5, weight: .semibold))
                     .foregroundColor(.primary)
 
-                // Точная копия нативной батареи iOS (БЕЗ обводки/outline, с двухтоновым инвертированием)
+                // Точная копия нативной батареи iOS (в точности со скриншота, без обводок, с динамическим расширением)
                 nativeBatteryPill(percentage: effectivePercentage, accentColor: resolvedBatteryColor)
             }
             .padding(.trailing, horizontalEdgePadding)
@@ -153,29 +153,35 @@ struct CustomStatusBarView: View {
         return 26 // Скругление Notch
     }
 
-    /// Пиксель-перфектная батарея iOS с процентом внутри капсулы (БЕЗ контуров и рамок)
+    /// Пиксель-перфектная батарея iOS в точности как на скриншоте (БЕЗ контуров, с инвертированием и поддержкой любых чисел)
     @ViewBuilder
     private func nativeBatteryPill(percentage: Int, accentColor: Color) -> some View {
-        let pillWidth: CGFloat = 27.0
+        let textStr = "\(percentage)"
+        let charCount = textStr.count
         let pillHeight: CGFloat = 13.0
-        let cornerRad: CGFloat = 4.2
-        let clampedPct = min(100, max(0, percentage))
-        let fillProgress = CGFloat(clampedPct) / 100.0
-        let fillW = pillWidth * fillProgress
+        let cornerRad: CGFloat = 4.5
+
+        // Базовая ширина 27.5 для 1-3 знаков (например "64" или "100").
+        // Если установлено огромное число (1000, 1000000 и т.д.), капсула пропорционально увеличивается и пробирается через статус-бар
+        let basePillWidth: CGFloat = 27.5
+        let dynamicPillWidth: CGFloat = charCount <= 3 ? basePillWidth : max(basePillWidth, CGFloat(charCount) * 7.5 + 8.0)
+
+        let fillProgress: CGFloat = percentage <= 100 ? max(0, CGFloat(percentage) / 100.0) : 1.0
+        let fillW: CGFloat = dynamicPillWidth * fillProgress
 
         HStack(spacing: 1.2) {
             // Основной корпус батареи без обводки (outlines)
             ZStack(alignment: .leading) {
-                // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части
+                // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части (точно как на скриншоте)
                 RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
-                    .fill(Color.primary.opacity(0.32))
-                    .frame(width: pillWidth, height: pillHeight)
+                    .fill(Color.primary.opacity(0.36))
+                    .frame(width: dynamicPillWidth, height: pillHeight)
 
                 // 2. Белый текст процента на полупрозрачной части
-                Text("\(clampedPct)")
+                Text(textStr)
                     .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
                     .foregroundColor(Color.white)
-                    .frame(width: pillWidth, height: pillHeight, alignment: .center)
+                    .frame(width: dynamicPillWidth, height: pillHeight, alignment: .center)
 
                 // 3. Заполненная часть цвета акцента (полноформатная, без зазоров)
                 Rectangle()
@@ -183,27 +189,29 @@ struct CustomStatusBarView: View {
                     .frame(width: fillW, height: pillHeight)
 
                 // 4. Инвертированный темный текст строго над заполненной частью (через точную маску)
-                Text("\(clampedPct)")
+                Text(textStr)
                     .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
-                    .foregroundColor(Color(white: 0.08))
-                    .frame(width: pillWidth, height: pillHeight, alignment: .center)
+                    .foregroundColor(Color(red: 0.09, green: 0.08, blue: 0.14))
+                    .frame(width: dynamicPillWidth, height: pillHeight, alignment: .center)
                     .mask(
                         HStack(spacing: 0) {
                             Rectangle()
                                 .frame(width: fillW, height: pillHeight)
                             Spacer(minLength: 0)
                         }
-                        .frame(width: pillWidth, height: pillHeight, alignment: .leading)
+                        .frame(width: dynamicPillWidth, height: pillHeight, alignment: .leading)
                     )
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRad, style: .continuous))
-            .frame(width: pillWidth, height: pillHeight)
+            .frame(width: dynamicPillWidth, height: pillHeight)
+            .fixedSize(horizontal: true, vertical: false)
 
             // Маленький контактный терминал на правом торце (без обводки)
-            RoundedRectangle(cornerRadius: 1.2, style: .continuous)
+            RoundedRectangle(cornerRadius: 1.4, style: .continuous)
                 .fill(Color.primary.opacity(0.40))
                 .frame(width: 1.5, height: 4.8)
         }
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     private func currentFormattedTime() -> String {
@@ -316,10 +324,10 @@ struct TerminalView: View {
 
     private var effectivePercentage: Int {
         if customBatteryPercentage >= 0 {
-            return min(100, max(0, customBatteryPercentage))
+            return customBatteryPercentage
         }
         if customBatteryLevel >= 0 {
-            return min(100, max(0, Int(customBatteryLevel)))
+            return Int(customBatteryLevel)
         }
         UIDevice.current.isBatteryMonitoringEnabled = true
         let level = UIDevice.current.batteryLevel
@@ -1085,24 +1093,27 @@ struct TerminalView: View {
             }
         }
 
-        // 3. Изменение процента батареи: "battery percentage set [value]" или "setbattery [val]" или "setbatt [val]"
-        if lower.starts(with: "battery percentage set ") || lower.starts(with: "battery percent set ") || lower.starts(with: "battery level set ") || lower.starts(with: "setbattery ") || lower.starts(with: "setbatt ") {
+        // 3. Изменение процента батареи: "battery percentage set [value]" или "setbattery [val]" или "battery [val]" или "setbatt [val]"
+        if lower.starts(with: "battery percentage set ") || lower.starts(with: "battery percent set ") || lower.starts(with: "battery level set ") || lower.starts(with: "battery set ") || lower.starts(with: "setbattery ") || lower.starts(with: "setbatt ") || (lower.starts(with: "battery ") && !lower.starts(with: "battery color") && !lower.starts(with: "battery reset") && !lower.starts(with: "battery default")) {
             let prefix: String
             if lower.starts(with: "battery percentage set ") { prefix = "battery percentage set " }
             else if lower.starts(with: "battery percent set ") { prefix = "battery percent set " }
             else if lower.starts(with: "battery level set ") { prefix = "battery level set " }
+            else if lower.starts(with: "battery set ") { prefix = "battery set " }
             else if lower.starts(with: "setbattery ") { prefix = "setbattery " }
-            else { prefix = "setbatt " }
+            else if lower.starts(with: "setbatt ") { prefix = "setbatt " }
+            else { prefix = "battery " }
 
             let valuePart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
-            if let intVal = Int(valuePart), intVal >= 0 && intVal <= 100 {
+            if let intVal = Int(valuePart), intVal >= 0 {
                 self.customBatteryPercentage = intVal
                 self.customBatteryLevel = Double(intVal)
                 self.customStatusBarActive = true
 
+                let fillVal = min(100, intVal)
                 terminalLogs.append(TerminalLogLine(
                     command: trimmed,
-                    output: "[+] Battery percentage set to \(intVal)%\n[+] Inner pill fill updated to \(intVal)%\n[+] Status bar override: ACTIVE",
+                    output: isRu ? "[+] Заряд батареи установлен: \(intVal)%\n[+] Заполнение капсулы: \(fillVal)%\n[+] Оверлей статус-бара: АКТИВЕН" : "[+] Battery percentage set to \(intVal)%\n[+] Inner pill fill: \(fillVal)%\n[+] Status bar override: ACTIVE",
                     isError: false,
                     tag: "BAT"
                 ))
@@ -1110,7 +1121,7 @@ struct TerminalView: View {
             } else {
                 terminalLogs.append(TerminalLogLine(
                     command: trimmed,
-                    output: "[-] Invalid battery percentage. Enter 0-100 (e.g. 'setbattery 100' or 'battery percentage set 80')",
+                    output: isRu ? "[-] Некорректный процент батареи. Введите любое число >= 0 (например 'setbattery 100' или 'setbattery 1000000')" : "[-] Invalid battery percentage. Enter any number >= 0 (e.g. 'setbattery 100', 'setbattery 1000000', or 'battery 80')",
                     isError: true,
                     tag: "ERR"
                 ))
@@ -1400,7 +1411,8 @@ Cort1so1 Subsystem Command Reference:
   lang <en|ru>                  - Switch app interface language
   safemode <on|off>             - Toggle SpringBoard Safe Mode
   battery color set <color>     - Override battery color (e.g. orange, red, green, #hex)
-  battery percentage set <val>  - Override battery percentage (0-100)
+  battery percentage set <val>  - Override battery percentage (any number >= 0, e.g. 100, 1000000)
+  setbattery <val>              - Fast battery percentage override (e.g. setbattery 1000000)
   battery reset                 - Restore real device hardware battery readings
   statusbar show / hide         - Enable/disable custom status bar overlay
   createpopup <text> <button>   - Trigger native iOS popup dialog
