@@ -276,18 +276,6 @@ struct TerminalView: View {
     @State private var popupButton: String = "OK"
     @FocusState private var isInputFocused: Bool
 
-    private let quickCommands = [
-        "help",
-        "install Sileo",
-        "install Filza",
-        "respring",
-        "deviceinfo",
-        "battery percentage set 100",
-        "battery color set green",
-        "battery color set orange",
-        "uicache"
-    ]
-
     private var isRu: Bool {
         appLanguage == "ru"
     }
@@ -361,28 +349,6 @@ struct TerminalView: View {
                         }
                         .disabled(commandInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .buttonStyle(BorderlessButtonStyle())
-                    }
-
-                    // Быстрые подсказки / команды в виде чипсов
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(quickCommands, id: \.self) { cmd in
-                                Button(action: {
-                                    self.commandInput = cmd
-                                    self.executeCommand(cmd)
-                                }) {
-                                    Text(cmd)
-                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
-                                        .clipShape(Capsule())
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                            }
-                        }
-                        .padding(.vertical, 4)
                     }
                 }
                 .alert(isPresented: $showInstallConfirmAlert) {
