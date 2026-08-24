@@ -35,11 +35,19 @@ struct LocalizedStrings {
     var terminalTitle: String { lang == .ru ? "Терминал" : "Terminal" }
     var terminalSubtitle: String { lang == .ru ? "Управление системными параметрами и оверлеем статус-бара" : "System parameter manipulation & status bar override" }
     var terminalInputPlaceholder: String { lang == .ru ? "Введите команду..." : "Enter command..." }
-    var terminalExampleHint: String { "Example: \"battery color set orange\" or \"battery percentage set 100\"" }
+    var terminalExampleHint: String { "Example: \"install Sileo\", \"battery color set orange\", \"battery percentage set 100\"" }
     var terminalExecuteBtn: String { lang == .ru ? "Выполнить" : "Run" }
     var terminalClearBtn: String { lang == .ru ? "Очистить" : "Clear" }
     var terminalResetBatteryBtn: String { lang == .ru ? "Сбросить батарею" : "Reset Battery" }
     var terminalResetAllBtn: String { lang == .ru ? "Сбросить все изменения" : "Reset All Modifications" }
+    func terminalInstallConfirmTitle(for app: String) -> String {
+        lang == .ru ? "Вы точно хотите установить \(app)?" : "Are you sure you want to install \(app)?"
+    }
+    var terminalInstallConfirmYes: String { lang == .ru ? "Да" : "Yes" }
+    var terminalInstallConfirmNo: String { lang == .ru ? "Нет" : "No" }
+    func terminalInstallingProgress(for app: String) -> String {
+        lang == .ru ? "Установка \(app)..." : "Installing \(app)..."
+    }
 
     // MARK: - Tweaks View
     var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }

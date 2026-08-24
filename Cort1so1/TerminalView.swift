@@ -266,12 +266,20 @@ struct TerminalView: View {
     @State private var terminalLogs: [TerminalLogLine] = []
     @State private var showCustomPopup: Bool = false
     @State private var showResetConfirmAlert: Bool = false
+    @State private var showInstallConfirmAlert: Bool = false
+    @State private var pendingInstallApp: String = ""
+    @State private var isInstallingApp: Bool = false
+    @State private var installingAppName: String = ""
+    @State private var installProgress: Double = 0.0
+    @State private var installCurrentStep: String = ""
     @State private var popupText: String = ""
     @State private var popupButton: String = "OK"
     @FocusState private var isInputFocused: Bool
 
     private let quickCommands = [
         "help",
+        "install Sileo",
+        "install Filza",
         "respring",
         "deviceinfo",
         "battery percentage set 100",
@@ -373,6 +381,58 @@ struct TerminalView: View {
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
                             }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .alert(isPresented: $showInstallConfirmAlert) {
+                    Alert(
+                        title: Text(strings.terminalInstallConfirmTitle(for: pendingInstallApp)),
+                        message: nil,
+                        primaryButton: .default(Text(strings.terminalInstallConfirmYes)) {
+                            let app = self.pendingInstallApp
+                            self.startAppInstallation(appName: app)
+                        },
+                        secondaryButton: .cancel(Text(strings.terminalInstallConfirmNo)) {
+                            let cancelled = self.pendingInstallApp
+                            self.terminalLogs.append(TerminalLogLine(
+                                command: "install \(cancelled)",
+                                output: self.isRu ? "[-] Установка '\(cancelled)' отменена пользователем." : "[-] Installation of '\(cancelled)' cancelled by user.",
+                                isError: true,
+                                tag: "CANCEL"
+                            ))
+                        }
+                    )
+                }
+
+                // Секция: Анимация загрузки и статус установки приложения
+                if isInstallingApp {
+                    Section(header: Text(isRu ? "Установка пакета" : "Package Installation")) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(spacing: 12) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                    .scaleEffect(0.95)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(strings.terminalInstallingProgress(for: installingAppName))
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(.primary)
+
+                                    Text(installCurrentStep)
+                                        .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Text("\(Int(installProgress * 100))%")
+                                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                    .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                            }
+
+                            ProgressView(value: installProgress, total: 1.0)
+                                .accentColor(AppTheme.resolveColor(name: appThemeColor))
                         }
                         .padding(.vertical, 4)
                     }
@@ -593,6 +653,97 @@ struct TerminalView: View {
         }
     }
 
+    /// Симуляция установки любого произвольного приложения / твика с детальным прогрессом и логами
+    private func startAppInstallation(appName: String) {
+        let cleanName = appName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanName.isEmpty else { return }
+
+        self.isInstallingApp = true
+        self.installingAppName = cleanName
+        self.installProgress = 0.05
+        self.installCurrentStep = isRu ? "Поиск пакета в репозиториях..." : "Resolving package repositories..."
+
+        let lightHaptic = UIImpactFeedbackGenerator(style: .light)
+        lightHaptic.impactOccurred()
+
+        terminalLogs.append(TerminalLogLine(
+            command: "install \(cleanName)",
+            output: "[*] Initializing Cort1so1 Package Manager (APT / dpkg rootless engine)...\n[*] Resolving dependencies and metadata for '\(cleanName)'...",
+            isError: false,
+            tag: "INSTALL"
+        ))
+
+        let cleanBundleId = cleanName.lowercased().filter { $0.isLetter || $0.isNumber }
+        let bundleId = "com.cort1so1.\(cleanBundleId.isEmpty ? "app" : cleanBundleId)"
+        let pkgVersion = "\(Int.random(in: 1...4)).\(Int.random(in: 0...9)).\(Int.random(in: 1...9))"
+        let pkgSize = String(format: "%.1f", Double.random(in: 14.5...98.2))
+        let sha256 = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
+        let sanitizedDir = cleanName.replacingOccurrences(of: " ", with: "")
+
+        // Этап 1: Пакет найден, старт загрузки (0.6 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard self.isInstallingApp else { return }
+            self.installProgress = 0.28
+            self.installCurrentStep = self.isRu ? "Загрузка архива \(cleanName)..." : "Downloading \(cleanName)..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[+] Match found: \(cleanName) (v\(pkgVersion)-rootless)\n[*] Repository: Procursus / Cort1so1 Core Repos\n[*] Architecture: arm64e (SPTMBypass)\n[*] Payload Size: \(pkgSize) MB",
+                isError: false,
+                tag: "GET"
+            ))
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+
+        // Этап 2: Загрузка завершена, проверка хэша и распаковка (1.4 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+            guard self.isInstallingApp else { return }
+            self.installProgress = 0.58
+            self.installCurrentStep = self.isRu ? "Проверка подписи и распаковка..." : "Verifying checksum & unpacking..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Downloading \(cleanName).deb [====================] 100% (\(pkgSize) MB)\n[+] Cryptographic hash verification: SHA256=\(sha256)... OK\n[*] Unpacking payload into /var/jb/Applications/\(sanitizedDir).app...",
+                isError: false,
+                tag: "FETCH"
+            ))
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+
+        // Этап 3: Патчинг Mach-O, инъекция хуков и ldid (2.3 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
+            guard self.isInstallingApp else { return }
+            self.installProgress = 0.85
+            self.installCurrentStep = self.isRu ? "Патчинг Mach-O и подпись ldid..." : "Patching Mach-O & signing..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Injecting Substrate runtime hooks & entitlements...\n[*] Applying ad-hoc fake-signature via ldid -S...\n[*] Registering BundleID '\(bundleId)' with MobileInstallation...",
+                isError: false,
+                tag: "DPKG"
+            ))
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+
+        // Этап 4: Обновление кэша иконок uicache и завершение (3.2 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) {
+            guard self.isInstallingApp else { return }
+            self.installProgress = 1.0
+            self.installCurrentStep = self.isRu ? "Установка успешно завершена" : "Installation finished"
+            self.isInstallingApp = false
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Rebuilding icon cache (uicache --all)...\n[+] [SUCCESS] '\(cleanName)' installed successfully!\n[+] Executable location: /var/jb/Applications/\(sanitizedDir).app\n[*] SpringBoard icon refreshed. Ready to launch directly from Home Screen.",
+                isError: false,
+                tag: "SUCCESS"
+            ))
+
+            let successHaptic = UINotificationFeedbackGenerator()
+            successHaptic.notificationOccurred(.success)
+        }
+    }
+
     /// Обработка команд терминала
     private func executeCommand(_ rawCommand: String) {
         let trimmed = rawCommand.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -600,6 +751,36 @@ struct TerminalView: View {
         commandInput = ""
 
         let lower = trimmed.lowercased()
+
+        // 0. Установка любого приложения: "install <app>", "apt install <app>", "pkg install <app>"
+        if lower.starts(with: "install") || lower.starts(with: "apt install") || lower.starts(with: "pkg install") || lower.starts(with: "dpkg -i") {
+            let prefix: String
+            if lower.starts(with: "apt install ") { prefix = "apt install " }
+            else if lower.starts(with: "pkg install ") { prefix = "pkg install " }
+            else if lower.starts(with: "dpkg -i ") { prefix = "dpkg -i " }
+            else if lower.starts(with: "install ") { prefix = "install " }
+            else if lower.starts(with: "apt install") { prefix = "apt install" }
+            else if lower.starts(with: "pkg install") { prefix = "pkg install" }
+            else if lower.starts(with: "dpkg -i") { prefix = "dpkg -i" }
+            else { prefix = "install" }
+
+            let appPart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleanApp = appPart.trimmingCharacters(in: CharacterSet(charactersIn: "\"\'`"))
+
+            if cleanApp.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: isRu ? "[-] Использование: install <название>\n[-] Пример: install Sileo или install Filza или install Fortnite" : "[-] Usage: install <app_name>\n[-] Example: install Sileo or install Filza or install Fortnite",
+                    isError: true,
+                    tag: "ERR"
+                ))
+                return
+            }
+
+            self.pendingInstallApp = cleanApp
+            self.showInstallConfirmAlert = true
+            return
+        }
 
         // 1. Создание нативного всплывающего окна: "createpopup <text> <button>"
         if lower.starts(with: "createpopup") {
@@ -985,6 +1166,7 @@ struct TerminalView: View {
                 command: trimmed,
                 output: """
 Cort1so1 Subsystem Command Reference:
+  install <app>                 - Install any custom package / app (e.g. Sileo, Filza, Fortnite)
   respring                      - Trigger SpringBoard respring reload sequence
   uicache                       - Rebuild IconServices cache & refresh app layout
   reboot / ldrestart            - Userspace daemon restart sequence
