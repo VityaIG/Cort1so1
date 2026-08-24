@@ -120,39 +120,63 @@ struct MainView: View {
 
                 // MARK: - 3. Основные действия
                 Section(header: Text(isRu ? "Управление" : "Actions")) {
-                    Button(action: {
-                        self.showingConfirmAlert = true
-                    }) {
-                        HStack {
-                            Spacer()
-                            Image(systemName: jailbreakState == .completed ? "arrow.clockwise" : "bolt.fill")
-                                .font(.system(size: 16, weight: .bold))
-                            Text(buttonTitle)
-                                .font(.system(size: 17, weight: .semibold))
-                            Spacer()
-                        }
-                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                        .padding(.vertical, 3)
-                    }
-
-                    if jailbreakState == .completed {
+                    VStack(spacing: 12) {
                         Button(action: {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                self.jailbreakState = .respring
-                            }
+                            self.showingConfirmAlert = true
                         }) {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Spacer()
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                                    .font(.system(size: 15, weight: .bold))
-                                Text(strings.buttonRespring)
-                                    .font(.system(size: 16, weight: .semibold))
+                                Image(systemName: jailbreakState == .completed ? "arrow.clockwise" : "bolt.fill")
+                                    .font(.system(size: 17, weight: .bold))
+                                Text(buttonTitle)
+                                    .font(.system(size: 17, weight: .bold))
                                 Spacer()
                             }
-                            .foregroundColor(.orange)
-                            .padding(.vertical, 3)
+                            .foregroundColor(.white)
+                            .padding(.vertical, 14)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        AppTheme.resolveColor(name: appThemeColor),
+                                        AppTheme.resolveColor(name: appThemeColor).opacity(0.82)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.35), radius: 8, x: 0, y: 4)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
+                        if jailbreakState == .completed {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    self.jailbreakState = .respring
+                                }
+                            }) {
+                                HStack(spacing: 8) {
+                                    Spacer()
+                                    Image(systemName: "arrow.triangle.2.circlepath")
+                                        .font(.system(size: 16, weight: .bold))
+                                    Text(strings.buttonRespring)
+                                        .font(.system(size: 17, weight: .bold))
+                                    Spacer()
+                                }
+                                .foregroundColor(.black)
+                                .padding(.vertical, 14)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
+                    .padding(.vertical, 4)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                 }
 
                 // MARK: - 4. Информация об устройстве
