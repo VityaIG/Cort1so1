@@ -99,10 +99,13 @@ struct ContentView: View {
 
             // Нативный оверлей кастомного статус-бара при активации через Терминал
             if customStatusBarActive && jailbreakState != .respring {
-                CustomStatusBarView()
-                    .ignoresSafeArea(edges: .top)
-                    .transition(.opacity)
-                    .zIndex(15)
+                VStack(spacing: 0) {
+                    CustomStatusBarView()
+                    Spacer()
+                }
+                .ignoresSafeArea(edges: .top)
+                .transition(.opacity)
+                .zIndex(15)
             }
 
             // Оверлей выполнения респринга SpringBoard

@@ -78,14 +78,14 @@ struct CustomStatusBarView: View {
             Text(displayTime)
                 .font(.system(size: 15, weight: .semibold, design: .default))
                 .foregroundColor(.primary)
-                .padding(.leading, 28)
+                .padding(.leading, horizontalEdgePadding)
 
             Spacer()
 
-            // Правая секция: Сигнал сотовой связи, Wi-Fi и Нативная батарея с процентом внутри
-            HStack(spacing: 6.0) {
+            // Правая секция: Сигнал сотовой связи, Wi-Fi и Нативная батарея без контуров
+            HStack(spacing: 5.5) {
                 // 4-полосный индикатор сигнала сотовой связи (iOS-style)
-                HStack(alignment: .bottom, spacing: 1.8) {
+                HStack(alignment: .bottom, spacing: 1.5) {
                     Capsule().frame(width: 3.0, height: 4.0)
                         .foregroundColor(.primary)
                     Capsule().frame(width: 3.0, height: 6.5)
@@ -98,14 +98,13 @@ struct CustomStatusBarView: View {
 
                 // Иконка Wi-Fi
                 Image(systemName: "wifi")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 12.5, weight: .semibold))
                     .foregroundColor(.primary)
-                    .padding(.horizontal, 0.5)
 
-                // Точная копия нативной батареи iOS (число процента ВНУТРИ капсулы с двухтоновым инвертированием)
+                // Точная копия нативной батареи iOS (БЕЗ обводки/outline, с двухтоновым инвертированием)
                 nativeBatteryPill(percentage: effectivePercentage, accentColor: resolvedBatteryColor)
             }
-            .padding(.trailing, 28)
+            .padding(.trailing, horizontalEdgePadding)
         }
         .frame(height: 22)
         .padding(.top, topSafeAreaPadding)
@@ -129,30 +128,43 @@ struct CustomStatusBarView: View {
 
     /// Безопасный отступ сверху для нативного статус бара
     private var topSafeAreaPadding: CGFloat {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
+        if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first {
             let topInset = window.safeAreaInsets.top
             if topInset >= 50 {
-                return 15 // Dynamic Island
+                return 15 // Dynamic Island (iPhone 14 Pro, 15, 16)
+            } else if topInset > 24 {
+                return 12 // Notch (iPhone X, 11, 12, 13, 14)
             } else if topInset > 0 {
-                return 11 // Notch
+                return 4 // Touch ID / Home button iPhones
             }
         }
-        return 12
+        return 14
     }
 
-    /// Пиксель-перфектная батарея iOS с процентом внутри капсулы (100% совпадение с iOS)
+    /// Горизонтальный отступ от краев экрана
+    private var horizontalEdgePadding: CGFloat {
+        if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first {
+            if window.safeAreaInsets.top >= 50 {
+                return 32 // Скругление Dynamic Island
+            }
+        }
+        return 26 // Скругление Notch
+    }
+
+    /// Пиксель-перфектная батарея iOS с процентом внутри капсулы (БЕЗ контуров и рамок)
     @ViewBuilder
     private func nativeBatteryPill(percentage: Int, accentColor: Color) -> some View {
         let pillWidth: CGFloat = 27.0
         let pillHeight: CGFloat = 13.0
-        let cornerRad: CGFloat = 4.5
+        let cornerRad: CGFloat = 4.2
         let clampedPct = min(100, max(0, percentage))
         let fillProgress = CGFloat(clampedPct) / 100.0
         let fillW = pillWidth * fillProgress
 
         HStack(spacing: 1.2) {
-            // Основной корпус батареи (100% совпадение с нативной капсулой Apple iOS)
+            // Основной корпус батареи без обводки (outlines)
             ZStack(alignment: .leading) {
                 // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части
                 RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
@@ -161,7 +173,7 @@ struct CustomStatusBarView: View {
 
                 // 2. Белый текст процента на полупрозрачной части
                 Text("\(clampedPct)")
-                    .font(.system(size: 10.5, weight: .bold, design: .default))
+                    .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
                     .foregroundColor(Color.white)
                     .frame(width: pillWidth, height: pillHeight, alignment: .center)
 
@@ -170,9 +182,9 @@ struct CustomStatusBarView: View {
                     .fill(accentColor)
                     .frame(width: fillW, height: pillHeight)
 
-                // 4. Инвертированный черный текст строго над заполненной частью (через точную маску)
+                // 4. Инвертированный темный текст строго над заполненной частью (через точную маску)
                 Text("\(clampedPct)")
-                    .font(.system(size: 10.5, weight: .bold, design: .default))
+                    .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
                     .foregroundColor(Color(white: 0.08))
                     .frame(width: pillWidth, height: pillHeight, alignment: .center)
                     .mask(
@@ -185,13 +197,9 @@ struct CustomStatusBarView: View {
                     )
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRad, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
-                    .stroke(Color.primary.opacity(0.35), lineWidth: 1.0)
-            )
             .frame(width: pillWidth, height: pillHeight)
 
-            // Маленький контактный терминал на правом торце (пиксель-в-пиксель с iOS)
+            // Маленький контактный терминал на правом торце (без обводки)
             RoundedRectangle(cornerRadius: 1.2, style: .continuous)
                 .fill(Color.primary.opacity(0.40))
                 .frame(width: 1.5, height: 4.8)
@@ -335,53 +343,7 @@ struct TerminalView: View {
                     }
                 }
 
-                // Секция 2: Быстрые команды
-                Section(header: Text(isRu ? "Быстрые команды" : "Quick Actions")) {
-                    Button(action: { executeCommand("respring") }) {
-                        Label {
-                            Text("respring")
-                                .font(.system(.subheadline, design: .monospaced))
-                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                        } icon: {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                        }
-                    }
-
-                    Button(action: { executeCommand("deviceinfo") }) {
-                        Label {
-                            Text("deviceinfo")
-                                .font(.system(.subheadline, design: .monospaced))
-                                .foregroundColor(.primary)
-                        } icon: {
-                            Image(systemName: "cpu.fill")
-                                .foregroundColor(.cyan)
-                        }
-                    }
-
-                    Button(action: { executeCommand("help") }) {
-                        Label {
-                            Text("help")
-                                .font(.system(.subheadline, design: .monospaced))
-                        } icon: {
-                            Image(systemName: "questionmark.circle.fill")
-                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                        }
-                    }
-
-                    Button(action: { resetAllModifications() }) {
-                        Label {
-                            Text(strings.terminalResetAllBtn)
-                                .font(.system(.subheadline, design: .default))
-                                .foregroundColor(.red)
-                        } icon: {
-                            Image(systemName: "arrow.counterclockwise.circle.fill")
-                                .foregroundColor(.red)
-                        }
-                    }
-                }
-
-                // Секция 3: Консоль логов с встроенным скроллбаром (РАСПОЛОЖЕНА НАД КОНФИГУРАЦИЕЙ)
+                // Секция 2: Консоль логов с встроенным скроллбаром
                 Section(
                     header: HStack {
                         Text(isRu ? "Журнал терминала" : "Console Output")
@@ -447,7 +409,22 @@ struct TerminalView: View {
                     }
                 }
 
-                // Секция 4: Текущее состояние статус-бара (РАСПОЛОЖЕНА ПОД ЖУРНАЛОМ)
+                // Секция 3: Кнопка сброса всех модификаций (РАСПОЛОЖЕНА СТРОГО ПОД КОНСОЛЬЮ)
+                Section {
+                    Button(action: { resetAllModifications() }) {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                                .foregroundColor(.red)
+                            Text(strings.terminalResetAllBtn)
+                                .foregroundColor(.red)
+                                .fontWeight(.medium)
+                            Spacer()
+                        }
+                    }
+                }
+
+                // Секция 4: Текущее состояние статус-бара
                 Section(header: Text(isRu ? "Состояние статус-бара" : "Status Bar Configuration")) {
                     Toggle(isRu ? "Оверлей статус-бара" : "Status Bar Override", isOn: $customStatusBarActive)
 
@@ -472,15 +449,6 @@ struct TerminalView: View {
                         } else {
                             Text(currentSystemBatteryText)
                                 .foregroundColor(.secondary)
-                        }
-                    }
-
-                    Button(action: { resetAllModifications() }) {
-                        HStack {
-                            Spacer()
-                            Text(strings.terminalResetAllBtn)
-                                .foregroundColor(.red)
-                            Spacer()
                         }
                     }
                 }
