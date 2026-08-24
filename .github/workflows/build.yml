@@ -89,16 +89,16 @@ jobs:
 
             Cort1so1 - iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & Custom Status Bar Simulator.
 
-            #### Что нового в v1.3 / What's New in v1.3:
-            - Снято ограничение в 100% на заряд батареи (поддержка 1000000% и любых значений).
-            - Интерактивный ввод процента заряда и цвета индикатора напрямую через графический интерфейс (нажатием на строки в Терминале).
-            - Поддержка быстрой установки через команды в Терминале: `setbattery 1000000`, `battery percentage set 1000000`, `battery color set orange`, `battery reset`.
-            - Нативный оверлей статус-бара iOS с динамическим расширением капсулы под большие числа и инверсией цвета текста.
-            - Вкладка Cortisol Terminal с интерактивным вводом, автодополнением и логом выполнения.
+            #### What's New in v1.3:
+            - Removed 100% battery percentage limit (supports 1,000,000% and any custom values).
+            - Interactive percentage and accent color configuration directly from the UI (tap rows in Terminal tab).
+            - Fast battery override commands in Terminal: `setbattery 1000000`, `battery percentage set 1000000`, `battery color set orange`, `battery reset`.
+            - Pixel-perfect native iOS Status Bar overlay with compact 24.5pt battery icon, dynamic pill expansion, and text inversion.
+            - Cortisol Terminal tab with interactive command input, quick chips, and log output.
 
-            #### Инструкция по установке / Installation Instructions:
-            1. Скачайте файл Cort1so1.ipa из раздела Assets ниже.
-            2. Установите с помощью TrollStore (рекомендуется), AltStore, SideStore или Sideloadly.
+            #### Installation Instructions:
+            1. Download the Cort1so1.ipa file from the Assets section below.
+            2. Sideload using TrollStore (recommended), AltStore, SideStore, or Sideloadly.
           files: Cort1so1.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
