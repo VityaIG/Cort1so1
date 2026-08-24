@@ -128,6 +128,11 @@ struct ContentView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TriggerRespring"))) { _ in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                self.jailbreakState = .respring
+            }
+        }
         .onChange(of: isJailbroken) { newValue in
             if newValue && jailbreakState != .completed {
                 withAnimation(.easeInOut(duration: 0.25)) {

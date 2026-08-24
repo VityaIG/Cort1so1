@@ -146,54 +146,55 @@ struct CustomStatusBarView: View {
     private func nativeBatteryPill(percentage: Int, accentColor: Color) -> some View {
         let pillWidth: CGFloat = 27.0
         let pillHeight: CGFloat = 13.0
+        let cornerRad: CGFloat = 4.5
         let clampedPct = min(100, max(0, percentage))
         let fillProgress = CGFloat(clampedPct) / 100.0
-        let fillW = max(0, (pillWidth - 2.8) * fillProgress)
+        let fillW = pillWidth * fillProgress
 
         HStack(spacing: 1.2) {
-            // Основной корпус батареи
+            // Основной корпус батареи (100% совпадение с нативной капсулой Apple iOS)
             ZStack(alignment: .leading) {
-                // 1. Внутренний фон незаполненной части
-                RoundedRectangle(cornerRadius: 4.2, style: .continuous)
-                    .fill(Color.primary.opacity(0.12))
+                // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части
+                RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
+                    .fill(Color.primary.opacity(0.32))
                     .frame(width: pillWidth, height: pillHeight)
 
-                // 2. Базовый текст процента для незаполненной темной области (белый / primary)
+                // 2. Белый текст процента на полупрозрачной части
                 Text("\(clampedPct)")
-                    .font(.system(size: 10.0, weight: .bold, design: .rounded))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 10.5, weight: .bold, design: .default))
+                    .foregroundColor(Color.white)
                     .frame(width: pillWidth, height: pillHeight, alignment: .center)
 
-                // 3. Заполненная часть цветом акцента
-                RoundedRectangle(cornerRadius: 2.8, style: .continuous)
+                // 3. Заполненная часть цвета акцента (полноформатная, без зазоров)
+                Rectangle()
                     .fill(accentColor)
-                    .frame(width: fillW, height: pillHeight - 2.8)
-                    .padding(.leading, 1.4)
+                    .frame(width: fillW, height: pillHeight)
 
-                // 4. Инвертированный темный текст, видимый строго над заполненной частью
+                // 4. Инвертированный черный текст строго над заполненной частью (через точную маску)
                 Text("\(clampedPct)")
-                    .font(.system(size: 10.0, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.black.opacity(0.95))
+                    .font(.system(size: 10.5, weight: .bold, design: .default))
+                    .foregroundColor(Color(white: 0.08))
                     .frame(width: pillWidth, height: pillHeight, alignment: .center)
                     .mask(
                         HStack(spacing: 0) {
                             Rectangle()
-                                .frame(width: fillW + 1.4, height: pillHeight)
+                                .frame(width: fillW, height: pillHeight)
                             Spacer(minLength: 0)
                         }
                         .frame(width: pillWidth, height: pillHeight, alignment: .leading)
                     )
-
-                // 5. Внешний четкий контур капсулы
-                RoundedRectangle(cornerRadius: 4.2, style: .continuous)
-                    .stroke(Color.primary.opacity(0.35), lineWidth: 1.0)
-                    .frame(width: pillWidth, height: pillHeight)
             }
+            .clipShape(RoundedRectangle(cornerRadius: cornerRad, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
+                    .stroke(Color.primary.opacity(0.35), lineWidth: 1.0)
+            )
+            .frame(width: pillWidth, height: pillHeight)
 
-            // Маленький контактный терминал на правом торце
-            RoundedRectangle(cornerRadius: 1.0, style: .continuous)
+            // Маленький контактный терминал на правом торце (пиксель-в-пиксель с iOS)
+            RoundedRectangle(cornerRadius: 1.2, style: .continuous)
                 .fill(Color.primary.opacity(0.40))
-                .frame(width: 1.4, height: 4.6)
+                .frame(width: 1.5, height: 4.8)
         }
     }
 
@@ -320,6 +321,28 @@ struct TerminalView: View {
 
                 // Секция 2: Быстрые команды
                 Section(header: Text(isRu ? "Быстрые команды" : "Quick Actions")) {
+                    Button(action: { executeCommand("respring") }) {
+                        Label {
+                            Text("respring")
+                                .font(.system(.subheadline, design: .monospaced))
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        } icon: {
+                            Image(systemName: "arrow.clockwise.circle.fill")
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        }
+                    }
+
+                    Button(action: { executeCommand("deviceinfo") }) {
+                        Label {
+                            Text("deviceinfo")
+                                .font(.system(.subheadline, design: .monospaced))
+                                .foregroundColor(.primary)
+                        } icon: {
+                            Image(systemName: "cpu.fill")
+                                .foregroundColor(.cyan)
+                        }
+                    }
+
                     Button(action: { executeCommand("help") }) {
                         Label {
                             Text("help")
@@ -680,28 +703,251 @@ struct TerminalView: View {
             return
         }
 
-        // 6. Очистка терминала
+        // 6. Выполнение респринга SpringBoard: "respring" / "sbreload" / "killall springboard"
+        if lower == "respring" || lower == "sbreload" || lower == "killall springboard" || lower == "killall -9 springboard" {
+            let impact = UIImpactFeedbackGenerator(style: .heavy)
+            impact.impactOccurred()
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[*] Initiating SpringBoard respring sequence...\n[+] Sending SIGTERM to com.apple.springboard (PID: \(Int.random(in: 412...890)))\n[+] Reloading SpringBoard server & tweak injection...",
+                isError: false,
+                tag: "RESPRING"
+            ))
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                NotificationCenter.default.post(name: NSNotification.Name("TriggerRespring"), object: nil)
+            }
+            return
+        }
+
+        // 7. Очистка кэша иконок: "uicache"
+        if lower.starts(with: "uicache") {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[*] Running uicache --all...\n[*] Scanning /Applications & /var/mobile/Containers...\n[+] Successfully rebuilt IconServices cache for 142 bundles.\n[+] SpringBoard icon grid refreshed.",
+                isError: false,
+                tag: "CACHE"
+            ))
+            return
+        }
+
+        // 8. Перезагрузка Userspace: "reboot" / "ldrestart"
+        if lower == "reboot" || lower == "ldrestart" {
+            let impact = UIImpactFeedbackGenerator(style: .heavy)
+            impact.impactOccurred()
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[*] Performing userspace restart (ldrestart)...\n[*] Terminating launchd user daemons...\n[+] Re-initializing SpringBoard...",
+                isError: false,
+                tag: "REBOOT"
+            ))
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                NotificationCenter.default.post(name: NSNotification.Name("TriggerRespring"), object: nil)
+            }
+            return
+        }
+
+        // 9. Тестирование тактильного отклика Taptic Engine: "haptic [type]"
+        if lower.starts(with: "haptic") {
+            let hapticType = lower.dropFirst("haptic".count).trimmingCharacters(in: .whitespacesAndNewlines)
+            switch hapticType {
+            case "light":
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            case "medium":
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            case "heavy":
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            case "warning":
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case "error":
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            case "success", "":
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            default:
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            }
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[+] CoreHaptics / Taptic Engine pulse triggered: \(hapticType.isEmpty ? "SUCCESS" : hapticType.uppercased())",
+                isError: false,
+                tag: "HAPTIC"
+            ))
+            return
+        }
+
+        // 10. Изменение системной темы оформления: "theme [color]"
+        if lower.starts(with: "theme ") {
+            let colorChoice = lower.dropFirst("theme ".count).trimmingCharacters(in: .whitespacesAndNewlines)
+            let valid = ["blue", "purple", "cyan", "orange", "red", "green", "pink"]
+            if valid.contains(colorChoice) {
+                self.appThemeColor = colorChoice
+                UserDefaults.standard.set(colorChoice, forKey: "appThemeColor")
+
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[+] Application accent theme updated to '\(colorChoice.capitalized)'.",
+                    isError: false,
+                    tag: "THEME"
+                ))
+            } else {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[-] Unknown theme '\(colorChoice)'. Available themes: \(valid.joined(separator: ", "))",
+                    isError: true,
+                    tag: "ERR"
+                ))
+            }
+            return
+        }
+
+        // 11. Смена языка: "language [en|ru]" / "lang [en|ru]"
+        if lower.starts(with: "language ") || lower.starts(with: "lang ") {
+            let prefix = lower.starts(with: "language ") ? "language " : "lang "
+            let langChoice = lower.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+            if langChoice == "ru" || langChoice == "russian" {
+                self.appLanguage = "ru"
+                UserDefaults.standard.set("ru", forKey: "appLanguage")
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[+] Язык интерфейса успешно изменен на Русский (ru).",
+                    isError: false,
+                    tag: "LANG"
+                ))
+                return
+            } else if langChoice == "en" || langChoice == "english" {
+                self.appLanguage = "en"
+                UserDefaults.standard.set("en", forKey: "appLanguage")
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[+] Interface language set to English (en).",
+                    isError: false,
+                    tag: "LANG"
+                ))
+                return
+            } else {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[-] Invalid language '\(langChoice)'. Use 'lang en' or 'lang ru'.",
+                    isError: true,
+                    tag: "ERR"
+                ))
+                return
+            }
+        }
+
+        // 12. Режим Safe Mode: "safemode [on|off|toggle]"
+        if lower.starts(with: "safemode") {
+            let arg = lower.dropFirst("safemode".count).trimmingCharacters(in: .whitespacesAndNewlines)
+            if arg == "on" || arg == "1" || arg == "enable" {
+                self.safeMode = true
+            } else if arg == "off" || arg == "0" || arg == "disable" {
+                self.safeMode = false
+            } else {
+                self.safeMode.toggle()
+            }
+            UserDefaults.standard.set(self.safeMode, forKey: "safeMode")
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[+] SpringBoard Safe Mode: \(self.safeMode ? "ENABLED (Tweaks disabled)" : "DISABLED (Normal mode)")",
+                isError: false,
+                tag: "SAFE"
+            ))
+            return
+        }
+
+        // 13. Сведения об устройстве: "deviceinfo" / "neofetch" / "sysinfo"
+        if lower == "deviceinfo" || lower == "neofetch" || lower == "sysinfo" || lower == "info" {
+            let model = UIDevice.current.model
+            let sysVer = UIDevice.current.systemVersion
+            let name = UIDevice.current.name
+            let ramGb = ProcessInfo.processInfo.physicalMemory / (1024 * 1024 * 1024)
+            let cores = ProcessInfo.processInfo.activeProcessorCount
+            let batPct = effectivePercentage
+
+            let infoText = """
+╭──────────────── Cort1so1 Subsystem ────────────────╮
+│ Model:       \(model) (\(name))
+│ Firmware:    iOS \(sysVer) (Darwin 23.4.0)
+│ Architecture: arm64e (A12-A18 Pro / Apple Silicon)
+│ Processor:   \(cores) Active CPU Cores
+│ Memory:      \(ramGb) GB Unified Memory
+│ Battery:     \(batPct)% (\(UIDevice.current.batteryState == .charging ? "Charging" : "Discharging"))
+│ Subsystem:   Cort1so1 v1.3 [Rooted & Jailbroken]
+╰────────────────────────────────────────────────────╯
+"""
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: infoText,
+                isError: false,
+                tag: "SYS"
+            ))
+            return
+        }
+
+        // 14. Вывод текста: "echo [text]"
+        if lower.starts(with: "echo ") {
+            let echoText = trimmed.dropFirst("echo ".count)
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: String(echoText),
+                isError: false,
+                tag: "ECHO"
+            ))
+            return
+        }
+
+        // 15. Текущая дата и время: "date" / "time"
+        if lower == "date" || lower == "time" {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: formatter.string(from: Date()),
+                isError: false,
+                tag: "DATE"
+            ))
+            return
+        }
+
+        // 16. Очистка терминала
         if lower == "clear" || lower == "cls" {
             terminalLogs.removeAll()
             return
         }
 
-        // 7. Помощь
+        // 17. Помощь
         if lower == "help" || lower == "?" {
             terminalLogs.append(TerminalLogLine(
                 command: trimmed,
                 output: """
 Cort1so1 Subsystem Command Reference:
-  help                          - Show this list of available commands
-  reset                         - Clear all modified settings & status bar overrides
-  createpopup <text> <button>   - Trigger a native iOS popup dialog
-  battery color set <color>     - Override battery color (e.g. orange, red, green, blue, #hex)
+  respring                      - Trigger SpringBoard respring reload sequence
+  uicache                       - Rebuild IconServices cache & refresh app layout
+  reboot / ldrestart            - Userspace daemon restart sequence
+  deviceinfo / neofetch         - Display detailed hardware & system info
+  haptic <light|heavy|success>  - Fire Taptic Engine vibration feedback
+  theme <blue|purple|cyan|...>  - Switch application accent color
+  lang <en|ru>                  - Switch app interface language
+  safemode <on|off>             - Toggle SpringBoard Safe Mode
+  battery color set <color>     - Override battery color (e.g. orange, red, green, #hex)
   battery percentage set <val>  - Override battery percentage (0-100)
-  battery reset                 - Restore real system device battery readings
-  statusbar show / hide         - Enable/disable status bar override
+  battery reset                 - Restore real device hardware battery readings
+  statusbar show / hide         - Enable/disable custom status bar overlay
+  createpopup <text> <button>   - Trigger native iOS popup dialog
+  echo <text>                   - Print text to console
+  date / time                   - Show system timestamp
   whoami                        - Display execution privilege (root)
   uname -a                      - Display kernel and architecture
-  clear                         - Clear console output
+  reset / clear all             - Clear all modifications and restore stock state
+  clear                         - Clear console log output
 """,
                 isError: false,
                 tag: "HELP"
@@ -709,18 +955,18 @@ Cort1so1 Subsystem Command Reference:
             return
         }
 
-        // 8. whoami
+        // 18. whoami
         if lower == "whoami" {
             terminalLogs.append(TerminalLogLine(
                 command: trimmed,
-                output: "root (uid=0, gid=0, groups=0(wheel))",
+                output: "root (uid=0, gid=0, groups=0(wheel), context=cort1so1_subsystem_t)",
                 isError: false,
                 tag: "AUTH"
             ))
             return
         }
 
-        // 9. uname -a
+        // 19. uname -a
         if lower == "uname -a" || lower == "uname" {
             terminalLogs.append(TerminalLogLine(
                 command: trimmed,
