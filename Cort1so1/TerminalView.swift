@@ -248,6 +248,7 @@ struct TerminalLogLine: Identifiable, Equatable {
 struct TerminalView: View {
     @AppStorage("appLanguage") private var appLanguage: String = "en"
     @AppStorage("appThemeColor") private var appThemeColor: String = "blue"
+    @AppStorage("safeMode") private var safeMode: Bool = false
     @AppStorage("customStatusBarActive") private var customStatusBarActive: Bool = false
     @AppStorage("customBatteryLevel") private var customBatteryLevel: Double = -1.0
     @AppStorage("customBatteryColor") private var customBatteryColor: String = "orange"
@@ -266,6 +267,21 @@ struct TerminalView: View {
 
     private var strings: LocalizedStrings {
         LocalizedStrings(langCode: appLanguage)
+    }
+
+    private var effectivePercentage: Int {
+        if customBatteryPercentage >= 0 {
+            return min(100, max(0, customBatteryPercentage))
+        }
+        if customBatteryLevel >= 0 {
+            return min(100, max(0, Int(customBatteryLevel)))
+        }
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        let level = UIDevice.current.batteryLevel
+        if level >= 0 {
+            return min(100, max(0, Int(round(level * 100))))
+        }
+        return 100
     }
 
     private var currentSystemBatteryText: String {
@@ -716,7 +732,7 @@ struct TerminalView: View {
             ))
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                NotificationCenter.default.post(name: NSNotification.Name("TriggerRespring"), object: nil)
+                NotificationCenter.default.post(name: Notification.Name("TriggerRespring"), object: nil)
             }
             return
         }
@@ -748,7 +764,7 @@ struct TerminalView: View {
             ))
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                NotificationCenter.default.post(name: NSNotification.Name("TriggerRespring"), object: nil)
+                NotificationCenter.default.post(name: Notification.Name("TriggerRespring"), object: nil)
             }
             return
         }

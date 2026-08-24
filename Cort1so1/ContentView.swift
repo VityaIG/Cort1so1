@@ -129,7 +129,7 @@ struct ContentView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TriggerRespring"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TriggerRespring"))) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
                 self.jailbreakState = .respring
             }
