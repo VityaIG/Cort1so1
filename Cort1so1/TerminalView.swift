@@ -284,15 +284,24 @@ struct TerminalView: View {
     @FocusState private var isInputFocused: Bool
 
     private var installedAppsList: [String] {
-        get {
-            installedPackagesListRaw
-                .split(separator: ",")
-                .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { !$0.isEmpty }
+        installedPackagesListRaw
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    private func addInstalledApp(_ name: String) {
+        var list = self.installedAppsList
+        if !list.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
+            list.append(name)
+            self.installedPackagesListRaw = list.joined(separator: ",")
         }
-        set {
-            installedPackagesListRaw = newValue.joined(separator: ",")
-        }
+    }
+
+    private func removeInstalledApp(_ name: String) {
+        var list = self.installedAppsList
+        list.removeAll { $0.caseInsensitiveCompare(name) == .orderedSame }
+        self.installedPackagesListRaw = list.joined(separator: ",")
     }
 
     private var isRu: Bool {
@@ -780,11 +789,7 @@ struct TerminalView: View {
             successHaptic.notificationOccurred(.success)
 
             // Сохранение установленного приложения в список
-            var list = self.installedAppsList
-            if !list.contains(where: { $0.caseInsensitiveCompare(cleanName) == .orderedSame }) {
-                list.append(cleanName)
-                self.installedAppsList = list
-            }
+            self.addInstalledApp(cleanName)
 
             // Новый нативный поп-ап об успешной установке приложения
             self.popupText = self.strings.terminalInstallSuccessPopup(for: cleanName)
@@ -870,9 +875,7 @@ struct TerminalView: View {
             self.isUninstallingApp = false
 
             // Удаление приложения из списка установленных
-            var list = self.installedAppsList
-            list.removeAll { $0.caseInsensitiveCompare(cleanName) == .orderedSame }
-            self.installedAppsList = list
+            self.removeInstalledApp(cleanName)
 
             self.terminalLogs.append(TerminalLogLine(
                 command: nil,
