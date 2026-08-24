@@ -81,37 +81,27 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.3' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.3' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.3.5' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Cort1so1 v1.3.5' }}
+          make_latest: true
           body: |
-            ### Cort1so1 Release v1.3
+            ### Cort1so1 Release v1.3.5
 
-            **Cort1so1** is an advanced iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & IPSW Downgrade Simulator built with SwiftUI and Apple Human Interface Guidelines (HIG).
+            **Cort1so1** - iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & Custom Status Bar Simulator.
 
-            #### What's New in v1.3:
-            - **Cortisol Terminal Tab**:
-              - Conditionally unlocked and visible ONLY when the user selects and runs the `"Cortisol"` jailbreak method (remains disabled for the legacy `"Dopamine"` method).
-              - Top standard `TextField` for interactive command input with autocomplete quick chips and console log history.
-              - Dedicated command hint: `Example: "battery color set orange" or "battery percentage set 100"`.
-              - Terminal commands support:
-                - `battery color set <color>` (orange, red, green, blue, purple, cyan, #hex, etc.)
-                - `battery percentage set <val>` (0–100%)
-                - `battery reset` (revert to real system battery metrics)
-                - `statusbar show` / `statusbar hide`
-                - `whoami`, `uname -a`, `help`, `clear`
-            - **Custom Status Bar Overlay Engine**:
-              - Dynamic real-time system clock updating each second.
-              - Live device battery query (`UIDevice.current.batteryLevel`) by default with automatic percentage rendering.
-              - Real-time dynamic battery level and color fill overrides.
-              - Standard iOS status bar hide management (`.statusBarHidden(true)`) when the custom status bar is active.
-            - **Localization Refinements**:
-              - Renamed the `"iOS Downgrade"` tab strictly to `"iOS"` in the English localization, keeping Russian (`"Откат iOS"`) preserved.
-            - **Build & Pipeline Polish**:
-              - Added `TerminalView.swift` to Xcode PBXBuildFile, PBXFileReference, and PBXSourcesBuildPhase for flawless CI/CD IPA compilation.
+            #### What's New in v1.3.5:
+            - **No Battery Limit (1000000% Support)**:
+              - Removed 100% cap on battery percentage display and capsule fill calculation.
+              - Added interactive UI controls in Terminal tab: tap "Уровень батареи" / "Battery Level" row directly in the UI to open an input dialog and enter any percentage (e.g. `1000000`, `9999999`, etc.).
+              - Interactive Accent Color selector menu directly in the UI.
+              - Terminal commands: `setbattery 1000000`, `battery percentage set 1000000`, `battery 1000000`, `battery color set orange`, `battery reset`.
+            - **Pixel-Perfect Native Status Bar Overlay**:
+              - Dual-color inverted text with dynamic pill expansion for huge percentage numbers.
+              - Seamless iOS Status Bar toggle and real-time battery sync.
 
             #### Installation Instructions:
             1. Download the `Cort1so1.ipa` file from the **Assets** section below.
-            2. Sideload the application using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
+            2. Sideload using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
           files: Cort1so1.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

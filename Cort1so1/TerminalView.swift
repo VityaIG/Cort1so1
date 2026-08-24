@@ -289,6 +289,8 @@ struct TerminalView: View {
     @State private var uninstallCurrentStep: String = ""
     @State private var popupText: String = ""
     @State private var popupButton: String = "OK"
+    @State private var showBatteryEditSheet: Bool = false
+    @State private var batteryInputString: String = ""
     @FocusState private var isInputFocused: Bool
 
     private var installedAppsList: [String] {
@@ -589,27 +591,49 @@ struct TerminalView: View {
                 Section(header: Text(isRu ? "Состояние статус-бара" : "Status Bar Configuration")) {
                     Toggle(isRu ? "Оверлей статус-бара" : "Status Bar Override", isOn: $customStatusBarActive)
 
-                    HStack {
-                        Text(isRu ? "Цвет индикатора" : "Accent Color")
-                        Spacer()
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(resolvedColorForDisplay(customBatteryColor))
-                                .frame(width: 10, height: 10)
-                            Text(customBatteryColor.capitalized)
-                                .foregroundColor(.secondary)
+                    Menu {
+                        Button("Orange") { self.customBatteryColor = "orange"; self.customStatusBarActive = true }
+                        Button("Red") { self.customBatteryColor = "red"; self.customStatusBarActive = true }
+                        Button("Green") { self.customBatteryColor = "green"; self.customStatusBarActive = true }
+                        Button("Yellow") { self.customBatteryColor = "yellow"; self.customStatusBarActive = true }
+                        Button("Blue") { self.customBatteryColor = "blue"; self.customStatusBarActive = true }
+                        Button("Purple") { self.customBatteryColor = "purple"; self.customStatusBarActive = true }
+                        Button("Cyan") { self.customBatteryColor = "cyan"; self.customStatusBarActive = true }
+                        Button("White") { self.customBatteryColor = "white"; self.customStatusBarActive = true }
+                    } label: {
+                        HStack {
+                            Text(isRu ? "Цвет индикатора" : "Accent Color")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(resolvedColorForDisplay(customBatteryColor))
+                                    .frame(width: 10, height: 10)
+                                Text(customBatteryColor.capitalized)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
 
-                    HStack {
-                        Text(isRu ? "Уровень батареи" : "Battery Level")
-                        Spacer()
-                        if customBatteryPercentage >= 0 {
-                            Text("\(customBatteryPercentage)% (Custom)")
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text(currentSystemBatteryText)
-                                .foregroundColor(.secondary)
+                    Button(action: {
+                        self.batteryInputString = customBatteryPercentage >= 0 ? "\(customBatteryPercentage)" : "1000000"
+                        self.showBatteryEditSheet = true
+                    }) {
+                        HStack {
+                            Text(isRu ? "Уровень батареи" : "Battery Level")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if customBatteryPercentage >= 0 {
+                                Text("\(customBatteryPercentage)% (Custom)")
+                                    .foregroundColor(.accentColor)
+                                    .bold()
+                            } else {
+                                Text(currentSystemBatteryText)
+                                    .foregroundColor(.secondary)
+                            }
+                            Image(systemName: "pencil.circle.fill")
+                                .foregroundColor(.accentColor)
+                                .font(.system(size: 14))
                         }
                     }
                 }
@@ -649,6 +673,30 @@ struct TerminalView: View {
                     message: nil,
                     dismissButton: .default(Text(popupButton.isEmpty ? "OK" : popupButton))
                 )
+            }
+            .alert(isRu ? "Уровень заряда батареи" : "Battery Percentage", isPresented: $showBatteryEditSheet) {
+                TextField(isRu ? "Введите значение (например 1000000)" : "Enter value (e.g. 1000000)", text: $batteryInputString)
+                Button(isRu ? "Применить" : "Apply") {
+                    if let val = Int(batteryInputString.trimmingCharacters(in: .whitespacesAndNewlines)), val >= 0 {
+                        self.customBatteryPercentage = val
+                        self.customBatteryLevel = Double(val)
+                        self.customStatusBarActive = true
+                        let fillVal = min(100, val)
+                        self.terminalLogs.append(TerminalLogLine(
+                            command: "setbattery \(val)",
+                            output: isRu ? "[+] Заряд батареи установлен: \(val)%\n[+] Заполнение капсулы: \(fillVal)%\n[+] Оверлей статус-бара: АКТИВЕН" : "[+] Battery percentage set to \(val)%\n[+] Inner pill fill: \(fillVal)%\n[+] Status bar override: ACTIVE",
+                            isError: false,
+                            tag: "BAT"
+                        ))
+                    }
+                }
+                Button(isRu ? "Сбросить к системному" : "Reset to Real", role: .destructive) {
+                    self.customBatteryPercentage = -1
+                    self.customBatteryLevel = -1.0
+                }
+                Button(strings.cancelBtn, role: .cancel) {}
+            } message: {
+                Text(isRu ? "Введите любой процент заряда без ограничений (100, 1000, 1000000 и т.д.):" : "Enter any custom battery percentage value without limits (e.g. 100, 1000, 1000000):")
             }
         }
         .onAppear {
