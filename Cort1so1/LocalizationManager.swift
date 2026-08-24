@@ -51,6 +51,18 @@ struct LocalizedStrings {
     func terminalInstallSuccessPopup(for app: String) -> String {
         lang == .ru ? "Успешно установлен \(app)!" : "Successfully installed \(app)!"
     }
+    func terminalUninstallConfirmTitle(for app: String) -> String {
+        lang == .ru ? "Вы точно хотите удалить \(app)?" : "Are you sure you want to uninstall \(app)?"
+    }
+    func terminalUninstallingProgress(for app: String) -> String {
+        lang == .ru ? "Удаление \(app)..." : "Uninstalling \(app)..."
+    }
+    func terminalUninstallSuccessPopup(for app: String) -> String {
+        lang == .ru ? "Успешно удален \(app)!" : "Successfully uninstalled \(app)!"
+    }
+    var terminalNoInstalledApps: String {
+        lang == .ru ? "[-] Список установленных приложений пуст.\n[*] Используйте команду 'install <название>' для установки (например: install Sileo)." : "[-] No packages currently installed.\n[*] Use 'install <app>' to install applications (e.g. install Sileo)."
+    }
 
     // MARK: - Tweaks View
     var tweaksTitle: String { lang == .ru ? "Твики" : "Tweaks" }

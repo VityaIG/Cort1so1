@@ -261,6 +261,7 @@ struct TerminalView: View {
     @AppStorage("customBatteryLevel") private var customBatteryLevel: Double = -1.0
     @AppStorage("customBatteryColor") private var customBatteryColor: String = "orange"
     @AppStorage("customBatteryPercentage") private var customBatteryPercentage: Int = -1
+    @AppStorage("installedPackagesList") private var installedPackagesListRaw: String = ""
 
     @State private var commandInput: String = ""
     @State private var terminalLogs: [TerminalLogLine] = []
@@ -272,9 +273,27 @@ struct TerminalView: View {
     @State private var installingAppName: String = ""
     @State private var installProgress: Double = 0.0
     @State private var installCurrentStep: String = ""
+    @State private var showUninstallConfirmAlert: Bool = false
+    @State private var pendingUninstallApp: String = ""
+    @State private var isUninstallingApp: Bool = false
+    @State private var uninstallingAppName: String = ""
+    @State private var uninstallProgress: Double = 0.0
+    @State private var uninstallCurrentStep: String = ""
     @State private var popupText: String = ""
     @State private var popupButton: String = "OK"
     @FocusState private var isInputFocused: Bool
+
+    private var installedAppsList: [String] {
+        get {
+            installedPackagesListRaw
+                .split(separator: ",")
+                .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        }
+        set {
+            installedPackagesListRaw = newValue.joined(separator: ",")
+        }
+    }
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -404,6 +423,39 @@ struct TerminalView: View {
                     }
                 }
 
+                // Секция: Анимация и статус удаления приложения
+                if isUninstallingApp {
+                    Section(header: Text(isRu ? "Удаление пакета" : "Package Uninstallation")) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(spacing: 12) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                    .scaleEffect(0.95)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(strings.terminalUninstallingProgress(for: uninstallingAppName))
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(.primary)
+
+                                    Text(uninstallCurrentStep)
+                                        .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Text("\(Int(uninstallProgress * 100))%")
+                                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.red)
+                            }
+
+                            ProgressView(value: uninstallProgress, total: 1.0)
+                                .accentColor(.red)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+
                 // Секция 2: Консоль логов с встроенным скроллбаром
                 Section(
                     header: HStack {
@@ -469,6 +521,25 @@ struct TerminalView: View {
                         }
                     }
                 }
+                .alert(isPresented: $showUninstallConfirmAlert) {
+                    Alert(
+                        title: Text(strings.terminalUninstallConfirmTitle(for: pendingUninstallApp)),
+                        message: nil,
+                        primaryButton: .destructive(Text(strings.terminalInstallConfirmYes)) {
+                            let app = self.pendingUninstallApp
+                            self.startAppUninstallation(appName: app)
+                        },
+                        secondaryButton: .cancel(Text(strings.terminalInstallConfirmNo)) {
+                            let cancelled = self.pendingUninstallApp
+                            self.terminalLogs.append(TerminalLogLine(
+                                command: "uninstall \(cancelled)",
+                                output: self.isRu ? "[-] Удаление '\(cancelled)' отменено пользователем." : "[-] Uninstallation of '\(cancelled)' cancelled by user.",
+                                isError: true,
+                                tag: "CANCEL"
+                            ))
+                        }
+                    )
+                }
 
                 // Секция 3: Кнопка сброса всех модификаций (РАСПОЛОЖЕНА СТРОГО ПОД КОНСОЛЬЮ)
                 Section {
@@ -483,6 +554,16 @@ struct TerminalView: View {
                             Spacer()
                         }
                     }
+                }
+                .alert(isPresented: $showResetConfirmAlert) {
+                    Alert(
+                        title: Text(strings.resetConfirmTitle),
+                        message: Text(strings.resetConfirmMessage),
+                        primaryButton: .destructive(Text(strings.terminalResetAllBtn)) {
+                            self.resetAllModifications()
+                        },
+                        secondaryButton: .cancel(Text(strings.cancelBtn))
+                    )
                 }
 
                 // Секция 4: Текущее состояние статус-бара
@@ -542,16 +623,6 @@ struct TerminalView: View {
                         Image(systemName: "ellipsis.circle")
                     }
                 }
-            }
-            .alert(isPresented: $showResetConfirmAlert) {
-                Alert(
-                    title: Text(strings.resetConfirmTitle),
-                    message: Text(strings.resetConfirmMessage),
-                    primaryButton: .destructive(Text(strings.terminalResetAllBtn)) {
-                        self.resetAllModifications()
-                    },
-                    secondaryButton: .cancel(Text(strings.cancelBtn))
-                )
             }
             .alert(isPresented: $showCustomPopup) {
                 Alert(
@@ -708,8 +779,113 @@ struct TerminalView: View {
             let successHaptic = UINotificationFeedbackGenerator()
             successHaptic.notificationOccurred(.success)
 
+            // Сохранение установленного приложения в список
+            var list = self.installedAppsList
+            if !list.contains(where: { $0.caseInsensitiveCompare(cleanName) == .orderedSame }) {
+                list.append(cleanName)
+                self.installedAppsList = list
+            }
+
             // Новый нативный поп-ап об успешной установке приложения
             self.popupText = self.strings.terminalInstallSuccessPopup(for: cleanName)
+            self.popupButton = "OK"
+            self.showCustomPopup = true
+        }
+    }
+
+    /// Симуляция удаления любого приложения / твика с детальным прогрессом, анимацией и логами
+    private func startAppUninstallation(appName: String) {
+        let cleanName = appName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanName.isEmpty else { return }
+
+        self.isUninstallingApp = true
+        self.uninstallingAppName = cleanName
+        self.uninstallProgress = 0.05
+        self.uninstallCurrentStep = isRu ? "Поиск пакета и остановка процессов..." : "Locating package & stopping active processes..."
+
+        let lightHaptic = UIImpactFeedbackGenerator(style: .light)
+        lightHaptic.impactOccurred()
+
+        terminalLogs.append(TerminalLogLine(
+            command: "uninstall \(cleanName)",
+            output: "[*] Initializing dpkg --purge uninstaller engine...\n[*] Verifying installed metadata and payload files for '\(cleanName)'...",
+            isError: false,
+            tag: "UNINSTALL"
+        ))
+
+        let cleanBundleId = cleanName.lowercased().filter { $0.isLetter || $0.isNumber }
+        let bundleId = "com.cort1so1.\(cleanBundleId.isEmpty ? "app" : cleanBundleId)"
+        let sanitizedDir = cleanName.replacingOccurrences(of: " ", with: "")
+
+        // Этап 1: Остановка фоновых демонов и процессов (0.6 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard self.isUninstallingApp else { return }
+            self.uninstallProgress = 0.32
+            self.uninstallCurrentStep = self.isRu ? "Завершение фоновых процессов \(cleanName)..." : "Terminating background daemons..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Sending SIGKILL to running process instances of '\(cleanName)'...\n[*] Unloading LaunchDaemons plist if active...\n[+] Application threads terminated.",
+                isError: false,
+                tag: "KILL"
+            ))
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+
+        // Этап 2: Удаление файлов и бинарников из /var/jb (1.4 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+            guard self.isUninstallingApp else { return }
+            self.uninstallProgress = 0.62
+            self.uninstallCurrentStep = self.isRu ? "Удаление файлов /var/jb/Applications..." : "Unlinking /var/jb payloads..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Removing /var/jb/Applications/\(sanitizedDir).app payload...\n[*] Removing /var/jb/Library/MobileSubstrate/DynamicLibraries/\(sanitizedDir).dylib...\n[+] Unlinked all package payload files from sandbox.",
+                isError: false,
+                tag: "PURGE"
+            ))
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+
+        // Этап 3: Очистка реестра dpkg и прав доступа (2.2 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            guard self.isUninstallingApp else { return }
+            self.uninstallProgress = 0.88
+            self.uninstallCurrentStep = self.isRu ? "Очистка манифестов и регистраций..." : "Purging dpkg manifests & registrations..."
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Unregistering bundle identifier '\(bundleId)' with SpringBoard...\n[*] Removing dpkg status entry and control metadata files...\n[+] Subsystem package index updated.",
+                isError: false,
+                tag: "DPKG"
+            ))
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+
+        // Этап 4: Обновление кэша иконок uicache и завершение (3.0 сек)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            guard self.isUninstallingApp else { return }
+            self.uninstallProgress = 1.0
+            self.uninstallCurrentStep = self.isRu ? "Удаление успешно завершено" : "Uninstallation finished"
+            self.isUninstallingApp = false
+
+            // Удаление приложения из списка установленных
+            var list = self.installedAppsList
+            list.removeAll { $0.caseInsensitiveCompare(cleanName) == .orderedSame }
+            self.installedAppsList = list
+
+            self.terminalLogs.append(TerminalLogLine(
+                command: nil,
+                output: "[*] Invoking uicache --all to remove Home Screen icon...\n[+] [SUCCESS] '\(cleanName)' completely uninstalled and purged.\n[*] SpringBoard icon layout refreshed.",
+                isError: false,
+                tag: "SUCCESS"
+            ))
+
+            let successHaptic = UINotificationFeedbackGenerator()
+            successHaptic.notificationOccurred(.success)
+
+            // Нативный поп-ап об успешном удалении приложения
+            self.popupText = self.strings.terminalUninstallSuccessPopup(for: cleanName)
             self.popupButton = "OK"
             self.showCustomPopup = true
         }
@@ -750,6 +926,75 @@ struct TerminalView: View {
 
             self.pendingInstallApp = cleanApp
             self.showInstallConfirmAlert = true
+            return
+        }
+
+        // 0.1. Список установленных приложений: "installed", "list", "apt list", "dpkg -l"
+        if lower == "installed" || lower == "list" || lower == "dpkg -l" || lower == "dpkg --list" || lower == "apt list" || lower == "apt list --installed" || lower == "pkg list" {
+            let list = self.installedAppsList
+            if list.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: strings.terminalNoInstalledApps,
+                    isError: false,
+                    tag: "PKG"
+                ))
+            } else {
+                var lines: [String] = []
+                lines.append("╭──────────────── Installed Packages ────────────────╮")
+                lines.append("│ Total: \(list.count) package(s) installed via Cort1so1")
+                lines.append("│ Subsystem: /var/jb (Rootless Procursus Engine)")
+                lines.append("╞════════════════════════════════════════════════════╡")
+                for (index, app) in list.enumerated() {
+                    let sanitized = app.replacingOccurrences(of: " ", with: "")
+                    lines.append("│ [\(index + 1)] \(app) • /var/jb/Applications/\(sanitized).app")
+                }
+                lines.append("╰────────────────────────────────────────────────────╯")
+                lines.append(isRu ? "[*] Для удаления используйте команду: uninstall <название>" : "[*] To remove a package, run: uninstall <name>")
+
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: lines.joined(separator: "\n"),
+                    isError: false,
+                    tag: "PKG"
+                ))
+            }
+            return
+        }
+
+        // 0.2. Удаление приложения: "uninstall <app>", "remove <app>", "apt remove <app>", "apt purge <app>", "dpkg -r <app>"
+        if lower.starts(with: "uninstall") || lower.starts(with: "remove") || lower.starts(with: "apt remove") || lower.starts(with: "apt purge") || lower.starts(with: "dpkg -r") || lower.starts(with: "pkg remove") || lower.starts(with: "delete") {
+            let prefix: String
+            if lower.starts(with: "apt remove ") { prefix = "apt remove " }
+            else if lower.starts(with: "apt purge ") { prefix = "apt purge " }
+            else if lower.starts(with: "dpkg -r ") { prefix = "dpkg -r " }
+            else if lower.starts(with: "pkg remove ") { prefix = "pkg remove " }
+            else if lower.starts(with: "uninstall ") { prefix = "uninstall " }
+            else if lower.starts(with: "remove ") { prefix = "remove " }
+            else if lower.starts(with: "delete ") { prefix = "delete " }
+            else if lower.starts(with: "apt remove") { prefix = "apt remove" }
+            else if lower.starts(with: "apt purge") { prefix = "apt purge" }
+            else if lower.starts(with: "dpkg -r") { prefix = "dpkg -r" }
+            else if lower.starts(with: "pkg remove") { prefix = "pkg remove" }
+            else if lower.starts(with: "uninstall") { prefix = "uninstall" }
+            else if lower.starts(with: "remove") { prefix = "remove" }
+            else { prefix = "delete" }
+
+            let appPart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleanApp = appPart.trimmingCharacters(in: CharacterSet(charactersIn: "\"\'`"))
+
+            if cleanApp.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: isRu ? "[-] Использование: uninstall <название>\n[-] Пример: uninstall Sileo или uninstall Filza" : "[-] Usage: uninstall <app_name>\n[-] Example: uninstall Sileo or uninstall Filza",
+                    isError: true,
+                    tag: "ERR"
+                ))
+                return
+            }
+
+            self.pendingUninstallApp = cleanApp
+            self.showUninstallConfirmAlert = true
             return
         }
 
@@ -1138,6 +1383,8 @@ struct TerminalView: View {
                 output: """
 Cort1so1 Subsystem Command Reference:
   install <app>                 - Install any custom package / app (e.g. Sileo, Filza, Fortnite)
+  installed / list              - List all packages installed via terminal
+  uninstall <app> / remove      - Completely uninstall and purge an installed package
   respring                      - Trigger SpringBoard respring reload sequence
   uicache                       - Rebuild IconServices cache & refresh app layout
   reboot / ldrestart            - Userspace daemon restart sequence
