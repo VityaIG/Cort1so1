@@ -902,37 +902,7 @@ struct TerminalView: View {
 
         let lower = trimmed.lowercased()
 
-        // 0. Установка любого приложения: "install <app>", "apt install <app>", "pkg install <app>"
-        if lower.starts(with: "install") || lower.starts(with: "apt install") || lower.starts(with: "pkg install") || lower.starts(with: "dpkg -i") {
-            let prefix: String
-            if lower.starts(with: "apt install ") { prefix = "apt install " }
-            else if lower.starts(with: "pkg install ") { prefix = "pkg install " }
-            else if lower.starts(with: "dpkg -i ") { prefix = "dpkg -i " }
-            else if lower.starts(with: "install ") { prefix = "install " }
-            else if lower.starts(with: "apt install") { prefix = "apt install" }
-            else if lower.starts(with: "pkg install") { prefix = "pkg install" }
-            else if lower.starts(with: "dpkg -i") { prefix = "dpkg -i" }
-            else { prefix = "install" }
-
-            let appPart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
-            let cleanApp = appPart.trimmingCharacters(in: CharacterSet(charactersIn: "\"\'`"))
-
-            if cleanApp.isEmpty {
-                terminalLogs.append(TerminalLogLine(
-                    command: trimmed,
-                    output: isRu ? "[-] Использование: install <название>\n[-] Пример: install Sileo или install Filza или install Fortnite" : "[-] Usage: install <app_name>\n[-] Example: install Sileo or install Filza or install Fortnite",
-                    isError: true,
-                    tag: "ERR"
-                ))
-                return
-            }
-
-            self.pendingInstallApp = cleanApp
-            self.showInstallConfirmAlert = true
-            return
-        }
-
-        // 0.1. Список установленных приложений: "installed", "list", "apt list", "dpkg -l"
+        // 0. Список установленных приложений: "installed", "list", "apt list", "dpkg -l"
         if lower == "installed" || lower == "list" || lower == "dpkg -l" || lower == "dpkg --list" || lower == "apt list" || lower == "apt list --installed" || lower == "pkg list" {
             let list = self.installedAppsList
             if list.isEmpty {
@@ -965,8 +935,8 @@ struct TerminalView: View {
             return
         }
 
-        // 0.2. Удаление приложения: "uninstall <app>", "remove <app>", "apt remove <app>", "apt purge <app>", "dpkg -r <app>"
-        if lower.starts(with: "uninstall") || lower.starts(with: "remove") || lower.starts(with: "apt remove") || lower.starts(with: "apt purge") || lower.starts(with: "dpkg -r") || lower.starts(with: "pkg remove") || lower.starts(with: "delete") {
+        // 0.1. Удаление приложения: "uninstall <app>", "remove <app>", "apt remove <app>", "apt purge <app>", "dpkg -r <app>"
+        if lower.starts(with: "uninstall ") || lower == "uninstall" || lower.starts(with: "remove ") || lower == "remove" || lower.starts(with: "apt remove") || lower.starts(with: "apt purge") || lower.starts(with: "dpkg -r") || lower.starts(with: "pkg remove") || lower.starts(with: "delete ") || lower == "delete" {
             let prefix: String
             if lower.starts(with: "apt remove ") { prefix = "apt remove " }
             else if lower.starts(with: "apt purge ") { prefix = "apt purge " }
@@ -998,6 +968,36 @@ struct TerminalView: View {
 
             self.pendingUninstallApp = cleanApp
             self.showUninstallConfirmAlert = true
+            return
+        }
+
+        // 0.2. Установка любого приложения: "install <app>", "apt install <app>", "pkg install <app>"
+        if lower.starts(with: "install ") || lower == "install" || lower.starts(with: "apt install") || lower.starts(with: "pkg install") || lower.starts(with: "dpkg -i") {
+            let prefix: String
+            if lower.starts(with: "apt install ") { prefix = "apt install " }
+            else if lower.starts(with: "pkg install ") { prefix = "pkg install " }
+            else if lower.starts(with: "dpkg -i ") { prefix = "dpkg -i " }
+            else if lower.starts(with: "install ") { prefix = "install " }
+            else if lower.starts(with: "apt install") { prefix = "apt install" }
+            else if lower.starts(with: "pkg install") { prefix = "pkg install" }
+            else if lower.starts(with: "dpkg -i") { prefix = "dpkg -i" }
+            else { prefix = "install" }
+
+            let appPart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleanApp = appPart.trimmingCharacters(in: CharacterSet(charactersIn: "\"\'`"))
+
+            if cleanApp.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: isRu ? "[-] Использование: install <название>\n[-] Пример: install Sileo или install Filza или install Fortnite" : "[-] Usage: install <app_name>\n[-] Example: install Sileo or install Filza or install Fortnite",
+                    isError: true,
+                    tag: "ERR"
+                ))
+                return
+            }
+
+            self.pendingInstallApp = cleanApp
+            self.showInstallConfirmAlert = true
             return
         }
 
