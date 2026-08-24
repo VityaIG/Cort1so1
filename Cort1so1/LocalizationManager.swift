@@ -181,10 +181,16 @@ struct LocalizedStrings {
     var jbRemovedSuccess: String { lang == .ru ? "Джейлбрейк успешно удален" : "Jailbreak successfully removed" }
 
     var aboutSection: String { lang == .ru ? "О программе" : "About" }
+    var creatorSection: String { lang == .ru ? "Создатель & Разработчик" : "Creator & Developer" }
     var appNameLabel: String { lang == .ru ? "Название" : "App Name" }
     var versionLabel: String { lang == .ru ? "Версия" : "Version" }
     var packageManagerLabel: String { lang == .ru ? "Пакетный менеджер" : "Package Manager" }
     var creatorLabel: String { lang == .ru ? "Создатель" : "Creator" }
+    var discordLabel: String { "Discord" }
+    var starOnGithubBtn: String { lang == .ru ? "Поставить звезду на GitHub" : "Star on GitHub" }
+    var copiedToClipboard: String { lang == .ru ? "Скопировано в буфер обмена" : "Copied to clipboard" }
+    var resetConfirmTitle: String { lang == .ru ? "Сбросить модификации?" : "Reset Modifications?" }
+    var resetConfirmMessage: String { lang == .ru ? "Все параметры статус-бара, цвет и процент заряда батареи будут возвращены к системным значениям." : "All status bar overrides, custom battery levels, and colors will be reverted to system defaults." }
     var aboutDisclaimer: String { lang == .ru ? "Cort1so1 — мощная утилита для джейлбрейка и отката iOS. Используйте на свой страх и риск." : "Cort1so1 is a powerful utility for iOS jailbreaking and downgrading. Use at your own risk." }
 
     // MARK: - Respring & Logs

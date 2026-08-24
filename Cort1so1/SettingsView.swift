@@ -114,6 +114,31 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+                // Всплывающее уведомление (Toast)
+                if showToast {
+                    VStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 14, weight: .semibold))
+
+                            Text(toastMessage)
+                                .font(.system(size: 13, weight: .semibold, design: .default))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Color.black.opacity(0.85))
+                        .clipShape(Capsule())
+                        .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
+                        .padding(.top, 12)
+
+                        Spacer()
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(100)
+                }
             }
             .navigationTitle(strings.settingsTitle)
             .toolbar {
@@ -503,63 +528,159 @@ struct SettingsView: View {
 
     // MARK: - 7. Создатель & Разработчик
     private var creatorCard: some View {
-        Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [telegramColor, telegramColor.opacity(0.8)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 44, height: 44)
-                        .shadow(color: telegramColor.opacity(0.4), radius: 6, x: 0, y: 3)
-
-                    Image(systemName: "paperplane.fill")
-                        .font(.system(size: 19, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(isRu ? "Создатель & Разработчик" : "Creator & Developer")
-                        .font(.system(size: 11, weight: .semibold))
+        VStack(alignment: .leading, spacing: 10) {
+            // Заголовок категории с маленькой круглой аватаркой профиля
+            HStack(spacing: 8) {
+                if let uiImage = UIImage(named: "creator_avatar") {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 20, height: 20)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 0.8))
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .font(.system(size: 18))
                         .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-
-                    HStack(spacing: 5) {
-                        Text("@VityaV")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.primary)
-
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(telegramColor)
-                    }
                 }
+
+                Text(strings.creatorSection)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
 
                 Spacer()
-
-                HStack(spacing: 4) {
-                    Text("Telegram")
-                        .font(.system(size: 12, weight: .bold))
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 11, weight: .bold))
-                }
-                .foregroundColor(telegramColor)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(telegramColor.opacity(0.12))
-                .clipShape(Capsule())
             }
-            .padding(16)
+            .padding(.horizontal, 4)
+
+            // Основная карточка информации и ссылок
+            VStack(spacing: 0) {
+                // Имя и роль разработчика
+                HStack(spacing: 12) {
+                    if let uiImage = UIImage(named: "creator_avatar") {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 42, height: 42)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.primary.opacity(0.15), lineWidth: 1))
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+                    } else {
+                        Circle()
+                            .fill(Color.secondary.opacity(0.2))
+                            .frame(width: 42, height: 42)
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 5) {
+                            Text("@VityaV")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.primary)
+
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                        }
+
+                        Text(isRu ? "Создатель и ведущий разработчик" : "Lead Developer & Researcher")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+                }
+                .padding(14)
+
+                Divider()
+                    .padding(.leading, 14)
+
+                // Telegram ссылка (@VityaV)
+                Link(destination: URL(string: "https://t.me/VityaV") ?? URL(string: "https://telegram.org")!) {
+                    HStack {
+                        Text("Telegram")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Text("@VityaV")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    .padding(14)
+                }
+
+                Divider()
+                    .padding(.leading, 14)
+
+                // Discord (@a8o4) - копирование юзернейма
+                Button(action: {
+                    UIPasteboard.general.string = "@a8o4"
+                    let haptic = UINotificationFeedbackGenerator()
+                    haptic.notificationOccurred(.success)
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                        toastMessage = isRu ? "Discord скопирован: @a8o4" : "Discord copied: @a8o4"
+                        showToast = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            showToast = false
+                        }
+                    }
+                }) {
+                    HStack {
+                        Text(strings.discordLabel)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Text("@a8o4")
+                            .font(.system(size: 14, weight: .medium, design: .monospaced))
+                            .foregroundColor(.secondary)
+
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    .padding(14)
+                }
+
+                Divider()
+                    .padding(.leading, 14)
+
+                // Кнопка Star on GitHub (открывает https://github.com/VityaIG/Cort1so1)
+                Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.8, blue: 0.0))
+
+                        Text(strings.starOnGithubBtn)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        HStack(spacing: 4) {
+                            Text("VityaIG/Cort1so1")
+                                .font(.system(size: 12, weight: .regular, design: .monospaced))
+                                .foregroundColor(.secondary)
+
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary.opacity(0.7))
+                        }
+                    }
+                    .padding(14)
+                }
+            }
             .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(telegramColor.opacity(0.15), lineWidth: 1)
-            )
         }
     }
 

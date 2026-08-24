@@ -265,9 +265,20 @@ struct TerminalView: View {
     @State private var commandInput: String = ""
     @State private var terminalLogs: [TerminalLogLine] = []
     @State private var showCustomPopup: Bool = false
+    @State private var showResetConfirmAlert: Bool = false
     @State private var popupText: String = ""
     @State private var popupButton: String = "OK"
     @FocusState private var isInputFocused: Bool
+
+    private let quickCommands = [
+        "help",
+        "respring",
+        "deviceinfo",
+        "battery percentage set 100",
+        "battery color set green",
+        "battery color set orange",
+        "uicache"
+    ]
 
     private var isRu: Bool {
         appLanguage == "ru"
@@ -307,9 +318,11 @@ struct TerminalView: View {
                 // Секция 1: Нативный ввод команды
                 Section(
                     header: Text(isRu ? "Командная строка" : "Command Input"),
-                    footer: Text("Example: \"help\", \"createpopup Hello OK\", \"battery color set orange\"")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
+                    footer: VStack(alignment: .leading, spacing: 6) {
+                        Text(strings.terminalExampleHint)
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
                 ) {
                     HStack {
                         Image(systemName: "terminal")
@@ -340,6 +353,28 @@ struct TerminalView: View {
                         }
                         .disabled(commandInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .buttonStyle(BorderlessButtonStyle())
+                    }
+
+                    // Быстрые подсказки / команды в виде чипсов
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(quickCommands, id: \.self) { cmd in
+                                Button(action: {
+                                    self.commandInput = cmd
+                                    self.executeCommand(cmd)
+                                }) {
+                                    Text(cmd)
+                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                        .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                            }
+                        }
+                        .padding(.vertical, 4)
                     }
                 }
 
@@ -411,7 +446,7 @@ struct TerminalView: View {
 
                 // Секция 3: Кнопка сброса всех модификаций (РАСПОЛОЖЕНА СТРОГО ПОД КОНСОЛЬЮ)
                 Section {
-                    Button(action: { resetAllModifications() }) {
+                    Button(action: { showResetConfirmAlert = true }) {
                         HStack {
                             Spacer()
                             Image(systemName: "arrow.counterclockwise.circle.fill")
@@ -457,10 +492,40 @@ struct TerminalView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(strings.terminalClearBtn) {
-                        terminalLogs.removeAll()
+                    Menu {
+                        Button(action: {
+                            let text = terminalLogs.map { log in
+                                if let cmd = log.command {
+                                    return "[root@cort1so1] # \(cmd)\n\(log.output)"
+                                }
+                                return log.output
+                            }.joined(separator: "\n\n")
+                            UIPasteboard.general.string = text
+                            let haptic = UINotificationFeedbackGenerator()
+                            haptic.notificationOccurred(.success)
+                        }) {
+                            Label(isRu ? "Скопировать журнал" : "Copy Logs", systemImage: "doc.on.doc")
+                        }
+
+                        Button(role: .destructive, action: {
+                            terminalLogs.removeAll()
+                        }) {
+                            Label(strings.terminalClearBtn, systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
+            }
+            .alert(isPresented: $showResetConfirmAlert) {
+                Alert(
+                    title: Text(strings.resetConfirmTitle),
+                    message: Text(strings.resetConfirmMessage),
+                    primaryButton: .destructive(Text(strings.terminalResetAllBtn)) {
+                        self.resetAllModifications()
+                    },
+                    secondaryButton: .cancel(Text(strings.cancelBtn))
+                )
             }
             .alert(isPresented: $showCustomPopup) {
                 Alert(
@@ -599,9 +664,10 @@ struct TerminalView: View {
             return
         }
 
-        // 2. Изменение цвета батареи: "battery color set [color]"
-        if lower.starts(with: "battery color set ") {
-            let colorPart = trimmed.dropFirst("battery color set ".count).trimmingCharacters(in: .whitespacesAndNewlines)
+        // 2. Изменение цвета батареи: "battery color set [color]" или "setbatterycolor [color]" или "setcolor [color]"
+        if lower.starts(with: "battery color set ") || lower.starts(with: "setbatterycolor ") || lower.starts(with: "setcolor ") {
+            let prefix = lower.starts(with: "battery color set ") ? "battery color set " : (lower.starts(with: "setbatterycolor ") ? "setbatterycolor " : "setcolor ")
+            let colorPart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
             if !colorPart.isEmpty {
                 self.customBatteryColor = colorPart.lowercased()
                 self.customStatusBarActive = true
@@ -616,9 +682,15 @@ struct TerminalView: View {
             }
         }
 
-        // 3. Изменение процента батареи: "battery percentage set [value]"
-        if lower.starts(with: "battery percentage set ") || lower.starts(with: "battery percent set ") || lower.starts(with: "battery level set ") {
-            let prefix = lower.starts(with: "battery percentage set ") ? "battery percentage set " : (lower.starts(with: "battery percent set ") ? "battery percent set " : "battery level set ")
+        // 3. Изменение процента батареи: "battery percentage set [value]" или "setbattery [val]" или "setbatt [val]"
+        if lower.starts(with: "battery percentage set ") || lower.starts(with: "battery percent set ") || lower.starts(with: "battery level set ") || lower.starts(with: "setbattery ") || lower.starts(with: "setbatt ") {
+            let prefix: String
+            if lower.starts(with: "battery percentage set ") { prefix = "battery percentage set " }
+            else if lower.starts(with: "battery percent set ") { prefix = "battery percent set " }
+            else if lower.starts(with: "battery level set ") { prefix = "battery level set " }
+            else if lower.starts(with: "setbattery ") { prefix = "setbattery " }
+            else { prefix = "setbatt " }
+
             let valuePart = trimmed.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
             if let intVal = Int(valuePart), intVal >= 0 && intVal <= 100 {
                 self.customBatteryPercentage = intVal
@@ -635,7 +707,7 @@ struct TerminalView: View {
             } else {
                 terminalLogs.append(TerminalLogLine(
                     command: trimmed,
-                    output: "[-] Invalid battery percentage. Enter 0-100 (e.g. 'battery percentage set 100')",
+                    output: "[-] Invalid battery percentage. Enter 0-100 (e.g. 'setbattery 100' or 'battery percentage set 80')",
                     isError: true,
                     tag: "ERR"
                 ))
