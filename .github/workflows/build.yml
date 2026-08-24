@@ -87,23 +87,18 @@ jobs:
           body: |
             ### Cort1so1 Release v1.3
 
-            **Cort1so1** - iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & Custom Status Bar Simulator.
+            Cort1so1 - iOS Jailbreak, Substrate Tweak Engine, Cortisol Terminal & Custom Status Bar Simulator.
 
-            #### What's New in v1.3:
-            - **No Battery Limit (1000000% Support)**:
-              - Removed 100% cap on battery percentage display and capsule fill calculation.
-              - Added interactive UI controls in Terminal tab: tap "Уровень батареи" / "Battery Level" row directly in the UI to open an input dialog and enter any percentage (e.g. `1000000`, `9999999`, etc.).
-              - Interactive Accent Color selector menu directly in the UI.
-              - Terminal commands: `setbattery 1000000`, `battery percentage set 1000000`, `battery 1000000`, `battery color set orange`, `battery reset`.
-            - **Pixel-Perfect Native Status Bar Overlay**:
-              - Dual-color inverted text with dynamic pill expansion for huge percentage numbers.
-              - Seamless iOS Status Bar toggle and real-time battery sync.
-            - **Cortisol Terminal & iOS Simulator**:
-              - Interactive terminal with autocomplete chips, custom commands, and system info.
+            #### Что нового в v1.3 / What's New in v1.3:
+            - Снято ограничение в 100% на заряд батареи (поддержка 1000000% и любых значений).
+            - Интерактивный ввод процента заряда и цвета индикатора напрямую через графический интерфейс (нажатием на строки в Терминале).
+            - Поддержка быстрой установки через команды в Терминале: `setbattery 1000000`, `battery percentage set 1000000`, `battery color set orange`, `battery reset`.
+            - Нативный оверлей статус-бара iOS с динамическим расширением капсулы под большие числа и инверсией цвета текста.
+            - Вкладка Cortisol Terminal с интерактивным вводом, автодополнением и логом выполнения.
 
-            #### Installation Instructions:
-            1. Download the `Cort1so1.ipa` file from the **Assets** section below.
-            2. Sideload using **TrollStore** (recommended), **AltStore**, **SideStore**, or **Sideloadly**.
+            #### Инструкция по установке / Installation Instructions:
+            1. Скачайте файл Cort1so1.ipa из раздела Assets ниже.
+            2. Установите с помощью TrollStore (рекомендуется), AltStore, SideStore или Sideloadly.
           files: Cort1so1.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
