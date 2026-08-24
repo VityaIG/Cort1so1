@@ -14,7 +14,7 @@ struct AdminDashboardView: View {
     @AppStorage("isAdminUnlocked") private var isAdminUnlocked: Bool = true
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
     @AppStorage("customSubtitle") private var customSubtitle: String = ""
-    @AppStorage("customAppVersion") private var customAppVersion: String = "1.2"
+    @AppStorage("customAppVersion") private var customAppVersion: String = "1.3"
     @AppStorage("customAppBuild") private var customAppBuild: String = "26B101"
 
     // Цвета оформления (Фон экрана и элементы)
@@ -162,7 +162,7 @@ struct AdminDashboardView: View {
                         Text(isRu ? "Версия" : "Version")
                             .frame(width: 100, alignment: .leading)
                             .foregroundColor(.secondary)
-                        TextField("1.2", text: $customAppVersion)
+                        TextField("1.3", text: $customAppVersion)
                     }
 
                     HStack {
@@ -335,7 +335,7 @@ struct AdminDashboardView: View {
         withAnimation {
             customAppName = "Cort1so1"
             customSubtitle = ""
-            customAppVersion = "1.2"
+            customAppVersion = "1.3"
             customAppBuild = "26B101"
             customAppBgTheme = "default"
             customBgColorHex = ""

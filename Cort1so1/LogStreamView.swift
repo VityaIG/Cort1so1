@@ -76,7 +76,7 @@ struct LogStreamView: View {
         currentLogIndex = 0
         let allLogs = verboseLogs
             ? LogData.systemLogs
-            : LogData.systemLogs.filter { $0.hasPrefix("[+]") || $0.contains("v1.2") || $0.contains("NeoSpringView") }
+            : LogData.systemLogs.filter { $0.hasPrefix("[+]") || $0.contains("v1.3") || $0.contains("NeoSpringView") }
         let interval = verboseLogs ? 0.05 : 0.12
         
         self.timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { t in

@@ -26,7 +26,7 @@ struct SettingsView: View {
     @AppStorage("isAdminUnlocked") private var isAdminUnlocked: Bool = false
     @AppStorage("customAppName") private var customAppName: String = "Cort1so1"
     @AppStorage("customSubtitle") private var customSubtitle: String = ""
-    @AppStorage("customAppVersion") private var customAppVersion: String = "1.2"
+    @AppStorage("customAppVersion") private var customAppVersion: String = "1.3"
     @AppStorage("customAppBuild") private var customAppBuild: String = "26B101"
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
     @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
@@ -247,7 +247,7 @@ struct SettingsView: View {
                                 handleAdminTap()
                             }
 
-                        let versionDisplay = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "v1.2" : (customAppVersion.hasPrefix("v") ? customAppVersion : "v\(customAppVersion)")
+                        let versionDisplay = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "v1.3" : (customAppVersion.hasPrefix("v") ? customAppVersion : "v\(customAppVersion)")
                         Text(versionDisplay)
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
@@ -482,7 +482,7 @@ struct SettingsView: View {
                 Text(strings.versionLabel)
                     .font(.system(.subheadline, design: .default))
                 Spacer()
-                let v = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "1.2" : customAppVersion
+                let v = customAppVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "1.3" : customAppVersion
                 let b = customAppBuild.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "26B101" : customAppBuild
                 Text("\(v) (Build \(b))")
                     .foregroundColor(.secondary)

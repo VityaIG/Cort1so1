@@ -22,17 +22,28 @@ The interface is designed strictly according to **Apple Human Interface Guidelin
 
 ---
 
-## What's New in Release 1.2
+## What's New in Release 1.3
 
-- **Dynamic Tweaks Tab Visibility**: The "Tweaks" tab unlocks and appears dynamically only after jailbreak is executed.
-- **Custom Post-Apply Pop-up System**:
-  - Configurable alert titles and buttons (`"son"` / `"Запустил"` and `"bruh"` / `"Семя в арбуууз"`).
-  - Ability to customize apply button and title text in the "New Tweak" & "Edit Tweak" dialogs with interactive testing.
-  - Cleaned up redundant action buttons into a single, top-level Apply action.
-- **First-Launch Onboarding Flow**:
-  - Sequential native modal dialogs introducing app capabilities followed by headphone & audio safety warnings.
-- **New Humorous Tweaks**: 3 new creative modules added across all categories.
-- **Stability & Performance**: Memory leak fixes, optimized observer lifecycles, and refined haptics.
+- **Cortisol Terminal Tab**:
+  - Unlocked and visible **only** when the user selects and executes the `"Cortisol"` jailbreak method (remains hidden for the legacy `"Dopamine"` method).
+  - Integrated command line interface with instant command autocomplete chips and console log history.
+  - Dedicated hint: `Example: "battery color set orange" or "battery percentage set 100"`.
+  - Commands support:
+    - `battery color set <color>` (orange, red, green, blue, purple, cyan, #hex, etc.)
+    - `battery percentage set <val>` (0–100%)
+    - `battery reset` (revert to real system device battery readings)
+    - `statusbar show` / `statusbar hide`
+    - `whoami`, `uname -a`, `help`, `clear`
+- **Dynamic iOS Status Bar Overlay Engine**:
+  - Live system clock in `HH:mm` updating continuously every second.
+  - Queries device's real battery level (`UIDevice.current.batteryLevel`) by default.
+  - Dynamically updates numerical percentage and battery icon fill width when modified via terminal commands.
+  - Dynamic battery fill color styling with automatic `.statusBarHidden(true)` activation.
+- **Tab & Localization Updates**:
+  - Renamed the `"iOS Downgrade"` tab strictly to `"iOS"` in the English localization (Russian `"Откат iOS"` preserved).
+- **Bundle ID & Project Settings**:
+  - Updated Bundle Identifier to `com.vitya.cort1so1`.
+  - Updated Marketing Version to `1.3` (Build `27`).
 
 ---
 
@@ -92,6 +103,7 @@ Cort1so1/
 │   ├── LogData.swift               # Kernel logs and message structures
 │   ├── LogStreamView.swift         # Terminal logger with chat-like behavior
 │   ├── NeoSpringView.swift         # SpringBoard respring simulation overlay
+│   ├── TerminalView.swift          # Cortisol terminal subsystem & custom status bar overlay
 │   ├── TweaksView.swift            # System tweaks management interface
 │   └── Info.plist                  # System app manifest
 ├── Cort1so1.xcodeproj/             # Xcode project configuration
