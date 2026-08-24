@@ -211,6 +211,9 @@ struct TerminalView: View {
 
     @State private var commandInput: String = ""
     @State private var terminalLogs: [TerminalLogLine] = []
+    @State private var showCustomPopup: Bool = false
+    @State private var popupText: String = ""
+    @State private var popupButton: String = "OK"
     @FocusState private var isInputFocused: Bool
 
     private var isRu: Bool {
@@ -227,7 +230,7 @@ struct TerminalView: View {
                 // Секция 1: Нативный ввод команды
                 Section(
                     header: Text(isRu ? "Командная строка" : "Command Input"),
-                    footer: Text("Example: \"battery color set orange\" or \"battery percentage set 100\"")
+                    footer: Text("Example: \"help\", \"createpopup Hello OK\", \"battery color set orange\"")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 ) {
@@ -263,61 +266,15 @@ struct TerminalView: View {
                     }
                 }
 
-                // Секция 2: Быстрые системные пресеты
-                Section(header: Text(isRu ? "Быстрые команды" : "Quick Presets")) {
-                    Button(action: { executeCommand("battery color set orange") }) {
+                // Секция 2: Быстрая команда Справки
+                Section(header: Text(isRu ? "Быстрые команды" : "Quick Actions")) {
+                    Button(action: { executeCommand("help") }) {
                         Label {
-                            HStack {
-                                Text("battery color set orange")
-                                    .font(.system(.subheadline, design: .monospaced))
-                                Spacer()
-                                Circle().fill(Color.orange).frame(width: 12, height: 12)
-                            }
+                            Text("help")
+                                .font(.system(.subheadline, design: .monospaced))
                         } icon: {
-                            Image(systemName: "paintpalette.fill")
-                                .foregroundColor(.orange)
-                        }
-                    }
-
-                    Button(action: { executeCommand("battery percentage set 100") }) {
-                        Label {
-                            HStack {
-                                Text("battery percentage set 100")
-                                    .font(.system(.subheadline, design: .monospaced))
-                                Spacer()
-                                Text("100%")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        } icon: {
-                            Image(systemName: "battery.100")
-                                .foregroundColor(.green)
-                        }
-                    }
-
-                    Button(action: { executeCommand("battery percentage set 20") }) {
-                        Label {
-                            HStack {
-                                Text("battery percentage set 20")
-                                    .font(.system(.subheadline, design: .monospaced))
-                                Spacer()
-                                Text("20%")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        } icon: {
-                            Image(systemName: "battery.25")
-                                .foregroundColor(.red)
-                        }
-                    }
-
-                    Button(action: { executeCommand("battery reset") }) {
-                        Label {
-                            Text(strings.terminalResetBatteryBtn)
-                                .foregroundColor(.red)
-                        } icon: {
-                            Image(systemName: "arrow.counterclockwise")
-                                .foregroundColor(.red)
+                            Image(systemName: "questionmark.circle.fill")
+                                .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                         }
                     }
                 }
@@ -385,12 +342,19 @@ struct TerminalView: View {
                     }
                 }
             }
+            .alert(isPresented: $showCustomPopup) {
+                Alert(
+                    title: Text(popupText.isEmpty ? "Cort1so1" : popupText),
+                    message: nil,
+                    dismissButton: .default(Text(popupButton.isEmpty ? "OK" : popupButton))
+                )
+            }
         }
         .onAppear {
             if terminalLogs.isEmpty {
                 terminalLogs.append(TerminalLogLine(
                     command: nil,
-                    output: "[+] Cortisol Subsystem initialized (PID: 1042, UID: 0)\n[+] Native Status Bar Controller listening for overrides\n[+] Example: 'battery color set orange' or 'battery percentage set 100'",
+                    output: "[+] Cortisol Subsystem initialized (PID: 1042, UID: 0)\n[+] Type 'help' to view available commands\n[+] Example: 'createpopup Hello OK' or 'battery color set orange'",
                     isError: false
                 ))
             }
@@ -405,7 +369,67 @@ struct TerminalView: View {
 
         let lower = trimmed.lowercased()
 
-        // 1. Изменение цвета батареи: "battery color set [color]"
+        // 1. Создание нативного всплывающего окна: "createpopup <text> <button>"
+        if lower.starts(with: "createpopup") {
+            let argsString = trimmed.dropFirst("createpopup".count).trimmingCharacters(in: .whitespacesAndNewlines)
+            if argsString.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[-] Usage: createpopup <text> <button>\n[-] Example: createpopup \"Hello World\" \"OK\" or createpopup Alert Dismiss",
+                    isError: true
+                ))
+                return
+            }
+
+            // Парсинг аргументов с поддержкой кавычек
+            var tokens: [String] = []
+            let pattern = "\"([^\"]*)\"|'([^']*)'|(\\S+)"
+            if let regex = try? NSRegularExpression(pattern: pattern) {
+                let nsString = argsString as NSString
+                let matches = regex.matches(in: argsString, range: NSRange(location: 0, length: nsString.length))
+                for match in matches {
+                    if match.range(at: 1).location != NSNotFound {
+                        tokens.append(nsString.substring(with: match.range(at: 1)))
+                    } else if match.range(at: 2).location != NSNotFound {
+                        tokens.append(nsString.substring(with: match.range(at: 2)))
+                    } else if match.range(at: 3).location != NSNotFound {
+                        tokens.append(nsString.substring(with: match.range(at: 3)))
+                    }
+                }
+            }
+
+            if tokens.isEmpty {
+                terminalLogs.append(TerminalLogLine(
+                    command: trimmed,
+                    output: "[-] Usage: createpopup <text> <button>",
+                    isError: true
+                ))
+                return
+            }
+
+            let text: String
+            let button: String
+            if tokens.count == 1 {
+                text = tokens[0]
+                button = "OK"
+            } else {
+                button = tokens.last!
+                text = tokens.dropLast().joined(separator: " ")
+            }
+
+            self.popupText = text
+            self.popupButton = button
+            self.showCustomPopup = true
+
+            terminalLogs.append(TerminalLogLine(
+                command: trimmed,
+                output: "[+] Native popup triggered:\n    Text: \"\(text)\"\n    Button: \"\(button)\"",
+                isError: false
+            ))
+            return
+        }
+
+        // 2. Изменение цвета батареи: "battery color set [color]"
         if lower.starts(with: "battery color set ") {
             let colorPart = trimmed.dropFirst("battery color set ".count).trimmingCharacters(in: .whitespacesAndNewlines)
             if !colorPart.isEmpty {
@@ -494,7 +518,9 @@ struct TerminalView: View {
                 command: trimmed,
                 output: """
 Cort1so1 Subsystem Command Reference:
-  battery color set <color>     - Override battery color (e.g. orange, red, green, blue)
+  help                          - Show this list of available commands
+  createpopup <text> <button>   - Show a custom native iOS popup dialog
+  battery color set <color>     - Override battery color (e.g. orange, red, green, blue, #hex)
   battery percentage set <val>  - Override battery percentage (0-100)
   battery reset                 - Restore system device battery values
   statusbar show / hide         - Enable/disable status bar override
@@ -530,7 +556,7 @@ Cort1so1 Subsystem Command Reference:
         // Неизвестная команда
         terminalLogs.append(TerminalLogLine(
             command: trimmed,
-            output: "cort1so1: command not found: '\(trimmed)'. Type 'help' or see example: \"battery color set orange\" or \"battery percentage set 100\"",
+            output: "cort1so1: command not found: '\(trimmed)'. Type 'help' to see all available commands.",
             isError: true
         ))
     }

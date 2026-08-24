@@ -29,11 +29,13 @@ The interface is designed strictly according to **Apple Human Interface Guidelin
   - Integrated command line interface with instant command autocomplete chips and console log history.
   - Dedicated hint: `Example: "battery color set orange" or "battery percentage set 100"`.
   - Commands support:
+    - `help` (interactive command reference)
+    - `createpopup <text> <button>` (trigger custom native iOS popup dialogs, e.g. `createpopup Hello OK` or `createpopup "Custom text" "Dismiss"`)
     - `battery color set <color>` (orange, red, green, blue, purple, cyan, #hex, etc.)
     - `battery percentage set <val>` (0–100%)
     - `battery reset` (revert to real system device battery readings)
     - `statusbar show` / `statusbar hide`
-    - `whoami`, `uname -a`, `help`, `clear`
+    - `whoami`, `uname -a`, `clear`
 - **Dynamic iOS Status Bar Overlay Engine**:
   - Live system clock in `HH:mm` updating continuously every second.
   - Queries device's real battery level (`UIDevice.current.batteryLevel`) by default.
