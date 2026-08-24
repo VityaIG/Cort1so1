@@ -29,8 +29,6 @@ struct ContentView: View {
     @AppStorage("customAppBgTheme") private var customAppBgTheme: String = "default"
     @AppStorage("customBgColorHex") private var customBgColorHex: String = ""
 
-    @AppStorage("useLiquidGlass") private var useLiquidGlass: Bool = true
-
     @State private var jailbreakState: JailbreakState = .idle
     @State private var selectedTab: Int = 0
     @State private var activeFirstLaunchAlert: FirstLaunchAlertItem? = nil
@@ -53,80 +51,48 @@ struct ContentView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .top) {
             AppCustomStyle.resolveBgColor(customHex: customBgColorHex, themeId: customAppBgTheme)
                 .ignoresSafeArea()
 
-            if useLiquidGlass {
-                // MARK: - iOS 26+ Format (LiquidGlass)
-                ZStack(alignment: .bottom) {
-                    Group {
-                        switch selectedTab {
-                        case 0:
-                            MainView(jailbreakState: $jailbreakState)
-                        case 1:
-                            TweaksView()
-                        case 2:
-                            DowngradeView()
-                        case 3:
-                            SettingsView(jailbreakState: $jailbreakState)
-                        case 4:
-                            TerminalView()
-                        default:
-                            MainView(jailbreakState: $jailbreakState)
-                        }
+            TabView(selection: $selectedTab) {
+                MainView(jailbreakState: $jailbreakState)
+                    .tabItem {
+                        Label(strings.tabMain, systemImage: "lock.open.fill")
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .tag(0)
 
-                    LiquidGlassTabBar(
-                        selectedTab: $selectedTab,
-                        isJailbroken: isJailbroken || jailbreakState == .completed,
-                        lastJailbreakMethod: lastJailbreakMethod,
-                        strings: strings,
-                        appThemeColor: appThemeColor
-                    )
+                if isJailbroken || jailbreakState == .completed {
+                    TweaksView()
+                        .tabItem {
+                            Label(strings.tabTweaks, systemImage: "hammer.fill")
+                        }
+                        .tag(1)
                 }
-            } else {
-                // MARK: - iOS 18 and below Classic Native Format
-                TabView(selection: $selectedTab) {
-                    MainView(jailbreakState: $jailbreakState)
+
+                if (isJailbroken || jailbreakState == .completed) && lastJailbreakMethod == "cortisol" {
+                    TerminalView()
                         .tabItem {
-                            Label(strings.tabMain, systemImage: "lock.open.fill")
+                            Label(strings.tabTerminal, systemImage: "terminal.fill")
                         }
-                        .tag(0)
-
-                    if isJailbroken || jailbreakState == .completed {
-                        TweaksView()
-                            .tabItem {
-                                Label(strings.tabTweaks, systemImage: "hammer.fill")
-                            }
-                            .tag(1)
-                    }
-
-                    if (isJailbroken || jailbreakState == .completed) && lastJailbreakMethod == "cortisol" {
-                        TerminalView()
-                            .tabItem {
-                                Label(strings.tabTerminal, systemImage: "terminal.fill")
-                            }
-                            .tag(4)
-                    }
-
-                    DowngradeView()
-                        .tabItem {
-                            Label(strings.tabDowngrade, systemImage: "arrow.counterclockwise.circle.fill")
-                        }
-                        .tag(2)
-
-                    SettingsView(jailbreakState: $jailbreakState)
-                        .tabItem {
-                            Label(strings.tabSettings, systemImage: "gearshape.fill")
-                        }
-                        .tag(3)
+                        .tag(4)
                 }
-                .id("tabview-\(isJailbroken)-\(jailbreakState == .completed)-\(lastJailbreakMethod)")
-                .toolbarBackground(.ultraThinMaterial, for: .tabBar)
-                .toolbarBackground(.visible, for: .tabBar)
+
+                DowngradeView()
+                    .tabItem {
+                        Label(strings.tabDowngrade, systemImage: "arrow.counterclockwise.circle.fill")
+                    }
+                    .tag(2)
+
+                SettingsView(jailbreakState: $jailbreakState)
+                    .tabItem {
+                        Label(strings.tabSettings, systemImage: "gearshape.fill")
+                    }
+                    .tag(3)
             }
+            .id("tabview-\(isJailbroken)-\(jailbreakState == .completed)-\(lastJailbreakMethod)")
+            .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
 
             // Нативный оверлей кастомного статус-бара при активации через Терминал
             if customStatusBarActive && jailbreakState != .respring {

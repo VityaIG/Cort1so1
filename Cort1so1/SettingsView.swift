@@ -34,7 +34,6 @@ struct SettingsView: View {
     @AppStorage("customTextColorHex") private var customTextColorHex: String = ""
     @AppStorage("customDeviceModel") private var customDeviceModel: String = ""
     @AppStorage("customOSVersion") private var customOSVersion: String = ""
-    @AppStorage("useLiquidGlass") private var useLiquidGlass: Bool = true
     @AppStorage("customArch") private var customArch: String = ""
     @AppStorage("customExploitName") private var customExploitName: String = ""
     @AppStorage("customPackageManager") private var customPackageManager: String = ""
@@ -182,11 +181,6 @@ struct SettingsView: View {
 
                 // 2. Внешний вид и язык
                 Section(header: Text(strings.appearanceSection)) {
-                    Toggle(isOn: $useLiquidGlass) {
-                        settingRowLabel(title: isRu ? "Формат LiquidGlass (iOS 26+)" : "LiquidGlass Format (iOS 26+)", icon: "sparkles", color: .cyan)
-                    }
-                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.resolveColor(name: appThemeColor)))
-
                     Toggle(isOn: $isDarkMode) {
                         settingRowLabel(title: strings.darkModeToggle, icon: "moon.fill", color: .indigo)
                     }

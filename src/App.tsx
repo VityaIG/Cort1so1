@@ -34,7 +34,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'status' | 'tweaks' | 'terminal' | 'downgrade' | 'settings'>('status');
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<'simulator' | 'download'>('simulator');
-  const [useLiquidGlass, setUseLiquidGlass] = useState(true);
 
   // App Simulator State
   const [isJailbroken, setIsJailbroken] = useState(false);
@@ -187,31 +186,6 @@ export default function App() {
                 }`}
               >
                 {isRu ? 'Релиз & IPA' : 'Release & IPA'}
-              </button>
-            </div>
-
-            {/* iOS Version / UI Format Selector */}
-            <div className={`flex items-center p-0.5 rounded-xl border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-200 border-slate-300'}`}>
-              <button
-                type="button"
-                onClick={() => setUseLiquidGlass(false)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  !useLiquidGlass ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="iOS 18 Native Classic"
-              >
-                iOS 18
-              </button>
-              <button
-                type="button"
-                onClick={() => setUseLiquidGlass(true)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 ${
-                  useLiquidGlass ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="iOS 26+ LiquidGlass"
-              >
-                <Sparkles className="w-3 h-3 text-cyan-300" />
-                iOS 26+
               </button>
             </div>
 
@@ -594,24 +568,6 @@ export default function App() {
                       <div className={`rounded-2xl border divide-y overflow-hidden ${isDarkMode ? 'bg-slate-900 border-slate-800 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'}`}>
                         <div className="p-3 flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-cyan-400" />
-                            <span>{isRu ? 'Формат LiquidGlass (iOS 26+)' : 'LiquidGlass Format (iOS 26+)'}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setUseLiquidGlass(!useLiquidGlass)}
-                            className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                              useLiquidGlass ? 'bg-indigo-600' : 'bg-slate-400'
-                            }`}
-                          >
-                            <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                              useLiquidGlass ? 'translate-x-5' : 'translate-x-0'
-                            }`} />
-                          </button>
-                        </div>
-
-                        <div className="p-3 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
                             <Moon className="w-4 h-4 text-indigo-500" />
                             <span>{isRu ? 'Темное оформление' : 'Dark Theme'}</span>
                           </div>
@@ -690,123 +646,52 @@ export default function App() {
               </div>
 
               {/* iOS Bottom Tab Bar */}
-              {useLiquidGlass ? (
-                /* LiquidGlass Floating Pill TabBar (iOS 26+) */
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-2 py-1.5 rounded-full bg-black/80 backdrop-blur-2xl border border-white/15 shadow-2xl flex items-center gap-1 max-w-[92%] overflow-x-auto no-scrollbar">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('status')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
-                      activeTab === 'status'
-                        ? 'bg-white/20 text-white shadow-inner border border-white/20'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Activity className={`w-4 h-4 ${activeTab === 'status' ? 'text-blue-400' : ''}`} />
-                    <span>{isRu ? 'Основное' : 'Main'}</span>
-                  </button>
+              <div className="bg-black/95 text-slate-400 border-t border-slate-800 grid grid-cols-5 text-[10px] font-medium py-2 px-1 z-30 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('status')}
+                  className={`flex flex-col items-center gap-1 transition ${activeTab === 'status' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
+                >
+                  <Activity className="w-4 h-4" />
+                  <span>{isRu ? 'Основное' : 'Main'}</span>
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('tweaks')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
-                      activeTab === 'tweaks'
-                        ? 'bg-white/20 text-white shadow-inner border border-white/20'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Puzzle className={`w-4 h-4 ${activeTab === 'tweaks' ? 'text-blue-400' : ''}`} />
-                    <span>{isRu ? 'Твики' : 'Tweaks'}</span>
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('tweaks')}
+                  className={`flex flex-col items-center gap-1 transition ${activeTab === 'tweaks' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
+                >
+                  <Puzzle className="w-4 h-4" />
+                  <span>{isRu ? 'Твики' : 'Tweaks'}</span>
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('terminal')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
-                      activeTab === 'terminal'
-                        ? 'bg-white/20 text-white shadow-inner border border-white/20'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <TerminalIcon className={`w-4 h-4 ${activeTab === 'terminal' ? 'text-blue-400' : ''}`} />
-                    <span>{isRu ? 'Терминал' : 'Terminal'}</span>
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('terminal')}
+                  className={`flex flex-col items-center gap-1 transition ${activeTab === 'terminal' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
+                >
+                  <TerminalIcon className="w-4 h-4" />
+                  <span>{isRu ? 'Терминал' : 'Terminal'}</span>
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('downgrade')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
-                      activeTab === 'downgrade'
-                        ? 'bg-white/20 text-white shadow-inner border border-white/20'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <ArrowDownCircle className={`w-4 h-4 ${activeTab === 'downgrade' ? 'text-blue-400' : ''}`} />
-                    <span>iOS</span>
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('downgrade')}
+                  className={`flex flex-col items-center gap-1 transition ${activeTab === 'downgrade' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
+                >
+                  <ArrowDownCircle className="w-4 h-4" />
+                  <span>iOS</span>
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('settings')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
-                      activeTab === 'settings'
-                        ? 'bg-white/20 text-white shadow-inner border border-white/20'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Settings className={`w-4 h-4 ${activeTab === 'settings' ? 'text-blue-400' : ''}`} />
-                    <span>{isRu ? 'Настройки' : 'Settings'}</span>
-                  </button>
-                </div>
-              ) : (
-                /* iOS 18 Classic Edge-to-Edge Bottom Tab Bar */
-                <div className="bg-black/95 text-slate-400 border-t border-slate-800 grid grid-cols-5 text-[10px] font-medium py-2 px-1 z-30 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('status')}
-                    className={`flex flex-col items-center gap-1 transition ${activeTab === 'status' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
-                  >
-                    <Activity className="w-4 h-4" />
-                    <span>{isRu ? 'Основное' : 'Main'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('tweaks')}
-                    className={`flex flex-col items-center gap-1 transition ${activeTab === 'tweaks' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
-                  >
-                    <Puzzle className="w-4 h-4" />
-                    <span>{isRu ? 'Твики' : 'Tweaks'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('terminal')}
-                    className={`flex flex-col items-center gap-1 transition ${activeTab === 'terminal' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
-                  >
-                    <TerminalIcon className="w-4 h-4" />
-                    <span>{isRu ? 'Терминал' : 'Terminal'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('downgrade')}
-                    className={`flex flex-col items-center gap-1 transition ${activeTab === 'downgrade' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
-                  >
-                    <ArrowDownCircle className="w-4 h-4" />
-                    <span>iOS</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('settings')}
-                    className={`flex flex-col items-center gap-1 transition ${activeTab === 'settings' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>{isRu ? 'Настройки' : 'Settings'}</span>
-                  </button>
-                </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className={`flex flex-col items-center gap-1 transition ${activeTab === 'settings' ? 'text-blue-500 font-bold' : 'hover:text-slate-200'}`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>{isRu ? 'Настройки' : 'Settings'}</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
