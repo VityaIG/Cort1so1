@@ -153,33 +153,35 @@ struct CustomStatusBarView: View {
         return 26 // Скругление Notch
     }
 
-    /// Пиксель-перфектная батарея iOS в точности как на скриншоте (БЕЗ контуров, с инвертированием и поддержкой любых чисел)
+    /// Пиксель-перфектная батарея iOS в точности как на скриншоте (БЕЗ контуров, с инвертированием и компактной шириной)
     @ViewBuilder
     private func nativeBatteryPill(percentage: Int, accentColor: Color) -> some View {
         let textStr = "\(percentage)"
         let charCount = textStr.count
-        let pillHeight: CGFloat = 13.0
-        let cornerRad: CGFloat = 4.5
+        let pillHeight: CGFloat = 12.0
+        let cornerRad: CGFloat = 3.8
 
-        // Базовая ширина 27.5 для 1-3 знаков (например "64" или "100").
-        // Если установлено огромное число (1000, 1000000 и т.д.), капсула пропорционально увеличивается и пробирается через статус-бар
-        let basePillWidth: CGFloat = 27.5
-        let dynamicPillWidth: CGFloat = charCount <= 3 ? basePillWidth : max(basePillWidth, CGFloat(charCount) * 7.5 + 8.0)
+        // Базовая нативная ширина iOS 24.5pt для 1-3 знаков (например "64" или "100").
+        // Компактное расширение для больших чисел (например 1000000)
+        let basePillWidth: CGFloat = 24.5
+        let dynamicPillWidth: CGFloat = charCount <= 3 ? basePillWidth : max(basePillWidth, CGFloat(charCount) * 5.8 + 6.0)
 
         let fillProgress: CGFloat = percentage <= 100 ? max(0, CGFloat(percentage) / 100.0) : 1.0
         let fillW: CGFloat = dynamicPillWidth * fillProgress
 
-        HStack(spacing: 1.2) {
+        let fontSize: CGFloat = charCount <= 3 ? 9.5 : (charCount <= 5 ? 9.0 : 8.5)
+
+        HStack(spacing: 1.0) {
             // Основной корпус батареи без обводки (outlines)
             ZStack(alignment: .leading) {
-                // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части (точно как на скриншоте)
+                // 1. Неотъемлемый базовый полупрозрачный фон незаполненной части
                 RoundedRectangle(cornerRadius: cornerRad, style: .continuous)
                     .fill(Color.primary.opacity(0.36))
                     .frame(width: dynamicPillWidth, height: pillHeight)
 
                 // 2. Белый текст процента на полупрозрачной части
                 Text(textStr)
-                    .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
+                    .font(.system(size: fontSize, weight: .bold, design: .default).monospacedDigit())
                     .foregroundColor(Color.white)
                     .frame(width: dynamicPillWidth, height: pillHeight, alignment: .center)
 
@@ -190,7 +192,7 @@ struct CustomStatusBarView: View {
 
                 // 4. Инвертированный темный текст строго над заполненной частью (через точную маску)
                 Text(textStr)
-                    .font(.system(size: 10.5, weight: .bold, design: .default).monospacedDigit())
+                    .font(.system(size: fontSize, weight: .bold, design: .default).monospacedDigit())
                     .foregroundColor(Color(red: 0.09, green: 0.08, blue: 0.14))
                     .frame(width: dynamicPillWidth, height: pillHeight, alignment: .center)
                     .mask(
@@ -207,9 +209,9 @@ struct CustomStatusBarView: View {
             .fixedSize(horizontal: true, vertical: false)
 
             // Маленький контактный терминал на правом торце (без обводки)
-            RoundedRectangle(cornerRadius: 1.4, style: .continuous)
+            RoundedRectangle(cornerRadius: 1.2, style: .continuous)
                 .fill(Color.primary.opacity(0.40))
-                .frame(width: 1.5, height: 4.8)
+                .frame(width: 1.3, height: 4.2)
         }
         .fixedSize(horizontal: true, vertical: false)
     }
