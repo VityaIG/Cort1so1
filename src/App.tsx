@@ -595,6 +595,41 @@ export default function App() {
                       </div>
                     </div>
 
+                    {/* Creator & Developer Section */}
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400 px-3">
+                        {isRu ? 'Создатель и разработчик' : 'Creator & Developer'}
+                      </div>
+                      <div className={`rounded-2xl border divide-y overflow-hidden ${isDarkMode ? 'bg-slate-900 border-slate-800 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'}`}>
+                        <div className="p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Send className="w-4 h-4 text-sky-400" />
+                            <span>Telegram</span>
+                          </div>
+                          <a href="https://t.me/VityaV" target="_blank" rel="noreferrer" className="text-xs font-semibold text-slate-400 hover:text-blue-400 transition">
+                            @VityaV ↗
+                          </a>
+                        </div>
+
+                        <div className="p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Code2 className="w-4 h-4 text-indigo-400" />
+                            <span>Discord</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('@a8o4');
+                              alert(isRu ? 'Discord скопирован: @a8o4' : 'Discord copied: @a8o4');
+                            }}
+                            className="text-xs font-semibold font-mono text-indigo-400 hover:text-indigo-300 transition"
+                          >
+                            @a8o4
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* About Section */}
                     <div className="space-y-1.5">
                       <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400 px-3">

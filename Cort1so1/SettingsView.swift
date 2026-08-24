@@ -366,19 +366,36 @@ struct SettingsView: View {
                         }
                     }
 
-                    Link(destination: URL(string: "https://t.me/vitalyabk") ?? URL(string: "https://telegram.org")!) {
+                    Button(action: {
+                        UIPasteboard.general.string = "@a8o4"
+                        let haptic = UINotificationFeedbackGenerator()
+                        haptic.notificationOccurred(.success)
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            toastMessage = isRu ? "Discord скопирован: @a8o4" : "Discord copied: @a8o4"
+                            showToast = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                showToast = false
+                            }
+                        }
+                    }) {
                         HStack(spacing: 8) {
-                            Image(systemName: "paperplane.circle.fill")
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(telegramColor)
+                                .foregroundColor(.indigo)
 
-                            Text(isRu ? "Канал в Telegram" : "Telegram Channel")
+                            Text("Discord")
                                 .font(.system(size: 15, weight: .regular))
                                 .foregroundColor(.primary)
 
                             Spacer()
 
-                            Image(systemName: "arrow.up.right")
+                            Text("@a8o4")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            Image(systemName: "doc.on.doc")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
