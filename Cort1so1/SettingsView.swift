@@ -239,22 +239,18 @@ struct SettingsView: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    // MARK: - 1. Профиль приложения Cort1so1 (Улучшенная карточка)
+    // MARK: - 1. Профиль приложения Cort1so1 (Улучшенная карточка без обводок)
 
     private var appHeaderCard: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             // Верхняя строка: Иконка, Название, Версия и Статус
             HStack(alignment: .center, spacing: 14) {
-                // Фирменная векторная иконка приложения
+                // Фирменная векторная иконка приложения (чистый дизайн без обводки)
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(Color.white)
                         .frame(width: 54, height: 54)
-                        .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.28), radius: 8, x: 0, y: 3)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Color.black.opacity(0.08), lineWidth: 1)
-                        )
+                        .shadow(color: AppTheme.resolveColor(name: appThemeColor).opacity(0.24), radius: 8, x: 0, y: 3)
 
                     Cort1so1IconShape()
                         .fill(Color(red: 0.08, green: 0.09, blue: 0.10))
@@ -265,7 +261,7 @@ struct SettingsView: View {
                     handleAdminTap()
                 }
 
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .center, spacing: 6) {
                         Text(customAppName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Cort1so1" : customAppName)
                             .font(.system(size: 21, weight: .bold))
@@ -280,15 +276,15 @@ struct SettingsView: View {
                         Text(versionDisplay)
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 2.5)
+                            .padding(.horizontal, 7.5)
+                            .padding(.vertical, 3)
                             .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.14))
                             .clipShape(Capsule())
                             .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text(customSubtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "iOS Jailbreak & IPSW Utility" : customSubtitle)
-                        .font(.system(size: 12, weight: .medium, design: .default))
+                        .font(.system(size: 12.5, weight: .medium, design: .default))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
@@ -307,75 +303,61 @@ struct SettingsView: View {
                         .foregroundColor(isJailbroken || jailbreakState == .completed ? .green : .secondary)
                         .lineLimit(1)
                 }
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4.5)
+                .padding(.horizontal, 9.5)
+                .padding(.vertical, 5)
                 .background((isJailbroken || jailbreakState == .completed ? Color.green : Color.secondary).opacity(0.12))
                 .clipShape(Capsule())
                 .fixedSize(horizontal: true, vertical: false)
             }
 
-            // Нижняя строка: Информационные чипы телеметрии
+            // Нижняя строка: Информационные чипы телеметрии (без обводок)
             HStack(spacing: 8) {
-                HStack(spacing: 4) {
+                HStack(spacing: 4.5) {
                     Image(systemName: "cpu")
                         .font(.system(size: 10, weight: .semibold))
                     Text(customArch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "arm64e / SPTM" : customArch)
-                        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
                 }
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3.5)
-                .background(Color.primary.opacity(0.04))
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .padding(.horizontal, 8.5)
+                .padding(.vertical, 4)
+                .background(Color.primary.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-                HStack(spacing: 4) {
+                HStack(spacing: 4.5) {
                     Image(systemName: "shield.lefthalf.filled")
                         .font(.system(size: 10, weight: .semibold))
                     Text("Rootless")
-                        .font(.system(size: 10.5, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                 }
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3.5)
-                .background(Color.primary.opacity(0.04))
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .padding(.horizontal, 8.5)
+                .padding(.vertical, 4)
+                .background(Color.primary.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                 Spacer()
 
-                HStack(spacing: 3) {
+                HStack(spacing: 4) {
                     Image(systemName: "bolt.badge.checkmark.fill")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 10.5, weight: .bold))
                         .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
-                    Text(isRu ? "iOS 16–26" : "iOS 16–26")
-                        .font(.system(size: 10.5, weight: .semibold))
+                    Text("iOS 16–27")
+                        .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(AppTheme.resolveColor(name: appThemeColor))
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3.5)
-                .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(AppTheme.resolveColor(name: appThemeColor).opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
         }
-        .padding(15)
+        .padding(16)
         .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            AppTheme.resolveColor(name: appThemeColor).opacity(0.2),
-                            Color.white.opacity(0.05)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
     }
 
-    // MARK: - 1.1. Star on GitHub Card (На самом верху под карточкой Cort1so1 - Минималистичный стиль)
+    // MARK: - 1.1. Star on GitHub Card (На самом верху под карточкой Cort1so1 - Чистый стиль без обводок)
 
     private var starOnGithubCard: some View {
         Link(destination: URL(string: "https://github.com/VityaIG/Cort1so1")!) {
@@ -398,10 +380,6 @@ struct SettingsView: View {
             .padding(.vertical, 12)
             .background(AppCustomStyle.resolveCardColor(customHex: customCardColorHex))
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
-            )
         }
         .buttonStyle(PlainButtonStyle())
     }
