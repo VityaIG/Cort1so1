@@ -287,13 +287,15 @@ struct TerminalView: View {
         installedPackagesListRaw
             .split(separator: ",")
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+            .filter { !$0.isEmpty && $0.lowercased() != "ed" }
     }
 
     private func addInstalledApp(_ name: String) {
+        let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, clean.lowercased() != "ed" else { return }
         var list = self.installedAppsList
-        if !list.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
-            list.append(name)
+        if !list.contains(where: { $0.caseInsensitiveCompare(clean) == .orderedSame }) {
+            list.append(clean)
             self.installedPackagesListRaw = list.joined(separator: ",")
         }
     }
@@ -663,10 +665,11 @@ struct TerminalView: View {
         self.showCustomPopup = false
         self.popupText = ""
         self.popupButton = "OK"
+        self.installedPackagesListRaw = ""
 
         terminalLogs.append(TerminalLogLine(
             command: "reset",
-            output: "[+] All terminal modifications and status bar overrides cleared.\n[*] Restored native iOS system device status.",
+            output: "[+] All terminal modifications, installed packages, and status bar overrides cleared.\n[*] Restored native iOS system device status.",
             isError: false,
             tag: "RESET"
         ))
