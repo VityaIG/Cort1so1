@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import AVKit
+import Combine
 
 /// Перечисление всплывающих окон первого запуска
 enum FirstLaunchAlertItem: Identifiable {
